@@ -1,6 +1,6 @@
 /* An object is an object that exists within the simulator.
-
-It may or may not be active: if it active, it affects the physics of the simulation. If it is not, it is only drawn translucently. */
+It may or may not be active: if it active, it affects the physics
+of the simulation. If it is not, it is only drawn translucently. */
 
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>

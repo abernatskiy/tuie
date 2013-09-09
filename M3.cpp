@@ -723,8 +723,6 @@ void Parse_Parameters(int argc, char **argv) {
 
 		if ( strcmp(argv[currParam],"-cp") == 0 )
 			capturePrefs = true;
-
-		
 	}
 }
 
@@ -750,7 +748,6 @@ void Close_File(FILE* fp) {
 
 int main (int argc, char **argv)
 {
-
 	showGraphics = true;
 
 	Parse_Parameters(argc,argv);
@@ -772,7 +769,7 @@ int main (int argc, char **argv)
 			Simulate(false);
 	}
 
-	delete envs;      
+	delete envs;
 	envs = NULL;
 
   	return 0;

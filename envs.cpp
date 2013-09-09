@@ -7,7 +7,6 @@
 
 //#include <GL/glut.h>
 
-
 #ifndef _ENVS_CPP
 #define _ENVS_CPP
 
@@ -371,19 +370,17 @@ void ENVS::Delete_Pair(void) {
 
 void ENVS::Delete_Pref(void) {
 
-        char fileName[100];
-        int fileIndex=0;
-        sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
-        while ( !File_Exists(fileName) && (fileIndex<10) )
-                sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
+	char fileName[100];
+	int fileIndex=0;
+	sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
+	while ( !File_Exists(fileName) && (fileIndex<10) )
+		sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
 
-        if ( File_Exists(fileName) ) {
-
-                char command[100];
-                sprintf(command,"rm %s",fileName);
-                system(command);
-        }
-
+	if ( File_Exists(fileName) ) {
+		char command[100];
+		sprintf(command,"rm %s",fileName);
+		system(command);
+	}
 }
 
 void ENVS::Draw(void) {
@@ -1032,16 +1029,14 @@ void ENVS::Camera_Position_Save(ofstream *outFile, int showGraphics) {
 
 void ENVS::Check_For_Pref(void) {
 
-        char fileName[100];
-        int fileIndex=0;
-        sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
-        while ( !File_Exists(fileName) && (fileIndex<10) )
-                sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
+	char fileName[100];
+	int fileIndex=0;
+	sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
+	while ( !File_Exists(fileName) && (fileIndex<10) )
+		sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
 
 	if ( File_Exists(fileName) ) {
-
 		Collect_Pref(fileName);
-
 		Rescore_Population();
 	}
 }
@@ -1122,13 +1117,12 @@ void ENVS::Collect_Pref(char *fileName) {
 	delete inFile;
 	inFile = NULL;
 
-	Delete_Pref();
+	Delete_Pref(); // deletes preferences file
 
 	tau->Store_Pref(firstControllerID,secondControllerID,pref);
 }
 
-void ENVS::Create_Robot_Current_Best( 	dWorldID      world, 
-					dSpaceID      space) {
+void ENVS::Create_Robot_Current_Best( dWorldID world, dSpaceID space ) {
 
 	currNumberOfEnvs = numberOfEnvs;
 
@@ -1673,7 +1667,7 @@ void ENVS::Save_Pair_For_Pref(void) {
 	sprintf(fileName2,"SavedFiles/pair0.dat");
 	if ( File_Exists(fileName2) )
 		return;
-	
+
 	char fileName[100];
 	sprintf(fileName,"SavedFiles/tmp.dat");
 
@@ -1687,11 +1681,11 @@ void ENVS::Save_Pair_For_Pref(void) {
 
 	outFile->close();
 	delete outFile;
-	outFile = NULL;	
+	outFile = NULL;
 
 	char command[100];
 	sprintf(command,"mv %s %s",fileName,fileName2);
-	system(command);	
+	system(command);
 }
 
 void ENVS::Save_Environments(ofstream *outFile) {

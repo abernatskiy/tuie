@@ -5,7 +5,7 @@
 	The sequence of design stages evolution must progress through.
 	The current best robot (if any).
 	And the robot that is currently being evaluated (if any).
- */
+*/
 
 #include "optimizer.h"
 #include "environment.h"
@@ -21,7 +21,7 @@ public:
 	int numberOfEnvs;
 	ENVIRONMENT **taskEnvironments;
 	OPTIMIZER   *optimizer;
-	TAU *tau;	
+	TAU *tau;
 	int recordingVideo;
 	int speed;
 
