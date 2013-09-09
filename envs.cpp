@@ -672,7 +672,7 @@ int  ENVS::Pair_Available(void) {
 }
 
 void ENVS::Prepare_To_Run_Without_Graphics(dWorldID world, dSpaceID space) {
-	
+
 	selectionLevel=SELECTION_LEVEL_ENVS;
 
 	Load(false);

@@ -240,42 +240,29 @@ void Simulate(int pause) {
 		envs->Draw();
 
 	if ( envs->recordingVideo )
-
 		envs->Video_Record();
 
-for (int i=0;i<envs->speed;i++) {
+	for (int i=0; i < envs->speed; i++) {
+		if ( !pause ) {
 
-	if ( !pause ) {
+			dSpaceCollide (space,0,&nearCallback);
+			dWorldStep (world,STEP_SIZE);
+			dJointGroupEmpty(contactgroup);
 
-		dSpaceCollide (space,0,&nearCallback);
-		dWorldStep (world,STEP_SIZE);
-		dJointGroupEmpty(contactgroup);
-
-		if ( envs->In_Evolution_Mode() )
-
-			envs->Evolve(		world,
-						space);
-
-		else if ( envs->In_Champ_Mode() )
-
-			envs->Show_Champ(	world, 
-						space);
-
-		else if ( envs->In_TAU_Mode() ) {
-
-			envs->TAU_Show_Robot_Pair(world,space);
-		}
-
-		else if ( envs->In_Design_Mode() ) {
-
-			if ( envs->Pair_Available() ) {
-
-				envs->Load_Pair();
-				envs->Mode_Simulate_Set_TAU(world,space);
+			if ( envs->In_Evolution_Mode() )
+				envs->Evolve( world, space );
+			else if ( envs->In_Champ_Mode() )
+				envs->Show_Champ(	world, space );
+			else if ( envs->In_TAU_Mode() )
+				envs->TAU_Show_Robot_Pair( world, space );
+			else if ( envs->In_Design_Mode() ) {
+				if ( envs->Pair_Available() ) {
+					envs->Load_Pair();
+					envs->Mode_Simulate_Set_TAU( world, space );
+				}
 			}
 		}
 	}
-}
 }
 
 static void simLoop (int pause)
@@ -707,15 +694,15 @@ void Print_Usage(void) {
 
 void Parse_Parameters(int argc, char **argv) {
 
-        int currParam;
+	int currParam;
 
-        for(currParam=0;currParam<argc;currParam++) {
+	for(currParam=0;currParam<argc;currParam++) {
 
-                if ( strcmp(argv[currParam],"-r") == 0 )
-                        randSeed = atoi(argv[currParam+1]);
+		if ( strcmp(argv[currParam],"-r") == 0 )
+			randSeed = atoi(argv[currParam+1]);
 
 		if ( strcmp(argv[currParam],"-null") == 0 )
-			showGraphics = false;	
+			showGraphics = false;
 
 		if ( strcmp(argv[currParam],"-h") == 0 ||
 		     strcmp(argv[currParam],"--help") == 0 )
