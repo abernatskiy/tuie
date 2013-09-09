@@ -245,9 +245,9 @@ void Simulate(int pause) {
 	for (int i=0; i < envs->speed; i++) {
 		if ( !pause ) {
 
-			dSpaceCollide (space,0,&nearCallback);
-			dWorldStep (world,STEP_SIZE);
-			dJointGroupEmpty(contactgroup);
+			dSpaceCollide (space, 0, &nearCallback);
+			dWorldStep (world, STEP_SIZE);
+			dJointGroupEmpty (contactgroup);
 
 			if ( envs->In_Evolution_Mode() )
 				envs->Evolve( world, space );

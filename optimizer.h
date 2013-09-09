@@ -36,12 +36,12 @@ public:
 	void		Genome_Discard_Being_Evaluated(void);
 	NEURAL_NETWORK *Genome_Get(int i);
 	NEURAL_NETWORK *Genome_Get_Best(void);
-        NEURAL_NETWORK *Genome_Get_Best_But_Not(NEURAL_NETWORK *other);
+	NEURAL_NETWORK *Genome_Get_Best_But_Not(NEURAL_NETWORK *other);
 	NEURAL_NETWORK *Genome_Get_Best_But_Not(int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Curr_To_Evaluate(void);
 	NEURAL_NETWORK *Genome_Get_First(void);
 	NEURAL_NETWORK *Genome_Get_Most_Different(int numControllers, NEURAL_NETWORK **controllers);
-        NEURAL_NETWORK *Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers);
+	NEURAL_NETWORK *Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite);
 	NEURAL_NETWORK *Genome_Get_Random(void);
 	NEURAL_NETWORK *Genome_Get_Random_But_Not(NEURAL_NETWORK *other);

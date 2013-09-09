@@ -863,7 +863,6 @@ NEURAL_NETWORK *ENVS::TAU_Get_User_Favorite(void) {
 int ENVS::TAU_Ready_To_Predict(void) {
 
 	if ( !tau )
-
 		return( false );
 
 	return( tau->Ready_To_Predict() );
@@ -886,7 +885,7 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space) {
 
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
-	 	tau->timer++;	
+	 	tau->timer++;
 
 	//	tau->Optimize();
 	}
