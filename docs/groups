@@ -1,0 +1,56 @@
+I) Assumptions
+I assume that we deal with small number of possible solutions, but
+with large number of users. The main process (the one that runs
+AFPO) does not know in advance the number of users. Users can join
+evaluation process in asynchronious manner.
+
+II) Process interaction
+Assume we have 3 processes - M3-null, M3-cp-1 and M3-cp-2. Process
+identification is based on UNIX PIDs. Process interaction proceeds as
+follows:
+
+1. M3-null supplies pair0.dat. 0 here is GID of group "any".
+That means any capturePrefs process is free to process the pair.
+It then creates an initial AFPO population and waits for files
+pref*.dat to appear.
+
+It also writes a string "0: *" into groups.dat.
+
+2. At the same time process M3-cp-1 waits for file pair*.dat to
+appear. When it appears, it reads groups.dat and discovers that 0
+(which was the * in pair*.dat) is a group into which processes with
+PID of * are allowed to enter. It compares its own PID with * and finds
+that it matches. It proceeds then to show the user the ANNs and to get
+the evaluation from her. It writes the obtained results into file
+pref<PID1>.dat, where PID1 is unix pid of the process.
+
+3. M3-null discovers the file pref<PID1>.dat. It reads it and assigns
+a new group id (say, 1) to the newly discovered evalution process. This
+is written into groups.dat immediately. It then creates a preference
+matrix tied to this GID and stores user preferences into it.
+
+4. Steps 2 and 3 happen for M3-cp-2, its separate pref*.dat and
+its separate (for now) GID, in asynchronious manner.
+
+5. Steps 2-4 are repeated until there is enough evaluation data to train
+user simulating ANNs.
+
+III) AFPO alterations
+AFPO starts only when we have a mature ANN. This saves the user from
+trouble of getting it out of local minima. Fitness function for AFPO is
+the goal fitness function multiplied by the sum of user preferences (or
+rather, group preferences). As algorithm advances, only mature ANNs are
+used in AFPO's evaluations. This can be accomplished, for example, by
+introducing weights proportional to maturity.
+
+IV) Group merging
+Every once in a while all mature networks are checked for matches
+in their preference vectors (for example, by measuring cartesian distance
+between them and comparing it to a certain epsilon). If preference vectors
+match, ANNs are merged and so are their respective groups.
+
+V) Dealing with user's changing opinions
+The difficulties of teaching user-modeling ANN are periodically 
+estimated, and, if they reach a certain maximal allowed value, 
+algorithm starts to forget user preferences incrementally, starting from 
+the oldest.
