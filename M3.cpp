@@ -118,7 +118,7 @@ char Get_Next_Cmd(FILE* fp) {
 
 	// assumes the file is opened for reading
 
-	char cmd, extra; 
+	char cmd, extra;
 
 	int filestop;
 
@@ -137,7 +137,7 @@ char Get_Next_Cmd(FILE* fp) {
 			filestop = fscanf(fp,"%c",&extra);
 		}
 		if ( filestop == EOF )
-			playbackDone = true; 
+			playbackDone = true;
 	}
 
 	return cmd;

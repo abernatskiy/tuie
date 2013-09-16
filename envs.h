@@ -106,10 +106,8 @@ private:
 	void Check_Whether_To_End(void);
 	void Check_Whether_To_Writeout(void);
 	void Collect_Pref(char *fileName);
-	void Create_Robot_Current_Best(	dWorldID      world, 
-					dSpaceID      space);
-	void Create_Robot_To_Evaluate(	dWorldID      world, 
-					dSpaceID      space);
+	void Create_Robot_Current_Best(dWorldID world, dSpaceID space);
+	void Create_Robot_To_Evaluate(dWorldID world, dSpaceID space);
 	void Deactivate_All(void);
 	void Destroy_Simulated_Objects(void);
 	int  Directory_Found(char *dirName);

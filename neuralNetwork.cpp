@@ -31,7 +31,7 @@ NEURAL_NETWORK::NEURAL_NETWORK(	int myID, int nS, int nM, int myAge ) {
 
 	weights		= new MATRIX(numSensors+numMotors,numMotors,0.0);
 
-	weights->Randomize(-1.0,1.0);	
+	weights->Randomize(-1.0,1.0);
 	weights->RoundToDecimalPlace(6);
 
 	taus		= new MATRIX(1,numMotors,0.0);
@@ -186,7 +186,7 @@ void   NEURAL_NETWORK::Fitness_Set(double fit) {
         fit = int(fit);
         fit = double(fit);
         fit = fit / pow(10.0,double(6));
-	
+
 	fitness = fit;
 
 	evaluated = true;

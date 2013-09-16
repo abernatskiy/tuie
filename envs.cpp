@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "sys/stat.h"
 #include <time.h>	// for fitness timestamp
+#include <unistd.h> // for getpid()
 
 #include <ode/ode.h>
 #include <drawstuff/drawstuff.h>
@@ -401,7 +402,7 @@ void ENVS::EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroup
 	Destroy_Simulated_Objects();
 
 	optimizer->Reset_But_Keep_Best();
-		
+
 	if ( optimizer )
 
 		optimizer->EvaluationPeriod_Decrease();
@@ -424,43 +425,43 @@ void ENVS::EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroup
 */
 }
 
-void ENVS::Evolve(      dWorldID      world,
-                        dSpaceID      space) {
+void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 
-        // If there is a robot being evaluated, and its time
-        // is not yet up, allow it to move.
-        if ( !Eval_Finished() ) {
+	// If there is a robot being evaluated, and its time
+	// is not yet up, allow it to move.
+	if ( !Eval_Finished() ) {
+		for (int i=0;   i<currNumberOfEnvs;     i++) {
+			taskEnvironments[i]->Allow_Robot_To_Move(optimizer->timer);
+		}
+		optimizer->Timer_Update();
+	}
 
-                for (int i=0;   i<currNumberOfEnvs;     i++) {
+	// If the time limit for the robot being evaluated has
+	// expired, record its fitness, remove it from the simulator,
+	// and prepare for the evaluation of the next robot.
+	else {
+//		double fitness = Fitness_Get();
+		double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
 
-                        taskEnvironments[i]->Allow_Robot_To_Move(optimizer->timer);
-                }
-                optimizer->Timer_Update();
-        }
+		MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
 
-        // If the time limit for the robot being evaluated has
-        // expired, record its fitness, remove it from the simulator,
-        // and prepare for the evaluation of the next robot.
-        else {
-//              double fitness = Fitness_Get();
-                double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
+		if ( TAU_Ready_To_Predict() )
+			optimizer->Fitness_Sensor_Data_Score_Receive( TAU_Get_User_Favorite(), // best controller TAU have seen so far
+																										fitness, // seems like a physical fitness
+																										timeSeries, // sensory time series
+																										TAU_Score_Get() ); // seems like a score estimation for current robot
+		else
+			optimizer->Fitness_Sensor_Data_Receive( TAU_Get_User_Favorite(), fitness, timeSeries );
+			// all the same, save for the score estimation for current robot
 
-                MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
+		timeSeries = NULL;
 
-                if ( TAU_Ready_To_Predict() )
+		Destroy_Simulated_Objects();
 
-                        optimizer->Fitness_Sensor_Data_Score_Receive(TAU_Get_User_Favorite(),fitness,timeSeries,TAU_Score_Get());
-                else
-                        optimizer->Fitness_Sensor_Data_Receive(TAU_Get_User_Favorite(),fitness,timeSeries);
+		optimizer->Timer_Reset();
 
-                timeSeries = NULL;
-
-                Destroy_Simulated_Objects();
-
-                optimizer->Timer_Reset();
-
-                // Set up next robot...
-                Create_Robot_To_Evaluate(world,space);
+		// Set up next robot...
+		Create_Robot_To_Evaluate(world,space);
 
 		evaluationsSinceLastSave++;
 
@@ -869,6 +870,9 @@ int ENVS::TAU_Ready_To_Predict(void) {
 }
 
 double ENVS::TAU_Score_Get(void) {
+
+	// TBD implement group interaction here
+	// Assuming I implement groups
 
 	// Get the current controller that was just evaluated,
 
@@ -1390,11 +1394,11 @@ void ENVS::Load(int showGraphics) {
 
 void ENVS::Load_Pair(void) {
 
-        char fileName[100];
-        int fileIndex=0;
-        sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
-        while ( !File_Exists(fileName) ) 
-                sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
+	char fileName[100];
+	int fileIndex=0;
+	sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
+	while ( !File_Exists(fileName) )
+		sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
 
 	ifstream *inFile = new ifstream(fileName);
 
@@ -1538,7 +1542,6 @@ int  ENVS::Ready_For_Design_Mode(void) {
 
         // Already in design mode.
         if ( In_Design_Mode() )
-                
                 return( false );
 
 	return( true );
@@ -1859,15 +1862,15 @@ void ENVS::TAU_Store_User_Preference(void) {
 	(*outFile) << tau->controllers[0]->ID << " ";
 	(*outFile) << tau->controllers[1]->ID << " ";
 
-        // mmm Get an automated preference, rather than one from the human user.
+  // mmm Get an automated preference, rather than one from the human user.
 	/*
         double prefFirst  = taskEnvironments[0]->robots[0]->Preference_Get(taskEnvironments[0]->robots[1],2);
         double prefSecond = taskEnvironments[1]->robots[0]->Preference_Get(taskEnvironments[0]->robots[1],2);
 
         if ( prefFirst > prefSecond )
-        	(*outFile) << "0"; 
+        	(*outFile) << "0";
         else
-        	(*outFile) << "1"; 
+        	(*outFile) << "1";
 	*/
 	// mmm
 	(*outFile) << activeEnvironment;
@@ -1881,7 +1884,7 @@ void ENVS::TAU_Store_User_Preference(void) {
 	sprintf(fileName2,"SavedFiles/pref%d.dat",fileIndex++);
 	while ( File_Exists(fileName2) )
 		sprintf(fileName2,"SavedFiles/pref%d.dat",fileIndex++);
-	
+
 	char command[100];
 	sprintf(command,"mv %s %s",fileName,fileName2);
 	system(command);

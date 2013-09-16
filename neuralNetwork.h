@@ -19,8 +19,8 @@ public:
 	int     numMotors;
 	double  fitness;
 	int	dominated;
-        int     age;
-        MATRIX *sensorTimeSeries;
+	int     age;
+	MATRIX *sensorTimeSeries;
 	int	evaluated;
 	int     ID;
 

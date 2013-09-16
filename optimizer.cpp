@@ -71,42 +71,37 @@ void OPTIMIZER::EvaluationPeriod_Increase(void) {
 	evaluationPeriod++;
 }
 
-void OPTIMIZER::Fitness_Sensor_Data_Receive(		NEURAL_NETWORK *userFavorite,
+void OPTIMIZER::Fitness_Sensor_Data_Receive(	NEURAL_NETWORK *userFavorite,
 							double fitness,
 							MATRIX *timeSeries) {
-        if ( genomeUnderEvaluation ) 
-
-                genomeUnderEvaluation->Fitness_Sensor_Data_Set(fitness,timeSeries);
-        else 
-                Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Sensor_Data_Set(fitness,timeSeries);
+	if ( genomeUnderEvaluation )
+		genomeUnderEvaluation->Fitness_Sensor_Data_Set(fitness,timeSeries);
+	else
+		Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Sensor_Data_Set(fitness,timeSeries);
 }
 
 void OPTIMIZER::Fitness_Sensor_Data_Score_Receive(	NEURAL_NETWORK *userFavorite,
 							double fitness,
 							MATRIX *timeSeries,
 							double score) {
-        if ( genomeUnderEvaluation )
 
-                genomeUnderEvaluation->Fitness_Sensor_Data_Score_Set(fitness,timeSeries,score);
-        else
-                Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Sensor_Data_Score_Set(fitness,timeSeries,score);
+	if ( genomeUnderEvaluation )
+		genomeUnderEvaluation->Fitness_Sensor_Data_Score_Set(fitness,timeSeries,score);
+	else
+		Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Sensor_Data_Score_Set(fitness,timeSeries,score);
 }
 
 void OPTIMIZER::Fitness_Receive(NEURAL_NETWORK *userFavorite, double fitness) {
 
-	if ( genomeUnderEvaluation ) {
-
+	if ( genomeUnderEvaluation )
 		genomeUnderEvaluation->Fitness_Set(fitness);
-	}
-	else {
+	else
 		Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Set(fitness);
-	}
 }
 
 void OPTIMIZER::Genome_Discard_Being_Evaluated(void) {
 
 	if ( genomeUnderEvaluation ) {
-
 		delete genomeUnderEvaluation;
 		genomeUnderEvaluation = NULL;
 	}
@@ -326,9 +321,9 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 	// the same fitness as any in the external list of controllers
 	// supplied as a parameter.
 
-        int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
+	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 
-	int found = false; 
+	int found = false;
 
 	int numberOfTries = 0;
 

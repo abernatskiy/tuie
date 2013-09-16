@@ -5,6 +5,8 @@
 #include "optimizer.h"
 #include "tauOptimizer.h"
 
+/*** The Approximate User ***/
+
 class TAU {
 
 public:
