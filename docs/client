@@ -1,0 +1,8 @@
+Detailed process interaction from client's viewpoint:
+
+1. Scan for either pair0.dat of pair<self's PID>.dat files.
+2. Read robot params from there, delete file.
+3. Get eval from user.
+4. Write pref<self's PID>.dat file.
+
+Maybe not remove the pair0.dat.

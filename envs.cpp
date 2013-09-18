@@ -64,19 +64,13 @@ ENVS::ENVS(int rs) {
 		taskEnvironments[i] = NULL;
 
 	taskEnvironments[0] = new ENVIRONMENT();
-
 	taskEnvironments[0]->Add_Light_Source();
-
 	taskEnvironments[0]->Add_Robot_Sandbox();
-
 	taskEnvironments[0]->Set_Color(1,0,0);
 
 	optimizer = NULL;
-
 	tau = NULL;
-
 	targetSensorValuesRecorded = false;
-
 	recordingVideo = false;
 
 	savedFileIndex = -1;
@@ -92,13 +86,13 @@ ENVS::ENVS(int rs) {
 
 	timeSinceLastWriteout = startTime;
 
+	client = new CLIENT();
+
 	char command[200];
 	sprintf(command,"rm SavedFiles/writeout%d.txt",randSeed);
 	system(command);
-
 	sprintf(command,"rm SavedFiles/pair*.dat");
 	system(command);
-
 	sprintf(command,"rm SavedFiles/pref*.dat");
 	system(command);
 }
@@ -129,53 +123,35 @@ ENVS::~ENVS(void) {
 void ENVS::Active_Element_Copy(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
 			Environment_Copy();
-
 		else if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Copy();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Copy();
 }
 
 void ENVS::Active_Element_Delete(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
 			Environment_Delete();
-
 		else if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Delete();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Delete();
 }
 
 void ENVS::Active_Element_Load(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN ) {
-
-		     if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
+		if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
 			taskEnvironments[activeEnvironment]->Load();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ENVS )
 			Load(true);
-
 		// Robots during design are always red.
 		for (int i=0;	i<numberOfEnvs;	i++) {
-
 //			taskEnvironments[i]->Robots_Set_Color(1,0,0);
-
 			taskEnvironments[i]->Robots_Recolor('r');
 		}
 	}
@@ -184,68 +160,44 @@ void ENVS::Active_Element_Load(void) {
 void ENVS::Active_Element_Mark(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Mark_Object();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Mark_Component();
 }
 
 void ENVS::Active_Element_Unmark(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Unmark_Object();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Unmark_Component();
 }
 
 void ENVS::Active_Element_Move(double x, double y, double z) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_ENVS )
-
 			Move(x,y,z);
-
 		else if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
 			Environment_Move(x,y,z);
-
 		else if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Move(x,y,z);
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Move(x,y,z);
 }
 
 void ENVS::Active_Element_Next(void) {
 
 	if ( simulateMode == MODE_SIMULATE_TAU )
-
 		Environment_Next();
-
 	else if ( simulateMode == MODE_SIMULATE_DESIGN ) {
-
 		if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
 			Environment_Next();
-
 		else if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Next();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Next();
 	}
 }
@@ -253,21 +205,13 @@ void ENVS::Active_Element_Next(void) {
 void ENVS::Active_Element_Previous(void) {
 
 	if ( simulateMode == MODE_SIMULATE_TAU )
-
 		Environment_Previous();
-
 	else if ( simulateMode == MODE_SIMULATE_DESIGN ) {
-
 		if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
 			Environment_Previous();
-
 		else if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Previous();
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Previous();
 	}
 }
@@ -275,119 +219,82 @@ void ENVS::Active_Element_Previous(void) {
 void ENVS::Active_Element_Resize(double changeX, double changeY, double changeZ) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Resize(changeX,changeY,changeZ);
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Resize(changeX,changeY,changeZ);
 }
 
 void ENVS::Active_Element_Rotate(double rotX, double rotY, double rotZ) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-
 			taskEnvironments[activeEnvironment]->Active_Element_Rotate(rotX,rotY,rotZ);
-
 		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Component_Rotate(rotX,rotY,rotZ);
 }
 
 void ENVS::Active_Element_Save(void) {
 
-	     if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
-
-		     taskEnvironments[activeEnvironment]->Save();
-
-	     else if ( selectionLevel == SELECTION_LEVEL_ENVS )
-		     Save(true);
+	if ( selectionLevel == SELECTION_LEVEL_ENVIRONMENT )
+		taskEnvironments[activeEnvironment]->Save();
+	else if ( selectionLevel == SELECTION_LEVEL_ENVS )
+		Save(true);
 }
 
 void ENVS::Joint_Connect(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 //		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-//
 //			taskEnvironments[activeEnvironment]->Connect_Object_Joint();
-//
 //		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 		if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Connect_Robot_Joint();
 }
 
 void ENVS::Joint_Range_Decrease(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 //		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-//
 //			taskEnvironments[activeEnvironment]->Active_Object_Joint_Range_Decrease();
-//
 //		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 		if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Joint_Range_Decrease();
 }
 
 void ENVS::Joint_Range_Increase(void) {
 
 	if ( simulateMode == MODE_SIMULATE_DESIGN )
-
 //		if ( selectionLevel == SELECTION_LEVEL_OBJECT )
-//
 //			taskEnvironments[activeEnvironment]->Active_Object_Joint_Range_Increase();
-//
 //		else if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 		if ( selectionLevel == SELECTION_LEVEL_ROBOT )
-
 			taskEnvironments[activeEnvironment]->Active_Joint_Range_Increase();
 }
 
 void ENVS::Delete_Pair(void) {
 
-        char fileName[100];
-        int fileIndex=0;
-        sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
-        while ( !File_Exists(fileName) && (fileIndex<10) )
-                sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
+	char fileName[100];
+	if( client->pairFileName(fileName) != 0 ) return;
 
-	if ( File_Exists(fileName) ) {
-
-		char command[100];
-		sprintf(command,"rm %s",fileName);
-		system(command);
-	}
+	char command[100];
+	sprintf(command, "rm %s", fileName);
+	system(command);
 }
 
 void ENVS::Delete_Pref(void) {
 
 	char fileName[100];
-	int fileIndex=0;
-	sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
-	while ( !File_Exists(fileName) && (fileIndex<10) )
-		sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
+	if( client->prefFileName(fileName) != 0 ) return;
 
-	if ( File_Exists(fileName) ) {
-		char command[100];
-		sprintf(command,"rm %s",fileName);
-		system(command);
-	}
+	char command[100];
+	sprintf(command, "rm %s", fileName);
+	system(command);
 }
 
 void ENVS::Draw(void) {
 
 	for (int i=0;	i<currNumberOfEnvs;	i++) {
-
 		if ( taskEnvironments[i] )
 			taskEnvironments[i]->Draw();
 	}
@@ -398,13 +305,9 @@ void ENVS::EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroup
 /*
 	if ( In_Design_Mode() )
 		return;
-
 	Destroy_Simulated_Objects();
-
 	optimizer->Reset_But_Keep_Best();
-
 	if ( optimizer )
-
 		optimizer->EvaluationPeriod_Decrease();
 */
 }
@@ -414,13 +317,9 @@ void ENVS::EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroup
 /*
 	if ( In_Design_Mode() )
 		return;
-
 	Destroy_Simulated_Objects();
-
 	optimizer->Reset_But_Keep_Best();
-
 	if ( optimizer )
-
 		optimizer->EvaluationPeriod_Increase();
 */
 }
@@ -498,9 +397,7 @@ int ENVS::In_TAU_Mode(void) {
 void ENVS::Mode_Simulate_Set_Champ(dWorldID world, dSpaceID space) {
 
 	// Switch to visualizing the best robot so far.
-
 	if ( !Ready_For_Champ_Mode() )
-
 		return;
 
 	End_Current_Mode();
@@ -523,9 +420,7 @@ void ENVS::Mode_Simulate_Set_Champ(dWorldID world, dSpaceID space) {
 void ENVS::Mode_Simulate_Set_Design(void) {
 
 	// Switch to the designing of task environments.
-
 	if ( !Ready_For_Design_Mode() )
-
 		return;
 
 	End_Current_Mode();
@@ -536,9 +431,7 @@ void ENVS::Mode_Simulate_Set_Design(void) {
 
 	// Robots during design are always red.
 	for (int i=0;	i<numberOfEnvs;	i++) {
-
 		taskEnvironments[i]->Set_Color(1,0,0);
-
 		taskEnvironments[activeEnvironment]->Robots_Recolor('r');
 	}
 }
@@ -546,14 +439,12 @@ void ENVS::Mode_Simulate_Set_Design(void) {
 void ENVS::Mode_Simulate_Set_Evolve(dWorldID world, dSpaceID space) {
 
 	// Switch to evolution mode.
-
 	if ( !Ready_For_Evolution_Mode() )
-
 		return;
 
 	End_Current_Mode();
 
-	// Selection level is too low. 
+	// Selection level is too low.
 	if ( selectionLevel == SELECTION_LEVEL_ROBOT )	// lowest level
 		Selection_Level_Raise();
 
@@ -577,9 +468,7 @@ void ENVS::Mode_Simulate_Set_Evolve(dWorldID world, dSpaceID space) {
 
 	// The evolving robots are always blue.
 	for (int i=0;i<numberOfEnvs;i++) {
-
 		taskEnvironments[i]->Set_Color(0,0,1);
-
 		taskEnvironments[activeEnvironment]->Robots_Recolor('b');
 	}
 
@@ -595,14 +484,16 @@ void ENVS::Mode_Simulate_Set_Evolve(dWorldID world, dSpaceID space) {
 
 void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
-        // Switch to The Approximate User (TAU) mode. 
+	// called from M3 in client mode
 
-//	if ( !Ready_For_TAU_Mode() )
-//		return;
+	// Switch to The Approximate User (TAU) mode.
+
+	//	if ( !Ready_For_TAU_Mode() )
+	//		return;
 
 	End_Current_Mode();
 
-        simulateMode=MODE_SIMULATE_TAU;
+	simulateMode=MODE_SIMULATE_TAU;
 
 	// In TAU mode, there are always two environments;
 	// the user must indicate which of the two robots
@@ -610,11 +501,10 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	Environment_Copy();
 
-        // The evolving robots are always yellow in TAU mode. 
+	// The evolving robots are always yellow in TAU mode.
 
-        for (int i=0;i<numberOfEnvs;i++)
-
-                taskEnvironments[i]->Set_Color(1,1,0);
+	for (int i=0;i<numberOfEnvs;i++)
+		taskEnvironments[i]->Set_Color(1,1,0);
 
 	// To start, highlight the first of the two controllers.
 	selectionLevel = SELECTION_LEVEL_ENVIRONMENT;
@@ -629,47 +519,37 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 void ENVS::Mode_View_Set_Back(void) {
 
 	viewMode = MODE_VIEW_BACK;
-
 	Viewpoint_Set(0,-2.792,0.79,90,-10.5,0);
 }
 
 void ENVS::Mode_View_Set_Side(void) {
 
 	viewMode = MODE_VIEW_SIDE;
-
 	Viewpoint_Set(-7.274,1.658,2.16,0,-6,0);
 }
 
 void ENVS::Mode_View_Set_Top(void) {
 
 	viewMode = MODE_VIEW_TOP;
-
 	Viewpoint_Set(0,2,7,90,-90,0);
 }
 
 void ENVS::MutationProbability_Decrease(void) {
 
 	if ( optimizer )
-
 		optimizer->MutationProbability_Decrease();
 }
 
 void ENVS::MutationProbability_Increase(void) {
 
 	if ( optimizer )
-
 		optimizer->MutationProbability_Increase();
 }
 
-int  ENVS::Pair_Available(void) {
+bool ENVS::Pair_Available(void) {
 
-        char fileName[100];
-        int fileIndex=0;
-        sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
-        while ( !File_Exists(fileName) && (fileIndex<10) ) 
-                sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
-
-	return( File_Exists(fileName) );
+	// called from M3 in client mode
+	return client->pairFileExists();
 }
 
 void ENVS::Prepare_To_Run_Without_Graphics(dWorldID world, dSpaceID space) {
@@ -705,7 +585,7 @@ void ENVS::Reset(void) {
 		if ( tau ) {
 			delete tau;
 			tau = NULL;
-		}	
+		}
 	}
 
 	else if ( In_TAU_Mode() ) {
@@ -726,116 +606,74 @@ void ENVS::Selection_Level_Lower(void) {
 		return;
 
 	if ( selectionLevel==SELECTION_LEVEL_OBJECT ) {
-
 		taskEnvironments[activeEnvironment]->Deactivate_All();
-
 		taskEnvironments[activeEnvironment]->Unmark_All();
-
 		taskEnvironments[activeEnvironment]->Unhide_All();
-
 		taskEnvironments[activeEnvironment]->Activate_Component(0);
-
 		selectionLevel = SELECTION_LEVEL_ROBOT;
 	}
-
 	else if ( selectionLevel==SELECTION_LEVEL_ENVIRONMENT ) {
-
 		taskEnvironments[activeEnvironment]->Deactivate_All();
-
 		taskEnvironments[activeEnvironment]->Unmark_All();
-
 		taskEnvironments[activeEnvironment]->Activate_Light_Source();
-
 		selectionLevel = SELECTION_LEVEL_OBJECT;
 	}
-
 	else {  // selection level is envs
-		
 		Deactivate_All();
-
 		if ( activeEnvironment<0 )
 			activeEnvironment=0;
-
 		taskEnvironments[activeEnvironment]->Activate_All();
-
 		selectionLevel = SELECTION_LEVEL_ENVIRONMENT;
 	}
 }
 
 void ENVS::Selection_Level_Raise(void) {
 
-        // Only allow selection level change in design mode.
-        if ( !In_Design_Mode() )
-                return;
+	// Only allow selection level change in design mode.
+	if ( !In_Design_Mode() )
+		return;
 
 	// Already at highest level...
 	if ( selectionLevel==SELECTION_LEVEL_ENVS )
 		return;
-
 	else if ( selectionLevel==SELECTION_LEVEL_ENVIRONMENT ) {
 //	TBD: "environment" is highest level for users for now
 //		return;
-
 		taskEnvironments[activeEnvironment]->Deactivate_All();
-
 		taskEnvironments[activeEnvironment]->Unmark_All();
-
 		Activate_All();
-
 		selectionLevel=SELECTION_LEVEL_ENVS;
 	}
-
 	else if ( selectionLevel==SELECTION_LEVEL_OBJECT ) {
-
 		taskEnvironments[activeEnvironment]->Unmark_All();
-
 		taskEnvironments[activeEnvironment]->Activate_All();
-
 		selectionLevel=SELECTION_LEVEL_ENVIRONMENT;
-
 		taskEnvironments[activeEnvironment]->Robots_Recolor('r');
 	}
-
 	else { // selectionLevel==SELECTION_LEVEL_ROBOT
-
 		taskEnvironments[activeEnvironment]->Unmark_All();
-
 		taskEnvironments[activeEnvironment]->Hide_Robot_Joints();
-
 		taskEnvironments[activeEnvironment]->Activate_Robot(0);
-
 		selectionLevel=SELECTION_LEVEL_OBJECT;
-
 		taskEnvironments[activeEnvironment]->Robots_Recolor('r');
 	}
 }
 
-void ENVS::Show_Champ(	dWorldID      world, 
-			dSpaceID      space) {
+void ENVS::Show_Champ( dWorldID world, dSpaceID space) {
 
 	// If there is a champ being evaluated, and its time
 	// is not yet up, allow it to move.
-
 	if ( !Eval_Finished() ) {
-
-		for (int i=0;	i<currNumberOfEnvs;	i++) {
-
+		for (int i=0;	i<currNumberOfEnvs;	i++)
 			taskEnvironments[i]->Allow_Robot_To_Move(optimizer->timer);
-		}
-
 		optimizer->Timer_Update();
 	}
-
 	// If the time limit for the champ has
 	// expired, replay it.
 	else {
-
 		optimizer->Print();
-
 		Destroy_Simulated_Objects();
-
 		optimizer->Timer_Reset();
-
 		Create_Robot_Current_Best(world,space);
 	}
 }
@@ -855,9 +693,7 @@ void ENVS::Speed_Increase(void) {
 NEURAL_NETWORK *ENVS::TAU_Get_User_Favorite(void) {
 
 	if ( !tau )
-
 		return( NULL );
-
 	return( tau->Controller_Get_Best() );
 }
 
@@ -865,7 +701,6 @@ int ENVS::TAU_Ready_To_Predict(void) {
 
 	if ( !tau )
 		return( false );
-
 	return( tau->Ready_To_Predict() );
 }
 
@@ -883,42 +718,41 @@ double ENVS::TAU_Score_Get(void) {
 	return( tau->Score_Predict(currentController) );
 }
 
-void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space) {
+void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 
 	if ( tau->timer<1000 ) {
 
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
 	 	tau->timer++;
-
 	//	tau->Optimize();
 	}
 
 	// If the time limit for the robot pair has expired, replay it.
 	else {
 
-                // mmm Modification to allow for automated preferences.
-                // TAU_User_Has_Indicated_A_Preference(world,space);
+		// mmm Modification to allow for automated preferences.
+		// TAU_User_Has_Indicated_A_Preference(world,space);
 
-                // mmm Modification to allow for automated preferences.
+		// mmm Modification to allow for automated preferences.
 		//TAU_Store_Sensor_Data();
 
 		Destroy_Simulated_Objects();
 
 		tau->timer=0;
 
-		TAU_Send_Controllers_For_Evaluation(world,space);
+		TAU_Send_Controllers_For_Evaluation(world, space);
 	}
 }
 
-void ENVS::TAU_User_Has_Indicated_A_Preference(dWorldID world, dSpaceID space) {
+void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space ) {
+
+	// called from M3 upon pressing the spacebar in client mode
 
 	// Only accept a user's preference if in TAU mode.
-
 	if ( In_TAU_Mode() ) {
 
 		TAU_Store_User_Preference();
-
 		delete tau;
 		tau = NULL;
 
@@ -927,8 +761,9 @@ void ENVS::TAU_User_Has_Indicated_A_Preference(dWorldID world, dSpaceID space) {
 		Mode_Simulate_Set_Design();
 
 		Delete_Pair();
-	}
 
+		client->checkIfFirstIterationAndMakeRecord();
+	}
 }
 
 void ENVS::Video_Record(void) {
@@ -1033,32 +868,22 @@ void ENVS::Camera_Position_Save(ofstream *outFile, int showGraphics) {
 void ENVS::Check_For_Pref(void) {
 
 	char fileName[100];
-	int fileIndex=0;
-	sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
-	while ( !File_Exists(fileName) && (fileIndex<10) )
-		sprintf(fileName,"SavedFiles/pref%d.dat",fileIndex++);
+	if( client->prefFileName(fileName) != 0 ) return;
 
-	if ( File_Exists(fileName) ) {
-		Collect_Pref(fileName);
-		Rescore_Population();
-	}
+	Collect_Pref(fileName);
+	Rescore_Population();
 }
 
 void ENVS::Check_Whether_To_End(void) {
 
 	clock_t currTime = clock();
-
 	double CPUSecondsUsed = ((double) (currTime - startTime)) / CLOCKS_PER_SEC;
-
 	double CPUMinutesUsed = CPUSecondsUsed/60.0;
-
 	double CPUHoursUsed = CPUMinutesUsed/60.0;
 
 	// End run after 9 hours of CPU time
-
 //	if ( CPUSecondsUsed > 60 )
 	if ( CPUHoursUsed >= 9.0 )
-
 		exit(0);
 }
 
@@ -1120,7 +945,7 @@ void ENVS::Collect_Pref(char *fileName) {
 	delete inFile;
 	inFile = NULL;
 
-	Delete_Pref(); // deletes preferences file
+	Delete_Pref();
 
 	tau->Store_Pref(firstControllerID,secondControllerID,pref);
 }
@@ -1128,42 +953,29 @@ void ENVS::Collect_Pref(char *fileName) {
 void ENVS::Create_Robot_Current_Best( dWorldID world, dSpaceID space ) {
 
 	currNumberOfEnvs = numberOfEnvs;
-
 	NEURAL_NETWORK *bestGenome = optimizer->Genome_Get_Best();
-
 	for (int i=0;	i<currNumberOfEnvs;	i++) {
-
 		taskEnvironments[i]->Prepare_For_Simulation(world,space);
-
 		taskEnvironments[i]->Label(bestGenome,i);
 	}
-
 	bestGenome = NULL;
 }
 
-void ENVS::Create_Robot_To_Evaluate(	dWorldID      world, 
-					dSpaceID      space) {
+void ENVS::Create_Robot_To_Evaluate( dWorldID world, dSpaceID space ) {
 
 	NEURAL_NETWORK *nextGenome = optimizer->Genome_Get_Next_To_Evaluate(TAU_Get_User_Favorite());
-
 	for (int i=0;	i<currNumberOfEnvs;	i++) {
-
 		taskEnvironments[i]->Prepare_For_Simulation(world,space);
-
 		taskEnvironments[i]->Label(nextGenome,i);
-
 		taskEnvironments[i]->Record_Sensor_Data(optimizer->evaluationPeriod);
 	}
-
 	nextGenome = NULL;
 }
 
 void ENVS::Deactivate_All(void) {
 
 	for (int i=0;	i<numberOfEnvs;	i++)
-
 		if ( taskEnvironments[i] )
-
 			taskEnvironments[i]->Deactivate_All();
 }
 
@@ -1241,12 +1053,11 @@ int  ENVS::End_State_Missing(void) {
 
 void ENVS::Environment_Copy(void) {
 
-	// Maximum number of environments already exist. 
+	// Maximum number of environments already exist.
 	if ( numberOfEnvs == MAX_ENVIRONMENTS )
 		return;
 
-	taskEnvironments[numberOfEnvs] = 
-
+	taskEnvironments[numberOfEnvs] =
 		new ENVIRONMENT(taskEnvironments[activeEnvironment]);
 
 	taskEnvironments[activeEnvironment]->Deactivate_All();
@@ -1312,13 +1123,13 @@ int  ENVS::Eval_Finished(void) {
 	return( optimizer->Time_Elapsed() );
 }
 
-bool  ENVS::File_Exists(char *fileName) {
+bool ENVS::File_Exists(char *fileName) {
 
 	ifstream ifile(fileName);
 	return ifile;
 }
 
-int  ENVS::File_Index_Next_Available(void) {
+int ENVS::File_Index_Next_Available(void) {
 
 	int fileIndex = 0;
 	char fileName[100];
@@ -1327,7 +1138,6 @@ int  ENVS::File_Index_Next_Available(void) {
 		fileIndex++;
 		sprintf(fileName,"SavedFiles/envs%d.dat",fileIndex);
 	}
-
 	return( fileIndex );
 }
 
@@ -1394,11 +1204,9 @@ void ENVS::Load(int showGraphics) {
 
 void ENVS::Load_Pair(void) {
 
+	// called from M3 in client mode
 	char fileName[100];
-	int fileIndex=0;
-	sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
-	while ( !File_Exists(fileName) )
-		sprintf(fileName,"SavedFiles/pair%d.dat",fileIndex++);
+	client->pairFileName(fileName);
 
 	ifstream *inFile = new ifstream(fileName);
 
@@ -1437,7 +1245,7 @@ void ENVS::Load_Optimizer(ifstream *inFile) {
 
 	if ( isOptimizer )
 		optimizer = new OPTIMIZER(inFile);
-	else 
+	else
 		optimizer = NULL;
 }
 
@@ -1573,28 +1381,23 @@ int  ENVS::Ready_For_Evolution_Mode(void) {
         return( true );
 }
 
-int  ENVS::Ready_For_TAU_Mode(void) {
+int ENVS::Ready_For_TAU_Mode(void) {
 
 	// Already in TAU mode.
 	if ( In_TAU_Mode() )
-
 		return( false );
 
 	// Only allow TAU if there is one task environment.
 	if ( numberOfEnvs != 1 )
-
 		return( false );
 
 	// Only allow TAU if there are at least two controllers
 	// available for the user to choose between.
-
 	if ( !optimizer )
-
 		return( false );
 
 	if ( optimizer->Genomes_Num_Of_Evaluated() < 2 )
-
-		return( false ); 
+		return( false );
 
 	return( true );
 }
@@ -1610,7 +1413,7 @@ void ENVS::Reset(dWorldID world, dSpaceID space, dJointGroupID contactgroup) {
 	Create_Robot_To_Evaluate(world, space);
 }
 
-int  ENVS::Robot_Being_Evaluated(void) {
+int ENVS::Robot_Being_Evaluated(void) {
 
 	int allAreBeingEvaluated = true;
 
@@ -1707,7 +1510,7 @@ void ENVS::Save_Fitness(string str) {
 	sprintf(fileName,"SavedFiles/fitness.dat");
 
 	ofstream fitFile;
-	fitFile.open (fileName, ios::app); 
+	fitFile.open (fileName, ios::app);
 
 	if ( str == "" )  {
 		char fit[127];
@@ -1719,7 +1522,7 @@ void ENVS::Save_Fitness(string str) {
 
 	fitFile.close();
 
-//	printf("Fitness saved.\n");
+	printf("Fitness saved.\n");
 }
 
 void ENVS::Save_Optimizer(ofstream *outFile) {
@@ -1781,28 +1584,23 @@ int  ENVS::Target_Sensor_Values_Recorded(void) {
 
 void ENVS::TAU_Get_Controllers_From_Optimizer(void) {
 
-        if ( !tau )
-                tau = new TAU;
-
+	if ( !tau )
+		tau = new TAU;
 	tau->Controllers_Select_From_Optimizer(optimizer);
 }
 
 void ENVS::TAU_Load_Controller_Pair(ifstream *inFile) {
 
-        if ( !tau )
-                tau = new TAU;
-
-        tau->Controllers_Load_Pair(inFile);
+	if ( !tau )
+		tau = new TAU;
+	tau->Controllers_Load_Pair(inFile);
 }
 
 void ENVS::TAU_Reset_User_Models(void) {
 
 	if ( optimizer )
-
 		optimizer->Scores_Reset();
-
 //	if ( tau )
-
 //		tau->User_Models_Reset();
 }
 
@@ -1817,15 +1615,11 @@ void ENVS::TAU_Save_Controller_Pair(ofstream *outFile) {
 void ENVS::TAU_Send_Controllers_For_Evaluation(dWorldID world, dSpaceID space) {
 
 	taskEnvironments[0]->Prepare_For_Simulation(world,space);
-
 	taskEnvironments[0]->Label(tau->Controller_Pair_Get_First(),0);
+	taskEnvironments[0]->Record_Sensor_Data(STARTING_EVALUATION_TIME); // into RAM matrix
 
-	taskEnvironments[0]->Record_Sensor_Data(STARTING_EVALUATION_TIME);
-
-        taskEnvironments[1]->Prepare_For_Simulation(world,space);
-
-        taskEnvironments[1]->Label(tau->Controller_Pair_Get_Second(),1);
-
+	taskEnvironments[1]->Prepare_For_Simulation(world,space);
+	taskEnvironments[1]->Label(tau->Controller_Pair_Get_Second(),1);
 	taskEnvironments[1]->Record_Sensor_Data(STARTING_EVALUATION_TIME);
 
 	// There are contact resolution errors if the non-robot objects in both
@@ -1855,7 +1649,7 @@ void ENVS::TAU_Store_Sensor_Data(void) {
 void ENVS::TAU_Store_User_Preference(void) {
 
 	char fileName[100];
-	sprintf(fileName,"SavedFiles/tmp2.dat");
+	client->prefFileName(fileName);
 
 	ofstream *outFile = new ofstream(fileName);
 
@@ -1879,7 +1673,7 @@ void ENVS::TAU_Store_User_Preference(void) {
 	delete outFile;
 	outFile = NULL;
 
-	char fileName2[100];
+/*	char fileName2[100];
 	int fileIndex=0;
 	sprintf(fileName2,"SavedFiles/pref%d.dat",fileIndex++);
 	while ( File_Exists(fileName2) )
@@ -1887,7 +1681,7 @@ void ENVS::TAU_Store_User_Preference(void) {
 
 	char command[100];
 	sprintf(command,"mv %s %s",fileName,fileName2);
-	system(command);
+	system(command); */ // TO BE REMOVED
 }
 
 void ENVS::Video_Start(void) {

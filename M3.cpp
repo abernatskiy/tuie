@@ -234,7 +234,7 @@ void Simulator_Destroy(void) {
 	dCloseODE();
 }
 
-void Simulate(int pause) {
+void Simulate(int pause) { // main function, always called
 
 	if ( showGraphics )
 		envs->Draw();
@@ -249,14 +249,14 @@ void Simulate(int pause) {
 			dWorldStep (world, STEP_SIZE);
 			dJointGroupEmpty (contactgroup);
 
-			if ( envs->In_Evolution_Mode() )
+			if ( envs->In_Evolution_Mode() ) // evolve/server mode
 				envs->Evolve( world, space );
 			else if ( envs->In_Champ_Mode() )
 				envs->Show_Champ(	world, space );
 			else if ( envs->In_TAU_Mode() )
 				envs->TAU_Show_Robot_Pair( world, space );
 			else if ( envs->In_Design_Mode() ) {
-				if ( envs->Pair_Available() ) {
+				if ( envs->Pair_Available() ) { // client mode
 					envs->Load_Pair();
 					envs->Mode_Simulate_Set_TAU( world, space );
 				}

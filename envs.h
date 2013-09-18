@@ -11,6 +11,7 @@
 #include "environment.h"
 #include "tau.h"
 #include "time.h"
+#include "client.h"
 
 class ENVS {
 
@@ -24,6 +25,7 @@ public:
 	TAU *tau;
 	int recordingVideo;
 	int speed;
+	CLIENT* client;
 
 private:
 	int targetSensorValuesRecorded;
@@ -60,15 +62,14 @@ public:
 	void Draw(void);
 	void EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroupID contactgroup);
 	void EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroupID contactgroup);
-	void Evolve(	dWorldID      world, 
-			dSpaceID      space);
-	int  In_Champ_Mode(void);
-	int  In_Design_Mode(void);
-	int  In_Evolution_Mode(void);
-	int  In_TAU_Mode(void);
-        void Joint_Connect(void);
-        void Joint_Range_Decrease(void);
-        void Joint_Range_Increase(void);
+	void Evolve(dWorldID world, dSpaceID space);
+	int In_Champ_Mode(void);
+	int In_Design_Mode(void);
+	int In_Evolution_Mode(void);
+	int In_TAU_Mode(void);
+	void Joint_Connect(void);
+	void Joint_Range_Decrease(void);
+	void Joint_Range_Increase(void);
 	void Load(int showGraphics);
 	void Load_Pair(void);
 	void Mode_Simulate_Set_Champ(dWorldID world, dSpaceID space);
@@ -80,13 +81,12 @@ public:
 	void Mode_View_Set_Top(void);
 	void MutationProbability_Decrease(void);
 	void MutationProbability_Increase(void);
-	int  Pair_Available(void);
+	bool Pair_Available(void);
 	void Prepare_To_Run_Without_Graphics(dWorldID world, dSpaceID space);
 	void Reset(void);
 	void Selection_Level_Lower(void);
 	void Selection_Level_Raise(void);
-	void Show_Champ(	dWorldID      world, 
-				dSpaceID      space);
+	void Show_Champ(dWorldID world, dSpaceID space);
 	void Speed_Decrease(void);
 	void Speed_Increase(void);
 	NEURAL_NETWORK *TAU_Get_User_Favorite(void);

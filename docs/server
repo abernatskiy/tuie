@@ -1,0 +1,61 @@
+Detailed process interation from server's viewpoint:
+
+Notes
+- server assumes that clients are going for the same target in the beginning
+
+1. Create initial AFPO population.
+2. Select a random pair in this population.
+3. Set a variable inside ENVS which means that all clients are currently in one group.
+4. Write pair0.dat.
+5. Wait for pref*.dat to appear. Read them, delete them.
+6. Parse filenames - * stands for client's pids. Remember the PIDs.
+7. Create 1 TAU and feed data from both PIDs to is.
+8. Observe how it performs.
+9. Create 2 evaluator TAUs and feed data from each PID to them.
+10. Observe how they perform.
+
+11.Pick 2 random pairs form initial AFPO opulation.
+12.Write pair<pid1>.dat and pair<pid2>.dat.
+13.Wait for pref*.dat to appear. Read them, delete them.
+14.Parse filenames - * stands for client's pids.
+15.Feed all data to the common TAU
+16.Continue observing how it performs.
+17.Feed data from each file to the corresponding TAU from evaluator population.
+18.Continue observing how they perform.
+
+19.Repeat steps 11-18 until one of TAUs performs well enough.
+
+ - if it is the common TAU:
+  20.a Set a variable inside ENVS which means that clients are currently in one group.
+	21.a Start AFPO using the common TAUs user estimations.
+	22.a Repeat steps 11-18.
+	23.a If evaluator TAUs BOTH perform better than the common one, go to step 20.b
+
+ - if BOTH evaluator TAUs perform better then the common one:
+  20.b Set a variable inside ENVS which means that clients are separate.
+	21.b Start (or continue) AFPO with user evaluation = max (evaluations of evaluator TAUs)
+	22.b Repeat steps 11-18.
+	23.b If the common TAU performs better than the separate ones, go to step 20.a
+
+--------
+
+INCREMENTAL IMPLEMENTATION
+
+Stub v.0:
+
+1. Create initial AFPO population and start AFPO.
+2. Select a random pair in population.
+3. Set a variable inside ENVS which means that all clients are currently in one group.
+4. Write pair0.dat.
+5. Wait for pref*.dat to appear. Read them, delete them.
+6. Parse filenames - * stands for client's pids. Remember the PIDs.
+7. Create 1 TAU and feed data from both PIDs to is.
+9. Create 2 evaluator TAUs and feed data from each PID to them.
+
+11.Pick 2 random pairs form initial AFPO opulation.
+12.Write pair<pid1>.dat and pair<pid2>.dat.
+13.Wait for pref*.dat to appear. Read them, delete them.
+14.Parse filenames - * stands for client's pids.
+15.Feed all data to the common TAU
+17.Feed data from each file to the corresponding TAU from evaluator population.
+
