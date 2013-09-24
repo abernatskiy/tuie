@@ -53,7 +53,7 @@ ENVS::ENVS(int rs) {
 
 	randSeed = rs;
 
-	simulateMode=MODE_SIMULATE_DESIGN;
+	simulateMode = MODE_SIMULATE_DESIGN;
 
 	numberOfEnvs = 1;
 	currNumberOfEnvs = 1;
@@ -87,6 +87,7 @@ ENVS::ENVS(int rs) {
 	timeSinceLastWriteout = startTime;
 
 	client = new CLIENT();
+	server = new SERVER();
 
 	char command[200];
 	sprintf(command,"rm SavedFiles/writeout%d.txt",randSeed);
@@ -118,6 +119,9 @@ ENVS::~ENVS(void) {
 		delete tau;
 		tau = NULL;
 	}
+
+	delete client;
+	delete server;
 }
 
 void ENVS::Active_Element_Copy(void) {
@@ -272,7 +276,9 @@ void ENVS::Joint_Range_Increase(void) {
 			taskEnvironments[activeEnvironment]->Active_Joint_Range_Increase();
 }
 
-void ENVS::Delete_Pair(void) {
+
+// preferences and pairs deleting logic now resides in interactor.h
+/* void ENVS::Delete_Pair(void) {
 
 	char fileName[100];
 	if( client->pairFileName(fileName) != 0 ) return;
@@ -290,7 +296,7 @@ void ENVS::Delete_Pref(void) {
 	char command[100];
 	sprintf(command, "rm %s", fileName);
 	system(command);
-}
+}*/
 
 void ENVS::Draw(void) {
 
@@ -302,8 +308,7 @@ void ENVS::Draw(void) {
 
 void ENVS::EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroupID contactgroup) {
 
-/*
-	if ( In_Design_Mode() )
+/*if ( In_Design_Mode() )
 		return;
 	Destroy_Simulated_Objects();
 	optimizer->Reset_But_Keep_Best();
@@ -314,8 +319,7 @@ void ENVS::EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroup
 
 void ENVS::EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroupID contactgroup) {
 
-/*
-	if ( In_Design_Mode() )
+/*if ( In_Design_Mode() )
 		return;
 	Destroy_Simulated_Objects();
 	optimizer->Reset_But_Keep_Best();
@@ -326,22 +330,21 @@ void ENVS::EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroup
 
 void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 
+	// called from M3 in evolution mode
+
 	// If there is a robot being evaluated, and its time
 	// is not yet up, allow it to move.
-	if ( !Eval_Finished() ) {
-		for (int i=0;   i<currNumberOfEnvs;     i++) {
+	if( !Eval_Finished() ) {
+		for( int i=0; i<currNumberOfEnvs; i++ )
 			taskEnvironments[i]->Allow_Robot_To_Move(optimizer->timer);
-		}
 		optimizer->Timer_Update();
 	}
-
 	// If the time limit for the robot being evaluated has
 	// expired, record its fitness, remove it from the simulator,
 	// and prepare for the evaluation of the next robot.
 	else {
 //		double fitness = Fitness_Get();
 		double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
-
 		MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
 
 		if ( TAU_Ready_To_Predict() )
@@ -360,15 +363,17 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		optimizer->Timer_Reset();
 
 		// Set up next robot...
-		Create_Robot_To_Evaluate(world,space);
+		Create_Robot_To_Evaluate(world, space);
 
 		evaluationsSinceLastSave++;
 
 		if ( evaluationsSinceLastSave == AFPO_POP_SIZE ) {
 
+			// SERVER mode master calls
 			selectionLevel = SELECTION_LEVEL_ENVS;
 			Check_For_Pref();
-			Save_Pair_For_Pref();
+			Save_All_Pairs_For_Pref();
+			server->checkIfFirstIterationAndMakeRecord();
 			evaluationsSinceLastSave = 0;
 		}
 	}
@@ -406,9 +411,7 @@ void ENVS::Mode_Simulate_Set_Champ(dWorldID world, dSpaceID space) {
 
 	// The best robot is always green.
 	for (int i=0;	i<numberOfEnvs;	i++) {
-
 		taskEnvironments[i]->Set_Color(0,1,0);
-
 		taskEnvironments[activeEnvironment]->Robots_Recolor('g');
 	}
 
@@ -493,7 +496,7 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
-	simulateMode=MODE_SIMULATE_TAU;
+	simulateMode = MODE_SIMULATE_TAU;
 
 	// In TAU mode, there are always two environments;
 	// the user must indicate which of the two robots
@@ -548,31 +551,25 @@ void ENVS::MutationProbability_Increase(void) {
 
 bool ENVS::Pair_Available(void) {
 
-	// called from M3 in client mode
+	// called from M3 in CLIENT mode
 	return client->pairFileExists();
 }
 
 void ENVS::Prepare_To_Run_Without_Graphics(dWorldID world, dSpaceID space) {
 
 	selectionLevel=SELECTION_LEVEL_ENVS;
-
 	Load(false);
-
 	Mode_Simulate_Set_Evolve(world,space);
-
 	Reset();
-
 	Mode_Simulate_Set_Evolve(world,space);
 }
 
 void ENVS::Rescore_Population(void) {
 
 	for (int i=0; i<AFPO_POP_SIZE; i++) {
-
 		if (	optimizer	&&
 			optimizer->genomes[i] &&
 			optimizer->genomes[i]->sensorTimeSeries )
-
 			optimizer->genomes[i]->Score_Set( tau->Score_Predict(optimizer->genomes[i]) );
 	}
 }
@@ -706,15 +703,13 @@ int ENVS::TAU_Ready_To_Predict(void) {
 
 double ENVS::TAU_Score_Get(void) {
 
-	// TBD implement group interaction here
-	// Assuming I implement groups
+	// called from Evolve() in SERVER mode
+	// TBD implement group interaction here (max-equivalent F function and behaviour choice)
 
 	// Get the current controller that was just evaluated,
-
 	NEURAL_NETWORK *currentController = taskEnvironments[0]->robots[0]->neuralNetwork;
 
 	// and return the predicted score of that controller.
-
 	return( tau->Score_Predict(currentController) );
 }
 
@@ -747,12 +742,12 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 
 void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space ) {
 
-	// called from M3 upon pressing the spacebar in client mode
+	// called from M3 upon pressing the spacebar in CLIENT mode
 
 	// Only accept a user's preference if in TAU mode.
 	if ( In_TAU_Mode() ) {
 
-		TAU_Store_User_Preference();
+		TAU_Store_User_Preference(); // into a file
 		delete tau;
 		tau = NULL;
 
@@ -760,8 +755,7 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 
 		Mode_Simulate_Set_Design();
 
-		Delete_Pair();
-
+		client->deletePairFile();
 		client->checkIfFirstIterationAndMakeRecord();
 	}
 }
@@ -814,13 +808,11 @@ void ENVS::Video_Record(void) {
 	frameIndex++;
 	timeStepsSinceLastFrameCapture = 0;
 */
-
 }
 
 void ENVS::Video_Start_Stop(void) {
 
 	if ( recordingVideo )
-
 		Video_Stop();
 	else
 		Video_Start();
@@ -839,18 +831,14 @@ void ENVS::Viewpoint_Get(void) {
 void ENVS::Activate_All(void) {
 
 	for (int i=0;	i<numberOfEnvs;	i++)
-
 		if ( taskEnvironments[i] )
-
 			taskEnvironments[i]->Activate_All();
 }
 
 void ENVS::Camera_Position_Load(ifstream *inFile, int showGraphics) {
 
 	(*inFile) >> xyz[0] >> xyz[1] >> xyz[2];
-
 	(*inFile) >> hpr[0] >> hpr[1] >> hpr[2];
-
 	if ( showGraphics )
 		dsSetViewpoint(xyz,hpr);
 }
@@ -859,19 +847,24 @@ void ENVS::Camera_Position_Save(ofstream *outFile, int showGraphics) {
 
 	if ( showGraphics )
 		dsGetViewpoint(xyz,hpr);
-
 	(*outFile) << xyz[0] << " " << xyz[1] << " " << xyz[2] << "\n";
-
 	(*outFile) << hpr[0] << " " << hpr[1] << " " << hpr[2] << "\n";
 }
 
 void ENVS::Check_For_Pref(void) {
 
-	char fileName[100];
-	if( client->prefFileName(fileName) != 0 ) return;
+	// called from Evolve() in SERVER mode
 
-	Collect_Pref(fileName);
-	Rescore_Population();
+	server->updatePreferences();
+
+	printf("Feeding the obtained preferences to TAU:\n");
+	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in tau
+		tau->Store_Pref( server->curPrefTable[i][1], // ID of the first controller as read by server->updatePreferences()
+										server->curPrefTable[i][2], // ID of the second controller
+										server->curPrefTable[i][3] ); // user preference
+		printf("%d\t%d\t%d\n", server->curPrefTable[i][1], server->curPrefTable[i][2], server->curPrefTable[i][3] );
+		Rescore_Population();
+	}
 }
 
 void ENVS::Check_Whether_To_End(void) {
@@ -889,27 +882,22 @@ void ENVS::Check_Whether_To_End(void) {
 
 void ENVS::Check_Whether_To_Writeout(void) {
 
-        clock_t currTime = clock();
-
-        double CPUSecondsSinceLastWriteout = ((double) (currTime - timeSinceLastWriteout)) / CLOCKS_PER_SEC;
-
+	clock_t currTime = clock();
+	double CPUSecondsSinceLastWriteout = ((double) (currTime - timeSinceLastWriteout)) / CLOCKS_PER_SEC;
 	double CPUMinutesSinceLastWriteout = CPUSecondsSinceLastWriteout/60.0;
 
 	// Write an update every 5 minutes.
-        if ( CPUSecondsSinceLastWriteout > 5 ) {
+	if ( CPUSecondsSinceLastWriteout > 5 ) {
 //	if ( CPUMinutesSinceLastWriteout > 1 ) {
-
-	        char fileName[200];
-        	sprintf(fileName,"SavedFiles/writeout%d.txt",randSeed);
+			char fileName[200];
+			sprintf(fileName,"SavedFiles/writeout%d.txt",randSeed);
 
 		ofstream *outFile = new ofstream(fileName,ios::app);
 
-                // Write out elapsed hours...
-                (*outFile) << double((clock()-startTime)/CLOCKS_PER_SEC)/(60.0*60.0) << "\t";
-
-                // Write out elapsed minutes...
-                (*outFile) << double((clock()-startTime)/CLOCKS_PER_SEC)/60.0 << "\t";
-
+		// Write out elapsed hours...
+		(*outFile) << double((clock()-startTime)/CLOCKS_PER_SEC)/(60.0*60.0) << "\t";
+		// Write out elapsed minutes...
+		(*outFile) << double((clock()-startTime)/CLOCKS_PER_SEC)/60.0 << "\t";
 		// Write out elapsed seconds...
 		(*outFile) << double((clock()-startTime)/CLOCKS_PER_SEC) << "\t";
 
@@ -923,31 +911,6 @@ void ENVS::Check_Whether_To_Writeout(void) {
 
 		timeSinceLastWriteout = currTime;
 	}
-}
-
-void ENVS::Collect_Pref(char *fileName) {
-
-	// Code relevant for Bernatskiy...
-	// This function reads in the preference
-	// just supplied by the user.
-
-	ifstream *inFile = new ifstream(fileName);
-
-	int firstControllerID;
-	int secondControllerID;
-	int pref;
-
-	(*inFile) >> firstControllerID;
-	(*inFile) >> secondControllerID;
-	(*inFile) >> pref;
-
-	inFile->close();
-	delete inFile;
-	inFile = NULL;
-
-	Delete_Pref();
-
-	tau->Store_Pref(firstControllerID,secondControllerID,pref);
 }
 
 void ENVS::Create_Robot_Current_Best( dWorldID world, dSpaceID space ) {
@@ -982,11 +945,10 @@ void ENVS::Deactivate_All(void) {
 void ENVS::Destroy_Simulated_Objects(void) {
 
 	for (int i=0;i<currNumberOfEnvs;i++)
-
 		taskEnvironments[i]->Destroy_Simulated_Objects();
 }
 
-int  ENVS::Directory_Found(char *dirName) {
+int ENVS::Directory_Found(char *dirName) {
 
 	struct stat stFileInfo;
 	bool blnReturn;
@@ -1021,26 +983,21 @@ void ENVS::End_Current_Mode(void) {
         // reset the timer in the optimizer.
 
         if ( optimizer )
-
                 optimizer->Timer_Reset();
-
 
         // If in TAU mode, two environments were simulated,
         // so delete the second one.
 
         if ( In_TAU_Mode() )
-
                 Environment_Delete();
 }
 
 int  ENVS::End_State_Missing(void) {
 
 	int missing = false;
-
 	int currentEnvironment = 0;
 
-	while ( (currentEnvironment<numberOfEnvs) && 
-		(!missing) ) {
+	while ( (currentEnvironment<numberOfEnvs) && (!missing) ) {
 
 		if ( taskEnvironments[currentEnvironment]->numRobots<2 )
 			missing = true;
@@ -1204,16 +1161,13 @@ void ENVS::Load(int showGraphics) {
 
 void ENVS::Load_Pair(void) {
 
-	// called from M3 in client mode
+	// called from M3 in CLIENT mode
 	char fileName[100];
 	client->pairFileName(fileName);
-
 	ifstream *inFile = new ifstream(fileName);
 
 	Camera_Position_Load(inFile,true);
-
 	Load_Environments(inFile);
-
 	TAU_Load_Controller_Pair(inFile);
 
 	inFile->close();
@@ -1227,11 +1181,8 @@ void ENVS::Load_Environments(ifstream *inFile) {
 		delete taskEnvironments[i];
 		taskEnvironments[i] = NULL;
 	}
-
 	(*inFile) >> numberOfEnvs;
-
 	for (int i=0;	i<numberOfEnvs;	i++)
-
 		taskEnvironments[i] = new ENVIRONMENT(inFile);
 }
 
@@ -1266,58 +1217,45 @@ void ENVS::Load_TAU(ifstream *inFile) {
 void ENVS::Move(double x, double y, double z) {
 
 	for (int i=0;i<numberOfEnvs;i++)
-
 		if ( taskEnvironments[i] )
-
 			taskEnvironments[i]->Move(x,y,z);
 }
 
 int ENVS::No_Robots_Above_The_Barrier(void) {
 
         if ( !optimizer )
-
                 return( true );
 
-        int noRobotsAboveTheBarrier = true;
-
+				int noRobotsAboveTheBarrier = true;
         for (int i=0; i<AFPO_POP_SIZE; i++) {
-
                 if ( optimizer->Genome_Get(i)->sensorTimeSeries ) {
-
                         if ( optimizer->Genome_Get(i)->sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,12) > 3.0 )
-
                                 noRobotsAboveTheBarrier = false;
                 }
         }
-
         return( noRobotsAboveTheBarrier );
 }
 
 void ENVS::Optimizer_Initialize(void) {
 
 	if ( !optimizer ) {
+		int numberOfSensors = taskEnvironments[0]->robots[0]->Sensors_Number_Of();
+		int numberOfMotors = taskEnvironments[0]->robots[0]->Motors_Number_Of();
 
-		int numberOfSensors = 
-		taskEnvironments[0]->robots[0]->Sensors_Number_Of();
-
-		int numberOfMotors = 
-		taskEnvironments[0]->robots[0]->Motors_Number_Of();
- 
 		// The genomes encode a synaptic weight from each
 		// sensor to each hidden neuron, and from each
 		// hidden neuron to each motor
 		// of size = (inputs + outputs ) x hidden neurons
-		optimizer = new OPTIMIZER(	numberOfSensors,
-						numberOfMotors);
+		optimizer = new OPTIMIZER(numberOfSensors, numberOfMotors );
 	}
 }
 
 int ENVS::Optimizer_Robot_Mismatch(void) {
 
-	if ( !optimizer ) 
+	if ( !optimizer )
 		return (1);
 
-	return ( optimizer->numSensors != 
+	return ( optimizer->numSensors !=
 	     	taskEnvironments[0]->robots[0]->Sensors_Number_Of()
 	     || optimizer->numMotors !=
 		 taskEnvironments[0]->robots[0]->Motors_Number_Of() );
@@ -1326,24 +1264,19 @@ int ENVS::Optimizer_Robot_Mismatch(void) {
 int  ENVS::Ready_For_Champ_Mode(void) {
 
         // Already in champ mode.
-
         if ( In_Champ_Mode() )
-
                 return( false );
 
 
 	// Can't play back the best controller
 	// if there aren't any.
-
 	if ( !optimizer )
-
 		return( false );
 
 	if ( optimizer->Genome_Get_Best() == NULL )
-
 		return( false );
 
-        return( true );
+  return( true );
 }
 
 int  ENVS::Ready_For_Design_Mode(void) {
@@ -1460,37 +1393,39 @@ void ENVS::Save(int showGraphics) {
 //	printf("Envs %d saved.\n",fileIndex);
 }
 
-void ENVS::Save_Pair_For_Pref(void) {
-
-	// Code relevant for Bernatskiy...
-	// This function sends two controllers for the
-	// user to decide between.
-
-	// Don't send another pair if the user is
-	// currently working on one.
-	char fileName2[100];
-	sprintf(fileName2,"SavedFiles/pair0.dat");
-	if ( File_Exists(fileName2) )
-		return;
-
-	char fileName[100];
-	sprintf(fileName,"SavedFiles/tmp.dat");
+void ENVS::Save_Pair_For_Pref(char* fileName) {
 
 	ofstream *outFile = new ofstream(fileName);
 
 	Camera_Position_Save(outFile,false);
-
 	Save_Environments(outFile);
-
-	TAU_Save_Controller_Pair(outFile);
+	TAU_Save_Controller_Pair(outFile); // calls tau->Controllers_Save_Pair()
 
 	outFile->close();
 	delete outFile;
 	outFile = NULL;
+}
 
-	char command[100];
-	sprintf(command,"mv %s %s",fileName,fileName2);
-	system(command);
+void ENVS::Save_All_Pairs_For_Pref(void) {
+
+	// called from Evolve() in SERVER mode
+	char fileName[100];
+	int pid;
+
+	if( server->firstIteration ) { // if we are at the beginning of the service
+		if( server->pairFileNameByPID(fileName, 0) == 0 ) { // if common pair file exists
+			printf("Old common pair file found - exiting.\n"); // get grumpy and exit
+			exit(1);
+		}
+		Save_Pair_For_Pref(fileName); // otherwise, create a common pair file
+	}
+	else { // if we are not in the beginning of the service
+		for(int i=0; i < server->noOfClients; i++) { // go through the client list
+			pid = server->clientList[i];
+			if( server->pairFileNameByPID(fileName, pid) != 0) // if pair files do not exist
+				Save_Pair_For_Pref(fileName); // create them
+		}
+	}
 }
 
 void ENVS::Save_Environments(ofstream *outFile) {
@@ -1569,11 +1504,8 @@ void ENVS::Sensor_Data_Receive(void) {
 double ENVS::Sensor_Sum(void) {
 
 	double sum = 0.0;
-
 	for (int i=0;	i<numberOfEnvs;	i++)
-
 		sum = sum + taskEnvironments[i]->Sensor_Sum();
-
 	return( sum );
 }
 

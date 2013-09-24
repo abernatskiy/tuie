@@ -11,7 +11,7 @@
 #include "environment.h"
 #include "tau.h"
 #include "time.h"
-#include "client.h"
+#include "interactor.h"
 
 class ENVS {
 
@@ -26,6 +26,7 @@ public:
 	int recordingVideo;
 	int speed;
 	CLIENT* client;
+	SERVER* server;
 
 private:
 	int targetSensorValuesRecorded;
@@ -57,8 +58,8 @@ public:
 	void Active_Element_Resize(double changeX, double changeY, double changeZ);
 	void Active_Element_Rotate(double rotX, double rotY, double rotZ);
 	void Active_Element_Save(void);
-	void Delete_Pair(void);
-	void Delete_Pref(void);
+//	void Delete_Pair(void);
+//	void Delete_Pref(void);
 	void Draw(void);
 	void EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroupID contactgroup);
 	void EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroupID contactgroup);
@@ -105,7 +106,7 @@ private:
 	void Check_For_Pref(void);
 	void Check_Whether_To_End(void);
 	void Check_Whether_To_Writeout(void);
-	void Collect_Pref(char *fileName);
+//	void Collect_Pref(char *fileName);
 	void Create_Robot_Current_Best(dWorldID world, dSpaceID space);
 	void Create_Robot_To_Evaluate(dWorldID world, dSpaceID space);
 	void Deactivate_All(void);
@@ -141,7 +142,8 @@ private:
 	void Save_Environments(ofstream *outFile);
 	void Save_Fitness(string);
 	void Save_Optimizer(ofstream *outFile);
-	void Save_Pair_For_Pref(void);
+	void Save_Pair_For_Pref(char* filename);
+	void Save_All_Pairs_For_Pref(void);
 	void Save_TAU(ofstream *outFile);
 	void SavedFile_FindNext(void);
 	void Sensor_Data_Receive(void);

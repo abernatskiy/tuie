@@ -47,7 +47,7 @@ Stub v.0:
 2. Select a random pair in population.
 3. Set a variable inside ENVS which means that all clients are currently in one group.
 4. Write pair0.dat.
-5. Wait for pref*.dat to appear. Read them, delete them.
+5. Wait for pref*.dat to appear. Read them, delete them. Delete pair0.dat.
 6. Parse filenames - * stands for client's pids. Remember the PIDs.
 7. Create 1 TAU and feed data from both PIDs to is.
 9. Create 2 evaluator TAUs and feed data from each PID to them.
