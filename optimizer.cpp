@@ -44,7 +44,6 @@ OPTIMIZER::OPTIMIZER(ifstream *inFile) {
 	(*inFile) >> areGenomes;
 
 	if ( areGenomes )
-
 		Genomes_Load(inFile);
 	else
 		genomes = NULL;
@@ -115,11 +114,9 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get(int i) {
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Best(void) {
 
 	if ( !genomes )
-
 		return( NULL );
 
 	if ( !genomes[0] )
-
 		return( NULL );
 
 	return( genomes[0] );
@@ -143,7 +140,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Best_But_Not(NEURAL_NETWORK *other) {
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Best_But_Not(int numControllers, NEURAL_NETWORK **controllers) {
 
-        int genomeIndex = 0; 
+        int genomeIndex = 0;
 
         int found = false;
 
@@ -262,19 +259,14 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavor
 	NEURAL_NETWORK *genomeToReturn;
 
 	if ( !genomes )
-
 		Genomes_Create();
 
 	if ( genomeUnderEvaluation )
-
 		genomeToReturn = genomeUnderEvaluation;
-
 	else if ( Genomes_All_Evaluated() )
-
 		Generation_Create_Next(userFavorite);
 
 	genomeToReturn = Genome_Find_Next_Not_Evaluated();
-
 	return( genomeToReturn );
 }
 
@@ -780,7 +772,7 @@ void OPTIMIZER::Initialize(void) {
 
 	mutationProbability = MUTATION_PROBABILITY;
 
-	generation = 0;   
+	generation = 0;
 
 	Timer_Reset();
 }
@@ -806,7 +798,7 @@ int OPTIMIZER::RandInt(int min, int max) {
 		if ( val > max )
 			val = max;
 		if ( val < min )
-			val = min;	
+			val = min;
 		return( val );
 	}
 }

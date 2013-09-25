@@ -31,8 +31,13 @@ public:
 	void    	EvaluationPeriod_Decrease(void);
 	void    	EvaluationPeriod_Increase(void);
 	void		Fitness_Receive(NEURAL_NETWORK *userFavorite, double fitness);
+
 	void		Fitness_Sensor_Data_Receive(NEURAL_NETWORK *userFavorite, double fitness, MATRIX *timeSeries);
 	void		Fitness_Sensor_Data_Score_Receive(NEURAL_NETWORK *userFavorite, double fitness, MATRIX *timeSeries, double score);
+	// Those are called from ENVS::Evolve(). They call Genome_Get_Next_To_Evaluate(), which checks if all individuals in current
+	// population are currently evaluated, and if they are, calls Generation_Create_Next().
+	// If you want to implement AFPO retardation by TAU inside the AFPO, start here.
+
 	void		Genome_Discard_Being_Evaluated(void);
 	NEURAL_NETWORK *Genome_Get(int i);
 	NEURAL_NETWORK *Genome_Get_Best(void);
@@ -42,17 +47,18 @@ public:
 	NEURAL_NETWORK *Genome_Get_First(void);
 	NEURAL_NETWORK *Genome_Get_Most_Different(int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers);
-	NEURAL_NETWORK *Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite);
+	NEURAL_NETWORK *Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite); // calls Generation_Create_Next() if Genomes_All_Evaluated()
+																																						// returns Genome_Find_Next_Not_Evaluated()
 	NEURAL_NETWORK *Genome_Get_Random(void);
 	NEURAL_NETWORK *Genome_Get_Random_But_Not(NEURAL_NETWORK *other);
 	NEURAL_NETWORK *Genome_Get_Random_But_Not(int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Second(void);
 	void		Genome_Put_At_End(NEURAL_NETWORK *other);
-	int		Genomes_Num_Of_Evaluated(void);
+	int			Genomes_Num_Of_Evaluated(void);
 	void		Load(ifstream *inFile);
-	void    	MutationProbability_Decrease(void);
-	void    	MutationProbability_Increase(void);
-	void    	Print(void);
+	void    MutationProbability_Decrease(void);
+	void    MutationProbability_Increase(void);
+	void    Print(void);
 	void		Reset(void);
 	void		Reset_Genomes(void);
 	void		Save(ofstream *outFile);
@@ -64,22 +70,22 @@ public:
 	void		Timer_Update(void);
 
 private:
-	void    	Destroy(void);
-	int		FlipCoin(void);
-	void		Generation_Create_Next(NEURAL_NETWORK *userFavorite);
+	void    Destroy(void);
+	int			FlipCoin(void);
+	void		Generation_Create_Next(NEURAL_NETWORK *userFavorite); // generational function of AFPO - replaces current population with next gen population
 	void		Genome_Copy(int genomeIndex, int parentID);
-	void    	Genome_Create_Random(int genomeIndex);
-	void    	Genome_Destroy(int genomeIndex);
+	void    Genome_Create_Random(int genomeIndex);
+	void    Genome_Destroy(int genomeIndex);
 	int  		Genome_Evaluated(int genomeIndex);
 	NEURAL_NETWORK *Genome_Find_Next_Not_Evaluated(void);
 	void 		Genome_Load(int genomeIndex, ifstream *inFile);
 	void		Genome_Print(int genomeIndex);
-	int		Genomes_All_Evaluated(void);
+	int			Genomes_All_Evaluated(void);
 	void		Genomes_Create(void);
 	void		Genomes_Delete_Dominated(void);
 	void		Genomes_Destroy(void);
 	void		Genomes_Fill_Empty_Slots(void);
-        void            Genomes_Find_Pareto_Front(void);
+	void    Genomes_Find_Pareto_Front(void);
 	void		Genomes_Increase_Age(void);
 	void		Genomes_Inject_Random_Genome(void);
 	void		Genomes_Inject_User_Favorite(NEURAL_NETWORK *userFavorite);

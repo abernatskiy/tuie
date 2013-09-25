@@ -347,14 +347,16 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
 		MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
 
+		// feed the data obtained in the current simulation to the optimizer
+		// 1. user's favorite ANN (Not used in current implementation. Previously was used for elitism.)
+		// 2. fitness of the robot we just simulated
+		// 3. sensory time series we just obtained
+		// 4. (if available) predicted score of the robot we just simulated
 		if ( TAU_Ready_To_Predict() )
 			optimizer->Fitness_Sensor_Data_Score_Receive( TAU_Get_User_Favorite(), // best controller TAU have seen so far
-																										fitness, // seems like a physical fitness
-																										timeSeries, // sensory time series
-																										TAU_Score_Get() ); // seems like a score estimation for current robot
+																										fitness, timeSeries, TAU_Score_Get() );
 		else
 			optimizer->Fitness_Sensor_Data_Receive( TAU_Get_User_Favorite(), fitness, timeSeries );
-			// all the same, save for the score estimation for current robot
 
 		timeSeries = NULL;
 

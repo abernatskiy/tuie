@@ -132,7 +132,6 @@ NEURAL_NETWORK *TAU::Controller_Get_Best(void) {
 	NEURAL_NETWORK *best = NULL;
 
 	for (int i=0; i<numControllers; i++)
-
 		if ( controllers[i]->Score_Get() > bestScore ) {
 			bestScore = controllers[i]->Score_Get();
 			best = controllers[i];
@@ -297,11 +296,12 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 		Controller_Second_Preferred();
 }
 
+/*
 void TAU::User_Models_Reset(void) {
 
 	if ( tauOptimizer )
 		tauOptimizer->User_Models_Reset(Controllers_Available_For_Optimization() ,controllers);
-}
+}*/
 
 // --------------------------- Private methods -----------------------------
 

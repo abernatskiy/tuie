@@ -25,15 +25,19 @@ public:
 	TAU(void);
 	TAU(ifstream *inFile);
 	~TAU(void);
+
+	void	Store_Pref(int firstID, int secondID, int pref); // Is called from ENVS when reading preferences supplied by clients
+																												// After a couple of procedure levels calls Optimize() (see below)
+
 	int		All_Required_Preferences_Supplied(void); // Searches the preference matrix for non-diagonal elements
 																								// Might be useful for the implementaion of maturity
-	void  Controller_First_Preferred(void);
+
 	void	Controller_First_Store_Sensor_Data(MATRIX *sensorData);
+	void	Controller_Second_Store_Sensor_Data(MATRIX *sensorData);
+
 	NEURAL_NETWORK *Controller_Get_Best(void);
 	NEURAL_NETWORK *Controller_Pair_Get_First(void);
 	NEURAL_NETWORK *Controller_Pair_Get_Second(void);
-	void            Controller_Second_Preferred(void);
-	void		Controller_Second_Store_Sensor_Data(MATRIX *sensorData);
 	void		Controllers_Load_Pair(ifstream *inFile);
 	void		Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile);
  	void    Controllers_Select_From_Optimizer(OPTIMIZER *optimizer); // Pair selection implementation core component
@@ -41,7 +45,8 @@ public:
 																																	// value of Controllers_Num_Needed_From_Optimizer()
 																																	// Might be useful for sparse preference matrix implementation
 
-	void		Optimize(void); // Gets a variable "controllers" and the return value of Controllers_Available_For_Optimization()
+	void		Optimize(void); // Is called from Scores_Update()
+													// Gets a variable "controllers" and the return value of Controllers_Available_For_Optimization()
 													// and passes them all the way down to USER_MODEL::Evaluate( .. ).
 													// Scores and sensorTimeSeries (the entire matrix for each controller) are stored in controllers as member variables.
 
@@ -62,10 +67,12 @@ public:
 																	// May be useful in maturity implementation
 	void		Save(ofstream *outFile);
 	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
-	void		Store_Pref(int firstID, int secondID, int pref);
-	void		User_Models_Reset(void);
+//	void		User_Models_Reset(void); // never really called
 
 private:
+	void  Controller_First_Preferred(void);  // these two functions are called only from
+	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)
+
   void    Controller_Store(NEURAL_NETWORK *newController);
 	void		Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData);
   int     Controllers_Available_For_Optimization(void); // returns no of controllers with available scores and sensor data
@@ -85,7 +92,7 @@ private:
   double	Scale(	double value, double min1, double max1,
                              	double min2, double max2);
 	void		Scores_Print(void);
-	void		Scores_Update(void);
+	void		Scores_Update(void); // is called from Controller_First_Preferred(), Controller_Second_Preferred()
 	void		Storage_Expand(void);
 	void		Storage_Initialize(void);
 };
