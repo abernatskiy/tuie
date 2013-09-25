@@ -9,7 +9,7 @@ class USER_MODEL {
 private:
 	int numSensors;
 	CBackProp *ANN;
-	
+
 public:
 	USER_MODEL(int numS);
 	USER_MODEL(ifstream *inFile);

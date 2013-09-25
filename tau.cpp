@@ -55,9 +55,8 @@ TAU::TAU(ifstream *inFile) {
 		preferences = new MATRIX(inFile);
 	else
 		preferences = NULL;
-        
-        (*inFile) >> firstControllerIndex;
-        (*inFile) >> secondControllerIndex;
+  (*inFile) >> firstControllerIndex;
+  (*inFile) >> secondControllerIndex;
 
 	int tauOptimizerSaved;
 
@@ -76,28 +75,22 @@ TAU::TAU(ifstream *inFile) {
 TAU::~TAU(void) {
 
 	if ( controllers ) {
-
 		for (int i=0;i<numControllers;i++) {
-
 			if ( controllers[i] ) {
-
 				delete controllers[i];
 				controllers[i] = NULL;
 			}
 		}
-
 		delete controllers;
 		controllers = NULL;
 	}
 
 	if ( preferences ) {
-
 		delete preferences;
 		preferences = NULL;
 	}
 
 	if ( tauOptimizer ) {
-
 		delete tauOptimizer;
 		tauOptimizer = NULL;
 	}
@@ -106,7 +99,6 @@ TAU::~TAU(void) {
 int  TAU::All_Required_Preferences_Supplied(void) {
 
 	if ( preferences )
-
 		return( !preferences->ValFoundOffTheDiagonal(0.0) );
 	else
 		return( false );
@@ -152,14 +144,12 @@ NEURAL_NETWORK *TAU::Controller_Get_Best(void) {
 NEURAL_NETWORK *TAU::Controller_Pair_Get_First(void) {
 
 	// Get the first of the two controllers about to be evaluated.
-
-	return( controllers[firstControllerIndex] ); 
+	return( controllers[firstControllerIndex] );
 }
 
 NEURAL_NETWORK *TAU::Controller_Pair_Get_Second(void) {
 
 	// Get the second of the two controllers about to be evaluated.
-
 	return( controllers[secondControllerIndex] );
 }
 
@@ -188,24 +178,19 @@ void TAU::Controller_Second_Store_Sensor_Data(MATRIX *sensorData) {
 void TAU::Controllers_Load_Pair(ifstream *inFile) {
 
 	int numControllers = 2;
-
 	controllers = new NEURAL_NETWORK * [numControllers];
 
 	for (int i=0; i<numControllers; i++)
-
 		controllers[i] = new NEURAL_NETWORK(inFile);
 
 	firstControllerIndex = 0;
-
 	secondControllerIndex = 1;
 }
 
 void TAU::Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile) {
 
 	Controllers_Select_From_Optimizer(optimizer);
-
 	controllers[firstControllerIndex]->Save_ButNotSensorData(outFile);
-
 	controllers[secondControllerIndex]->Save_ButNotSensorData(outFile);
 }
 
@@ -233,13 +218,11 @@ void TAU::Optimize(void) {
 
 	// If the user has not yet supplied any preferences,
 	// there is nothing to optimize.
- 
-	if ( !Ready_For_Optimization() )
 
+	if ( !Ready_For_Optimization() )
 		return;
 
 	if ( !tauOptimizer )
-
 		tauOptimizer = new TAU_OPTIMIZER();
 
 	tauOptimizer->Optimize( Controllers_Available_For_Optimization() , controllers );
@@ -248,11 +231,8 @@ void TAU::Optimize(void) {
 void TAU::Print(void) {
 
 	printf("Number of controllers stored in TAU: %d.\n",numControllers);
-
 	if ( numControllers > 0 ) {
-
-		printf("Number of preferences supplied: %d.\n",Num_Prefs());	
-
+		printf("Number of preferences supplied: %d.\n",Num_Prefs());
 		printf("Average preferences per controller: %3.3f.\n", double(Num_Prefs())/double(numControllers) );
 	}
 }
@@ -260,13 +240,11 @@ void TAU::Print(void) {
 int TAU::Ready_To_Predict(void) {
 
 	if ( !tauOptimizer )
-
 		return( false );
-
 	return( tauOptimizer->Ready_To_Predict() );
 }
 
-void   TAU::Save(ofstream *outFile) {
+void TAU::Save(ofstream *outFile) {
 
 	(*outFile) << numControllers << "\n";
 
@@ -304,22 +282,17 @@ void   TAU::Save(ofstream *outFile) {
 double TAU::Score_Predict(NEURAL_NETWORK *controller) {
 
 	if ( !tauOptimizer )
-
 		return( TAU_NO_SCORE );
-
 	return( tauOptimizer->Score_Predict(controller) );
 }
 
 void TAU::Store_Pref(int firstID, int secondID, int pref) {
 
 	firstControllerIndex = Find_Index(firstID);
-
 	secondControllerIndex = Find_Index(secondID);
 
 	if ( pref==0 )
-
 		Controller_First_Preferred();
-
 	else
 		Controller_Second_Preferred();
 }
@@ -327,7 +300,6 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 void TAU::User_Models_Reset(void) {
 
 	if ( tauOptimizer )
-
 		tauOptimizer->User_Models_Reset(Controllers_Available_For_Optimization() ,controllers);
 }
 
@@ -336,7 +308,6 @@ void TAU::User_Models_Reset(void) {
 void TAU::Controller_Store(NEURAL_NETWORK *newController) {
 
         if ( !controllers )
-
                 Storage_Initialize();
         else
                 Storage_Expand();
@@ -344,25 +315,21 @@ void TAU::Controller_Store(NEURAL_NETWORK *newController) {
         controllers[numControllers] = new NEURAL_NETWORK(newController);
 
 	controllers[numControllers]->fitness = newController->fitness;
-
 	controllers[numControllers]->sensorTimeSeries = new MATRIX(newController->sensorTimeSeries);
-
-        numControllers++;
+  numControllers++;
 }
 
 void TAU::Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData) {
 
 	if ( controllers[controllerIndex] )
-
 		controllers[controllerIndex]->Store_Sensor_Data(sensorData);
 }
 
-int  TAU::Controllers_Available_For_Optimization(void) {
+int TAU::Controllers_Available_For_Optimization(void) {
 
 	int numAvailable = 0;
 
 	for (int i=0;	i<numControllers;	i++) {
-
 		if (	 controllers[i] &&
 			 controllers[i]->Score_Available() &&
 			(controllers[i]->Get_Sensor_Data()!=NULL) )
@@ -378,7 +345,6 @@ void TAU::Controllers_Expand(void) {
 	NEURAL_NETWORK **temp = new NEURAL_NETWORK * [numControllers+1];
 
 	for (int i=0;i<numControllers;i++) {
-
 		temp[i] = controllers[i];
 		controllers[i] = NULL;
 	}
@@ -394,25 +360,22 @@ void TAU::Controllers_Expand(void) {
 void TAU::Controllers_Initialize(void) {
 
 	controllers = new NEURAL_NETWORK * [1];
-
 	controllers[0] = NULL;
 }
 
-int  TAU::Controllers_Num_Needed_From_Optimizer(void) {
+int TAU::Controllers_Num_Needed_From_Optimizer(void) {
 
 	// If no controllers have yet been stored in TAU,
 	// request two controllers from the optimizer for comparison.
 
 	if ( numControllers == 0 )
-
 		return( 2 );
 
 	// If there is a zero entry at i,j in the preferences matrix,
 	// that indicates that controllers i and j have not yet been
 	// compared, so we don't need any new controllers from the optimizer.
- 
-	if ( preferences->ValFoundOffTheDiagonal(0.0) )
 
+	if ( preferences->ValFoundOffTheDiagonal(0.0) )
 		return(0);
 
 	// If there are no zero entries off the diagonal, that means
@@ -421,20 +384,19 @@ int  TAU::Controllers_Num_Needed_From_Optimizer(void) {
 	// those stored in TAU.
 
 	else
-		return(1); 
+		return(1);
 }
 
 void TAU::Controllers_Print(void) {
 
 	for (int i=0;i<numControllers;i++)
-
 		controllers[i]->Print();
 }
 
 void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer) {
 
-                // Choose the best controller stored in TAU to be compared against
-                // a new controller drawn from the optimizer.
+    // Choose the best controller stored in TAU to be compared against
+    // a new controller drawn from the optimizer.
 
 		// Choose best controller from TAU.
 
@@ -444,13 +406,13 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 
 			if ( controllers[i]->Score_Get() > bestScore ) {
 
-				bestScore = controllers[i]->Score_Get(); 
+				bestScore = controllers[i]->Score_Get();
 				firstControllerIndex = i;
 			}
 
 		// Choose second controller from optimizer.
 		if ( numControllers > 0 ) {
-		
+
 			NEURAL_NETWORK *secondController = NULL;
 
 			if ( !tauOptimizer )
@@ -502,7 +464,7 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 
 	for (int i=0;i<numControllers-1;i++)
 
-		// Find the best controller...		
+		// Find the best controller...
 		if (	(controllers[i]->Score_Get() > bestScore) &&
 
 			// ...that hasn't yet been evaluated against
@@ -518,22 +480,17 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 int  TAU::Find_Index(int ID) {
 
 	for (int i=0; i<numControllers; i++)
-
 		if ( controllers[i]->ID == ID )
-
 			return( i );
 }
 
 int TAU::Num_Prefs(void) {
 
 	if ( !preferences )
-
 		return( 0 );
 
 	int numZeros = preferences->NumOccurancesOf(0.0);
-
 	int numNonZeroValues = numControllers*numControllers - numZeros;
-
 	int numPrefs = int( double(numNonZeroValues) / 2.0 );
 
 	return( numPrefs );
@@ -542,7 +499,6 @@ int TAU::Num_Prefs(void) {
 void TAU::Preferences_Expand(void) {
 
 	preferences->AddColumn(0);
-
 	preferences->AddRow(0);
 }
 
@@ -562,11 +518,10 @@ int  TAU::Ready_For_Optimization(void) {
 	// there is nothing to optimize.
 
 	if ( !preferences )
-
 		return( false );
 
-	// Optimization can occur if there are at least 
-	// two controllers that have a non-zero score 
+	// Optimization can occur if there are at least
+	// two controllers that have a non-zero score
 	// assigned to them in the preferences matrix.
 
 	return( preferences->ValuesDifferentFrom(0) >= 2 );
@@ -579,43 +534,35 @@ double TAU::Scale(double value, double min1, double max1,
                 value = value - min1;
         else
                 value = value + min1;
-
         return( (value*(max2-min2)/(max1-min1)) + min2 );
 }
 
 void TAU::Scores_Print(void) {
 
 	for (int i=0; i<numControllers; i++)
-
 		printf("%0.0f ",controllers[i]->Score_Get() );
-
 	printf("\n");
 }
 
 void TAU::Scores_Update(void) {
 
+	// goes through the list of controllers and writes sums of rows of preferences matrix to their "score" field
+	// meanwhile, finds the maximum and minimum of these sums
 	for (int i=0; i<numControllers; i++) {
-
 		if ( preferences && controllers[i] ) {
-
 			double score = preferences->SumOfRow(i);
-
 			controllers[i]->Score_Set(score);
-
 			if ( score < scoreMin )
 				scoreMin = score;
-
 			if ( score > scoreMax )
 				scoreMax = score;
 		}
 	}
 
+	// rewrites "score" fields with scaled sums
 	for (int i=0; i<numControllers; i++) {
-
 		double score = controllers[i]->Score_Get();
-
 		score = Scale(score,scoreMin,scoreMax,0,1);
-
 		controllers[i]->Score_Set(score);
 	}
 
@@ -625,14 +572,12 @@ void TAU::Scores_Update(void) {
 void TAU::Storage_Expand(void) {
 
 	Controllers_Expand();
-
 	Preferences_Expand();
 }
 
 void TAU::Storage_Initialize(void) {
 
 	Controllers_Initialize();
-
 	Preferences_Initialize();
 }
 

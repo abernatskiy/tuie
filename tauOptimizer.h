@@ -9,9 +9,9 @@ class TAU_OPTIMIZER {
 private:
 	USER_MODEL *model;
 
+public:
 	double 	    modelError;
 
-public:
 	TAU_OPTIMIZER(void);
 	TAU_OPTIMIZER(ifstream *inFile);
 	~TAU_OPTIMIZER(void);
@@ -21,7 +21,7 @@ public:
 	void   Save(ofstream *outFile);
 	double Score_Predict( NEURAL_NETWORK *neuralNetwork);
 	double Score_Predict1(NEURAL_NETWORK *neuralNetwork);
-        double Score_Predict2(NEURAL_NETWORK *neuralNetwork);
+  double Score_Predict2(NEURAL_NETWORK *neuralNetwork);
 	void   User_Models_Reset(int numControllers, NEURAL_NETWORK **controllers);
 };
 

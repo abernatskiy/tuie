@@ -10,24 +10,25 @@
 class TAU {
 
 public:
-	int		timer;
-	int              numControllers;
+	int	timer;
+	int numControllers;
 	NEURAL_NETWORK **controllers;
-	MATRIX          *preferences;
+	MATRIX *preferences;
 	int		 firstControllerIndex;
 	int		 secondControllerIndex;
 	TAU_OPTIMIZER   *tauOptimizer;
 	int		 nextControllerForTraining;
-	double		 scoreMin;
-	double		 scoreMax;
+	double scoreMin;
+	double scoreMax;
 
 public:
 	TAU(void);
 	TAU(ifstream *inFile);
 	~TAU(void);
-	int		All_Required_Preferences_Supplied(void);
-	void            Controller_First_Preferred(void);
-	void		Controller_First_Store_Sensor_Data(MATRIX *sensorData);
+	int		All_Required_Preferences_Supplied(void); // Searches the preference matrix for non-diagonal elements
+																								// Might be useful for the implementaion of maturity
+	void  Controller_First_Preferred(void);
+	void	Controller_First_Store_Sensor_Data(MATRIX *sensorData);
 	NEURAL_NETWORK *Controller_Get_Best(void);
 	NEURAL_NETWORK *Controller_Pair_Get_First(void);
 	NEURAL_NETWORK *Controller_Pair_Get_Second(void);
@@ -35,33 +36,53 @@ public:
 	void		Controller_Second_Store_Sensor_Data(MATRIX *sensorData);
 	void		Controllers_Load_Pair(ifstream *inFile);
 	void		Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile);
-        void            Controllers_Select_From_Optimizer(OPTIMIZER *optimizer);
-	void		Optimize(void);
-	void            Print(void);
-	int		Ready_To_Predict(void);
+ 	void    Controllers_Select_From_Optimizer(OPTIMIZER *optimizer); // Pair selection implementation core component
+																																	// Selects varying combinations of ANNs from TAU and from AFPO population depending on
+																																	// value of Controllers_Num_Needed_From_Optimizer()
+																																	// Might be useful for sparse preference matrix implementation
+
+	void		Optimize(void); // Gets a variable "controllers" and the return value of Controllers_Available_For_Optimization()
+													// and passes them all the way down to USER_MODEL::Evaluate( .. ).
+													// Scores and sensorTimeSeries (the entire matrix for each controller) are stored in controllers as member variables.
+
+													// USER_MODEL::Evaluate() works by backpropagating the ANN user model TAU_BACK_PROP_TRAINING_ITERATIONS times for each controller
+													// among the first Controllers_Available_For_Optimization() NEURAL_NETWORK instances in "controllers"
+
+													// The network is created upon the first call of Optimize() and is never reset
+
+													// It returns average (used to be total before my modifications) prediction error of the ANN as it was registered during
+													// the backpropagation process on the data listed above (NOT all data in history!).
+													// Unbiased backpropagation result is used when evaluating the error.
+
+													// The error value is available as a member variable of tauOptimizer.
+													// It is updated every time this function or User_Models_Reset() is called.
+
+	void    Print(void);
+	int			Ready_To_Predict(void); // Returns tauOptimizer->Ready_To_Predict()
+																	// May be useful in maturity implementation
 	void		Save(ofstream *outFile);
-	double		Score_Predict(NEURAL_NETWORK *controller);
+	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
 	void		Store_Pref(int firstID, int secondID, int pref);
 	void		User_Models_Reset(void);
 
 private:
-        void            Controller_Store(NEURAL_NETWORK *newController);
+  void    Controller_Store(NEURAL_NETWORK *newController);
 	void		Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData);
-        int             Controllers_Available_For_Optimization(void);
-	void            Controllers_Expand(void);
-	void            Controllers_Initialize(void);
-	int		Controllers_Num_Needed_From_Optimizer(void);
-	void            Controllers_Print(void);
+  int     Controllers_Available_For_Optimization(void); // returns no of controllers with available scores and sensor data
+	void    Controllers_Expand(void);
+	void    Controllers_Initialize(void);
+	int		  Controllers_Num_Needed_From_Optimizer(void); // read this function before rewriting Controllers_Select_From_Optimizer()
+	void    Controllers_Print(void);
 	void		Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer);
 	void		Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer);
 	void		Controllers_Select_Two_From_TAU(void);
-	int		Find_Index(int ID);
-	int		Num_Prefs(void);
+	int			Find_Index(int ID);
+	int			Num_Prefs(void);
 	void		Preferences_Expand(void);
 	void		Preferences_Initialize(void);
 	void		Preferences_Print(void);
-	int		Ready_For_Optimization(void);
-        double		Scale(	double value, double min1, double max1,
+	int			Ready_For_Optimization(void);
+  double	Scale(	double value, double min1, double max1,
                              	double min2, double max2);
 	void		Scores_Print(void);
 	void		Scores_Update(void);

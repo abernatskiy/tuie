@@ -19,9 +19,8 @@ USER_MODEL::USER_MODEL(int numS) {
 	numSensors = numS;
 
 	int *layerSizes = new int[3];
-	
-	layerSizes[0] = 7*1;
 
+	layerSizes[0] = 7*1;
 	layerSizes[1] = 3;
 	layerSizes[2] = 1;
 
@@ -33,7 +32,7 @@ USER_MODEL::USER_MODEL(int numS) {
 
 USER_MODEL::USER_MODEL(ifstream *inFile) {
 
-        (*inFile) >> numSensors;
+  (*inFile) >> numSensors;
 
 	int isANN;
 
@@ -57,74 +56,61 @@ USER_MODEL::~USER_MODEL(void) {
 double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
 	double score, scorePrediction;
-
 	double totalError = 0.0;
-
 	double *in;
-
 	in = new double[7*1];
-
 	double *target = new double[1];
 
-	for (int j=0;   j<TAU_BACK_PROP_TRAINING_ITERATIONS; j++) {
+	for (int j=0; j<TAU_BACK_PROP_TRAINING_ITERATIONS; j++) {
+		for (int i=0;	i<numControllers;	i++) {
 
-	for (int i=0;	i<numControllers;	i++) {
+			MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
+			int sensorRow;
+			score = controllers[i]->Score_Get();
 
-		MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
+			int m=0;
+			for (int k=0;k<=10;k=k+2) {
+				//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
+				in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+				m++;
+			}
+			in[m] = 1.0; // Bias node
 
-		int sensorRow;
+			target[0] = score;
 
-		score = controllers[i]->Score_Get();
+			ANN->bpgt(in,target);
 
-		int m=0;
-		for (int k=0;k<=10;k=k+2) {
+			scorePrediction = ANN->Out(0); // raw, unbiased prediction
 
-			//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
-			in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
-			m++;
+			totalError = totalError + fabs(score-scorePrediction);
+
+			sensorTimeSeries = NULL;
 		}
-		in[m] = 1.0; // Bias node
-
-		target[0] = score;
-
-		ANN->bpgt(in,target);
-
-		scorePrediction = ANN->Out(0);
-
-		totalError = totalError + fabs(score-scorePrediction);
-
-		sensorTimeSeries = NULL;
-	}
 	}
 
 	delete in;
 	delete target;
 
-	return( totalError );
+	return( totalError / ((double) numControllers) );
 }
 
 double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
 
 	int i;
-
 	double *in;
-
 	in = new double[7*1];
 
 	int m=0;
 	for (int k=0;k<=10;k=k+2) {
-
 		//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
 		in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
 		m++;
-        }
+  }
 	in[m] = 1.0; // Bias neuron
 
-        ANN->ffwd(in);
-
+  ANN->ffwd(in);
 	delete in;
-
-	return( pow(ANN->Out(0),0.3) );
+	return( pow(ANN->Out(0),0.3) ); // artificial bias introduced to avoid underestimating individuals with low predicted score
 }
 
 void USER_MODEL::Save(ofstream *outFile) {

@@ -10,14 +10,12 @@ extern int TAU_NO_SCORE;
 TAU_OPTIMIZER::TAU_OPTIMIZER(void) {
 
 	model = NULL;
-
 	modelError = 0.0;
 }
 
 TAU_OPTIMIZER::TAU_OPTIMIZER(ifstream *inFile) {
 
 	int modelSaved;
-
 	(*inFile) >> modelSaved;
 
 	if ( modelSaved )
@@ -25,8 +23,7 @@ TAU_OPTIMIZER::TAU_OPTIMIZER(ifstream *inFile) {
 	else
 		model = NULL;
 
-        (*inFile) >> modelError;
-
+   (*inFile) >> modelError;
 }
 
 TAU_OPTIMIZER::~TAU_OPTIMIZER(void) {
@@ -40,9 +37,7 @@ TAU_OPTIMIZER::~TAU_OPTIMIZER(void) {
 void TAU_OPTIMIZER::Optimize(int numControllers, NEURAL_NETWORK **controllers) {
 
 	// Train the current user model on the supplied controllers.
-
 	if ( !model )
-
 		model = new USER_MODEL(controllers[0]->numSensors);
 
 	modelError = model->Evaluate(numControllers,controllers);
@@ -53,7 +48,6 @@ void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 					NEURAL_NETWORK **controllers) {
 
 	for (	int i=0;	i<numControllers;	i++) {
-
 		double actualScore = controllers[i]->Score_Get();
 		double predictedScore = model->Predict(controllers[i]->sensorTimeSeries);
 
@@ -61,8 +55,7 @@ void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 			actualScore,
 			predictedScore,
 			fabs(actualScore-predictedScore));
-	}	
-
+	}
 }
 
 int  TAU_OPTIMIZER::Ready_To_Predict(void) {
@@ -74,7 +67,7 @@ void   TAU_OPTIMIZER::Save(ofstream *outFile) {
 
 	if ( model ) {
 		(*outFile) << "1\n";
-		model->Save(outFile);	
+		model->Save(outFile);
 	}
 	else
 		(*outFile) << "0\n";
@@ -88,9 +81,7 @@ double TAU_OPTIMIZER::Score_Predict(NEURAL_NETWORK *controller) {
 	// to predict its score.
 
 	if ( !model )
-
 		return( TAU_NO_SCORE );
-
 	return( model->Predict(controller->sensorTimeSeries) );
 }
 
