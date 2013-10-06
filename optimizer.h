@@ -20,7 +20,8 @@ public:
 
 	NEURAL_NETWORK **genomes;
 
-	NEURAL_NETWORK *genomeUnderEvaluation;
+	NEURAL_NETWORK *genomeUnderEvaluation; // seems to be obsolete - no memory allocation for this pointer can be found in code
+																				// remove where possible
 
 	int		generation;
 
@@ -30,10 +31,8 @@ public:
 	~OPTIMIZER(void);
 	void    	EvaluationPeriod_Decrease(void);
 	void    	EvaluationPeriod_Increase(void);
-	void		Fitness_Receive(NEURAL_NETWORK *userFavorite, double fitness);
 
-	void		Fitness_Sensor_Data_Receive(NEURAL_NETWORK *userFavorite, double fitness, MATRIX *timeSeries);
-	void		Fitness_Sensor_Data_Score_Receive(NEURAL_NETWORK *userFavorite, double fitness, MATRIX *timeSeries, double score);
+	void		Data_Receive(double fitness, double score, MATRIX *timeSeries, NEURAL_NETWORK *userFavorite, bool startAFPO);
 	// Those are called from ENVS::Evolve(). They call Genome_Get_Next_To_Evaluate(), which checks if all individuals in current
 	// population are currently evaluated, and if they are, calls Generation_Create_Next().
 	// If you want to implement AFPO retardation by TAU inside the AFPO, start here.
@@ -47,7 +46,7 @@ public:
 	NEURAL_NETWORK *Genome_Get_First(void);
 	NEURAL_NETWORK *Genome_Get_Most_Different(int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers);
-	NEURAL_NETWORK *Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite); // calls Generation_Create_Next() if Genomes_All_Evaluated()
+	NEURAL_NETWORK *Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite, bool startAFPO); // calls Generation_Create_Next() if Genomes_All_Evaluated()
 																																						// returns Genome_Find_Next_Not_Evaluated()
 	NEURAL_NETWORK *Genome_Get_Random(void);
 	NEURAL_NETWORK *Genome_Get_Random_But_Not(NEURAL_NETWORK *other);

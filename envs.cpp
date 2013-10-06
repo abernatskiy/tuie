@@ -69,9 +69,10 @@ ENVS::ENVS(int rs) {
 	taskEnvironments[0]->Set_Color(1,0,0);
 
 	optimizer = NULL;
-	tau = NULL;
 	targetSensorValuesRecorded = false;
 	recordingVideo = false;
+
+	tau = new TAU();
 
 	savedFileIndex = -1;
 
@@ -347,16 +348,16 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
 		MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
 
+		if( !tau )
+			tau = new TAU;
+
 		// feed the data obtained in the current simulation to the optimizer
-		// 1. user's favorite ANN (Not used in current implementation. Previously was used for elitism.)
-		// 2. fitness of the robot we just simulated
+		// 1. fitness of the robot we just simulated
+		// 2. predicted score of the robot we just simulated (TAU_NO_SCORE if unavailable)
 		// 3. sensory time series we just obtained
-		// 4. (if available) predicted score of the robot we just simulated
-		if ( TAU_Ready_To_Predict() )
-			optimizer->Fitness_Sensor_Data_Score_Receive( TAU_Get_User_Favorite(), // best controller TAU have seen so far
-																										fitness, timeSeries, TAU_Score_Get() );
-		else
-			optimizer->Fitness_Sensor_Data_Receive( TAU_Get_User_Favorite(), fitness, timeSeries );
+		// 4. user's favorite ANN (Not used in current implementation. Was used for elitism.)
+		// 5. bool value showing if we should start changing generations yet
+		optimizer->Data_Receive( fitness, TAU_Score_Get(), timeSeries, NULL, TAU_Ready_To_Predict());
 
 		timeSeries = NULL;
 
@@ -928,7 +929,7 @@ void ENVS::Create_Robot_Current_Best( dWorldID world, dSpaceID space ) {
 
 void ENVS::Create_Robot_To_Evaluate( dWorldID world, dSpaceID space ) {
 
-	NEURAL_NETWORK *nextGenome = optimizer->Genome_Get_Next_To_Evaluate(TAU_Get_User_Favorite());
+	NEURAL_NETWORK *nextGenome = optimizer->Genome_Get_Next_To_Evaluate(NULL, true); /// IMPORTANT - correct this!
 	for (int i=0;	i<currNumberOfEnvs;	i++) {
 		taskEnvironments[i]->Prepare_For_Simulation(world,space);
 		taskEnvironments[i]->Label(nextGenome,i);

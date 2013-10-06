@@ -99,7 +99,7 @@ void SERVER::updatePreferences(void) {
 			if( file = fopen(tmpFileName, "r") )
 				printf("SERVER: file successfully opened\n");
 			else {
-				printf("FUCK THIS SHIT\n");
+				printf("Something has gone very, very wrong\n");
 				exit(1);
 			}
 			fscanf(file, "%d %d %d", curRecord+1, curRecord+2, curRecord+3);

@@ -70,32 +70,16 @@ void OPTIMIZER::EvaluationPeriod_Increase(void) {
 	evaluationPeriod++;
 }
 
-void OPTIMIZER::Fitness_Sensor_Data_Receive(	NEURAL_NETWORK *userFavorite,
-							double fitness,
-							MATRIX *timeSeries) {
-	if ( genomeUnderEvaluation )
-		genomeUnderEvaluation->Fitness_Sensor_Data_Set(fitness,timeSeries);
-	else
-		Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Sensor_Data_Set(fitness,timeSeries);
-}
+void OPTIMIZER::Data_Receive( double fitness,
+															double score,
+															MATRIX* timeSeries,
+															NEURAL_NETWORK *userFavorite,
+															bool startAFPO ) {
 
-void OPTIMIZER::Fitness_Sensor_Data_Score_Receive(	NEURAL_NETWORK *userFavorite,
-							double fitness,
-							MATRIX *timeSeries,
-							double score) {
-
-	if ( genomeUnderEvaluation )
-		genomeUnderEvaluation->Fitness_Sensor_Data_Score_Set(fitness,timeSeries,score);
-	else
-		Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Sensor_Data_Score_Set(fitness,timeSeries,score);
-}
-
-void OPTIMIZER::Fitness_Receive(NEURAL_NETWORK *userFavorite, double fitness) {
-
-	if ( genomeUnderEvaluation )
-		genomeUnderEvaluation->Fitness_Set(fitness);
-	else
-		Genome_Get_Next_To_Evaluate(userFavorite)->Fitness_Set(fitness);
+//	if ( genomeUnderEvaluation )
+//		genomeUnderEvaluation->Fitness_Sensor_Data_Score_Set(fitness, timeSeries, score);
+//	else
+		Genome_Get_Next_To_Evaluate(userFavorite, startAFPO)->Fitness_Sensor_Data_Score_Set(fitness, timeSeries, score);
 }
 
 void OPTIMIZER::Genome_Discard_Being_Evaluated(void) {
@@ -180,14 +164,10 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Best_But_Not(int numControllers, NEURAL_NE
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Curr_To_Evaluate(void) {
 
 	if ( !genomes )
-
 		Genomes_Create();
 
-
 	if ( !genomeUnderEvaluation )
-
 		return ( Genome_Find_Next_Not_Evaluated() );
-
 	else
 		return genomeUnderEvaluation;
 }
@@ -254,19 +234,20 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thi
                 return( chosenGenome );
 }
 
-NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite) {
+NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite, bool startAFPO) {
 
 	NEURAL_NETWORK *genomeToReturn;
 
 	if ( !genomes )
 		Genomes_Create();
 
-	if ( genomeUnderEvaluation )
-		genomeToReturn = genomeUnderEvaluation;
-	else if ( Genomes_All_Evaluated() )
-		Generation_Create_Next(userFavorite);
-
-	genomeToReturn = Genome_Find_Next_Not_Evaluated();
+//	if ( genomeUnderEvaluation )
+//		genomeToReturn = genomeUnderEvaluation;
+//	else {
+		if ( Genomes_All_Evaluated() )
+			Generation_Create_Next(userFavorite);
+		genomeToReturn = Genome_Find_Next_Not_Evaluated();
+//	}
 	return( genomeToReturn );
 }
 
@@ -544,15 +525,12 @@ void OPTIMIZER::Genome_Copy(int genomeIndex, int parentID) {
 
 void OPTIMIZER::Genome_Create_Random(int genomeIndex) {
 
-	genomes[genomeIndex] = 
-
-		new NEURAL_NETWORK(nextGenomeID++,numSensors,numMotors,0);
+	genomes[genomeIndex] = new NEURAL_NETWORK(nextGenomeID++,numSensors,numMotors,0);
 }
 
 void OPTIMIZER::Genome_Destroy(int genomeIndex) {
 
 	delete genomes[genomeIndex];
-
 	genomes[genomeIndex] = NULL;
 }
 
@@ -564,28 +542,20 @@ int OPTIMIZER::Genome_Evaluated(int genomeIndex) {
 NEURAL_NETWORK *OPTIMIZER::Genome_Find_Next_Not_Evaluated(void) {
 
 	int found = false;
-	
 	int genomeIndex = 0;
 
-	while (	(!found) &&
-
-		(genomeIndex < AFPO_POP_SIZE ) ) {
-
-		if ( !genomes[genomeIndex]->Evaluated() ) 
-
+	while (	(!found) && (genomeIndex < AFPO_POP_SIZE ) ) {
+		if ( !genomes[genomeIndex]->Evaluated() )
 			found = true;
-		else 
+		else
 			genomeIndex++;
 	}
-
 	return( genomes[genomeIndex] );
 }
 
 void OPTIMIZER::Genome_Load(int genomeIndex, ifstream *inFile) {
 
-	genomes[genomeIndex] = 
-
-		new NEURAL_NETWORK(inFile);
+	genomes[genomeIndex] = new NEURAL_NETWORK(inFile);
 }
 
 void OPTIMIZER::Genome_Print(int genomeIndex) {
