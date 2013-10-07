@@ -7,6 +7,7 @@
 #include "tauOptimizer.h"
 
 extern double TAU_NO_SCORE;
+extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
 extern int    AFPO_POP_SIZE;
 
 TAU::TAU(void) {
@@ -241,6 +242,13 @@ int TAU::Ready_To_Predict(void) {
 	if ( !tauOptimizer )
 		return( false );
 	return( tauOptimizer->Ready_To_Predict() );
+}
+
+double TAU::Model_Error(void) {
+
+	if ( !tauOptimizer )
+		return TAU_OPTIMIZER_ERROR_UNDEFINED;
+	return tauOptimizer->Model_Error();
 }
 
 void TAU::Save(ofstream *outFile) {

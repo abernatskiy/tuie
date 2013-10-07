@@ -5,12 +5,14 @@
 #include "stdlib.h"
 #include "tauOptimizer.h"
 
-extern int TAU_NO_SCORE;
+extern double TAU_NO_SCORE;
+extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
+extern double TAU_OPTIMIZER_ERROR_ACCEPTABLE;
 
 TAU_OPTIMIZER::TAU_OPTIMIZER(void) {
 
 	model = NULL;
-	modelError = 0.0;
+	modelError = TAU_OPTIMIZER_ERROR_UNDEFINED;
 }
 
 TAU_OPTIMIZER::TAU_OPTIMIZER(ifstream *inFile) {
@@ -58,12 +60,13 @@ void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 	}
 }
 
-int  TAU_OPTIMIZER::Ready_To_Predict(void) {
+int TAU_OPTIMIZER::Ready_To_Predict(void) {
 
-	return( model != NULL );
+//	if( model != NULL && modelError < TAU_OPTIMIZER_ERROR_ACCEPTABLE );
+	if( model != NULL );
 }
 
-void   TAU_OPTIMIZER::Save(ofstream *outFile) {
+void TAU_OPTIMIZER::Save(ofstream *outFile) {
 
 	if ( model ) {
 		(*outFile) << "1\n";

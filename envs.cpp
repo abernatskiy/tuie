@@ -11,6 +11,7 @@
 #ifndef _ENVS_CPP
 #define _ENVS_CPP
 
+//#include "constants.h"
 #include "envs.h"
 #include "optimizer.h"
 
@@ -46,6 +47,11 @@ extern int	ALG_VARIANT_FITS_ONLY;
 extern int	ALG_VARIANT_PREFS_ONLY;
 
 extern int	STARTING_EVALUATION_TIME;
+
+extern double TAU_NO_SCORE;
+
+extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
+extern double TAU_OPTIMIZER_ERROR_ACCEPTABLE;
 
 ENVS::ENVS(int rs) {
 
@@ -89,6 +95,8 @@ ENVS::ENVS(int rs) {
 
 	client = new CLIENT();
 	server = new SERVER();
+
+	controllerUnderEvaluation = NULL;
 
 	char command[200];
 	sprintf(command,"rm SavedFiles/writeout%d.txt",randSeed);
@@ -352,12 +360,10 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 			tau = new TAU;
 
 		// feed the data obtained in the current simulation to the optimizer
-		// 1. fitness of the robot we just simulated
-		// 2. predicted score of the robot we just simulated (TAU_NO_SCORE if unavailable)
-		// 3. sensory time series we just obtained
-		// 4. user's favorite ANN (Not used in current implementation. Was used for elitism.)
-		// 5. bool value showing if we should start changing generations yet
-		optimizer->Data_Receive( fitness, TAU_Score_Get(), timeSeries, NULL, TAU_Ready_To_Predict());
+		controllerUnderEvaluation -> Fitness_Set(fitness);
+		controllerUnderEvaluation -> Store_Sensor_Data(timeSeries);
+		if(TAU_Ready_To_Predict() && (tau->Model_Error() < TAU_OPTIMIZER_ERROR_ACCEPTABLE))
+			controllerUnderEvaluation -> Score_Set(TAU_Score_Get());
 
 		timeSeries = NULL;
 
@@ -366,6 +372,8 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		optimizer->Timer_Reset();
 
 		// Set up next robot...
+		if( optimizer->Genomes_All_Evaluated() )
+			optimizer->Generation_Create_Next();
 		Create_Robot_To_Evaluate(world, space);
 
 		evaluationsSinceLastSave++;
@@ -929,12 +937,15 @@ void ENVS::Create_Robot_Current_Best( dWorldID world, dSpaceID space ) {
 
 void ENVS::Create_Robot_To_Evaluate( dWorldID world, dSpaceID space ) {
 
-	NEURAL_NETWORK *nextGenome = optimizer->Genome_Get_Next_To_Evaluate(NULL, true); /// IMPORTANT - correct this!
+	NEURAL_NETWORK *nextGenome = optimizer->Genome_Get_Next_To_Evaluate();
 	for (int i=0;	i<currNumberOfEnvs;	i++) {
 		taskEnvironments[i]->Prepare_For_Simulation(world,space);
 		taskEnvironments[i]->Label(nextGenome,i);
 		taskEnvironments[i]->Record_Sensor_Data(optimizer->evaluationPeriod);
 	}
+
+	controllerUnderEvaluation = nextGenome;
+
 	nextGenome = NULL;
 }
 
@@ -949,6 +960,8 @@ void ENVS::Destroy_Simulated_Objects(void) {
 
 	for (int i=0;i<currNumberOfEnvs;i++)
 		taskEnvironments[i]->Destroy_Simulated_Objects();
+
+	controllerUnderEvaluation = NULL;
 }
 
 int ENVS::Directory_Found(char *dirName) {

@@ -162,7 +162,7 @@ double NEURAL_NETWORK::Fitness_Get(void) {
 	return( fitness );
 }
 
-void   NEURAL_NETWORK::Fitness_Sensor_Data_Set(		double fit,
+/*void   NEURAL_NETWORK::Fitness_Sensor_Data_Set(		double fit,
 							MATRIX *timeSeries) {
         Fitness_Set(fit);
 
@@ -177,7 +177,7 @@ void   NEURAL_NETWORK::Fitness_Sensor_Data_Score_Set(	double fit,
 	Store_Sensor_Data(timeSeries);
 
 	Score_Set(sc);
-}
+}*/
 
 void   NEURAL_NETWORK::Fitness_Set(double fit) {
 

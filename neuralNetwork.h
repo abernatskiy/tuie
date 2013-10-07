@@ -36,8 +36,8 @@ public:
 	int    Evaluated(void);
 	int    Fitness_Equal_To(double fit);
 	double Fitness_Get(void);
-	void   Fitness_Sensor_Data_Set(double fit, MATRIX *timeSeries);
-	void   Fitness_Sensor_Data_Score_Set(double fit, MATRIX *timeSeries, double sc);
+//	void   Fitness_Sensor_Data_Set(double fit, MATRIX *timeSeries);
+//	void   Fitness_Sensor_Data_Score_Set(double fit, MATRIX *timeSeries, double sc);
 	void   Fitness_Set(double fit);
 	int    Fitness_Worse_Than(double fit);
 	double Get_Motor_Neuron_Value(int motorIndex);

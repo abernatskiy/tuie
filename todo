@@ -1,0 +1,11 @@
+ROADMAP
+
+1. Implement AFPO retardation (dl 10/06 14.00)
+2. Reimplement envs.cpp for multiple TAUs (wednesday)
+
+--------------------------
+BUGS
+
+Client does not find pair0.dat file if was in the SavedFiles/ before client process start.
+
+Servers stops supplying different pairs after a while (maybe 1 iteration)

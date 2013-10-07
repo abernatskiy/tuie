@@ -28,6 +28,8 @@ public:
 	CLIENT* client;
 	SERVER* server;
 
+	NEURAL_NETWORK* controllerUnderEvaluation;
+
 private:
 	int targetSensorValuesRecorded;
 	int movieIndex;

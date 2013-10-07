@@ -70,17 +70,14 @@ void OPTIMIZER::EvaluationPeriod_Increase(void) {
 	evaluationPeriod++;
 }
 
-void OPTIMIZER::Data_Receive( double fitness,
-															double score,
-															MATRIX* timeSeries,
-															NEURAL_NETWORK *userFavorite,
-															bool startAFPO ) {
-
-//	if ( genomeUnderEvaluation )
-//		genomeUnderEvaluation->Fitness_Sensor_Data_Score_Set(fitness, timeSeries, score);
-//	else
-		Genome_Get_Next_To_Evaluate(userFavorite, startAFPO)->Fitness_Sensor_Data_Score_Set(fitness, timeSeries, score);
-}
+//void OPTIMIZER::Data_Receive( double fitness,
+//															double score,
+//															MATRIX* timeSeries,
+//															NEURAL_NETWORK *userFavorite,
+//															bool startAFPO ) {
+//
+//		Genome_Get_Next_To_Evaluate(userFavorite, startAFPO)->Fitness_Sensor_Data_Score_Set(fitness, timeSeries, score);
+//}
 
 void OPTIMIZER::Genome_Discard_Being_Evaluated(void) {
 
@@ -234,7 +231,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thi
                 return( chosenGenome );
 }
 
-NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavorite, bool startAFPO) {
+NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(void) {
 
 	NEURAL_NETWORK *genomeToReturn;
 
@@ -245,7 +242,8 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(NEURAL_NETWORK *userFavor
 //		genomeToReturn = genomeUnderEvaluation;
 //	else {
 		if ( Genomes_All_Evaluated() )
-			Generation_Create_Next(userFavorite);
+			return NULL;
+//			Generation_Create_Next(userFavorite);
 		genomeToReturn = Genome_Find_Next_Not_Evaluated();
 //	}
 	return( genomeToReturn );
@@ -482,19 +480,7 @@ void OPTIMIZER::Timer_Update(void) {
 	timer++;
 }
 
-// --------------------------- Private methods ------------------------
-
-void OPTIMIZER::Destroy(void) {
-
-	Genomes_Destroy();
-}
-
-int OPTIMIZER::FlipCoin(void) {
-
-	return( Rand(0.0,1.0) < 0.5 );
-}
-
-void OPTIMIZER::Generation_Create_Next(NEURAL_NETWORK *userFavorite) {
+void OPTIMIZER::Generation_Create_Next() {
 
 	Genomes_Find_Pareto_Front();
 
@@ -514,6 +500,18 @@ void OPTIMIZER::Generation_Create_Next(NEURAL_NETWORK *userFavorite) {
 	Genomes_Inject_Random_Genome();
 
 	generation++;
+}
+
+// --------------------------- Private methods ------------------------
+
+void OPTIMIZER::Destroy(void) {
+
+	Genomes_Destroy();
+}
+
+int OPTIMIZER::FlipCoin(void) {
+
+	return( Rand(0.0,1.0) < 0.5 );
 }
 
 void OPTIMIZER::Genome_Copy(int genomeIndex, int parentID) {
@@ -568,17 +566,12 @@ void OPTIMIZER::Genome_Print(int genomeIndex) {
 int OPTIMIZER::Genomes_All_Evaluated(void) {
 
 	int allEvaluated = true;
-
 	int genomeIndex = 0;
 
-	while ( (allEvaluated) && 
-
+	while ( (allEvaluated) &&
 		(genomeIndex < AFPO_POP_SIZE) ) {
-
 		if ( !Genome_Evaluated(genomeIndex) )
-
 			allEvaluated = false;
-
 		else
 			genomeIndex++;
 	}

@@ -142,16 +142,15 @@ double		ROBOT_SANDBOX_MOTOR_SPEED	= 5.0;
 //int		TIME_STEPS_PER_FRAME		= 4;
 int		TIME_STEPS_PER_FRAME		= 0;
 
-// TAU-specific constants	
+// TAU-specific constants
 
 int		TAU_MAX_CONTROLLERS		= 10000;
-
 double		TAU_NO_SCORE			= -1000000;
-
 int		TAU_NUM_NEURONS			= 5;
-
 int		TAU_NUM_SENSOR_ROWS		= 1;
-
 int		TAU_BACK_PROP_TRAINING_ITERATIONS = 1000;
+
+double TAU_OPTIMIZER_ERROR_UNDEFINED = -1.0;
+double TAU_OPTIMIZER_ERROR_ACCEPTABLE = 10000.0;
 
 //#endif

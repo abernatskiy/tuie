@@ -21,11 +21,10 @@ ENVIRONMENT::ENVIRONMENT(void) {
 }
 
 ENVIRONMENT::ENVIRONMENT(ENVIRONMENT *other) {
-	
+
 	Initialize();
 
 	if ( other->lightSource )
-		
 		lightSource = new OBJECT(this,other->lightSource);
 
 	numOtherObjects = other->numOtherObjects;

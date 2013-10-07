@@ -65,6 +65,8 @@ public:
 	void    Print(void);
 	int			Ready_To_Predict(void); // Returns tauOptimizer->Ready_To_Predict()
 																	// May be useful in maturity implementation
+	double	Model_Error(void);
+
 	void		Save(ofstream *outFile);
 	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
 //	void		User_Models_Reset(void); // never really called
