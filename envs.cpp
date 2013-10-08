@@ -78,7 +78,8 @@ ENVS::ENVS(int rs) {
 	targetSensorValuesRecorded = false;
 	recordingVideo = false;
 
-	tau = new TAU();
+//	tau = new TAU();
+	tau = NULL;
 
 	savedFileIndex = -1;
 
@@ -98,13 +99,15 @@ ENVS::ENVS(int rs) {
 
 	controllerUnderEvaluation = NULL;
 
-	char command[200];
-	sprintf(command,"rm SavedFiles/writeout%d.txt",randSeed);
-	system(command);
-	sprintf(command,"rm SavedFiles/pair*.dat");
-	system(command);
-	sprintf(command,"rm SavedFiles/pref*.dat");
-	system(command);
+	if( !(In_Design_Mode() && client->pairFileExists()) ) {
+		char command[200];
+		sprintf(command,"rm SavedFiles/writeout%d.txt",randSeed);
+		system(command);
+		sprintf(command,"rm SavedFiles/pair*.dat");
+		system(command);
+		sprintf(command,"rm SavedFiles/pref*.dat");
+		system(command);
+	}
 }
 
 ENVS::~ENVS(void) {
@@ -1430,7 +1433,7 @@ void ENVS::Save_All_Pairs_For_Pref(void) {
 
 	if( server->firstIteration ) { // if we are at the beginning of the service
 		if( server->pairFileNameByPID(fileName, 0) == 0 ) { // if common pair file exists
-			printf("Old common pair file found - exiting.\n"); // get grumpy and exit
+			printf("Old common pair file found - another server is possibly running.\nExiting.\n"); // get grumpy and exit
 			exit(1);
 		}
 		Save_Pair_For_Pref(fileName); // otherwise, create a common pair file
@@ -1602,7 +1605,7 @@ void ENVS::TAU_Store_User_Preference(void) {
 	ofstream *outFile = new ofstream(fileName);
 
 	(*outFile) << tau->controllers[0]->ID << " ";
-	(*outFile) << tau->controllers[1]->ID << " ";
+	(*outFile) << tau->controllers[1]->ID << " "; // !!!!
 
   // mmm Get an automated preference, rather than one from the human user.
 	/*
@@ -1621,15 +1624,6 @@ void ENVS::TAU_Store_User_Preference(void) {
 	delete outFile;
 	outFile = NULL;
 
-/*	char fileName2[100];
-	int fileIndex=0;
-	sprintf(fileName2,"SavedFiles/pref%d.dat",fileIndex++);
-	while ( File_Exists(fileName2) )
-		sprintf(fileName2,"SavedFiles/pref%d.dat",fileIndex++);
-
-	char command[100];
-	sprintf(command,"mv %s %s",fileName,fileName2);
-	system(command); */ // TO BE REMOVED
 }
 
 void ENVS::Video_Start(void) {

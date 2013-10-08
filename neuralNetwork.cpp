@@ -250,7 +250,7 @@ int  NEURAL_NETWORK::Is_Dominated_By(NEURAL_NETWORK *other) {
 			return( ID < other->ID );
 		else
 			return( age > other->age );
-	}	
+	}
 	else {
 		if ( age == other->age )
 

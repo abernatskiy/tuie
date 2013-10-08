@@ -6,6 +6,13 @@ ROADMAP
 --------------------------
 BUGS
 
-Client does not find pair0.dat file if was in the SavedFiles/ before client process start.
+All pairs supplied by server, starting with the 2nd, are the same. Same pairs are supplied 
+to different clients when there are several clients.
 
-Servers stops supplying different pairs after a while (maybe 1 iteration)
+Client deletes pair0.dat upon exit.
+
+RESOLVED - had to do with TAU allocation in ENVS constructor
+Client complains something about glibc memory allocation and exits if you're not gentle with it.
+
+RESOLVED - client deleted pair0.dat upon start
+Client does not find pair0.dat file if was in the SavedFiles/ before client process start.

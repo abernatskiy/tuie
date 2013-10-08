@@ -1,0 +1,9 @@
+#!/bin/bash
+
+IFS=$'\n'
+DIR="SavedFiles/"
+for i in `ls ${DIR}pair*.dat`; do
+	AA=`ls -l ${i} | awk '{print $8, $9}'`;
+	BB=`md5sum ${i} | awk '{print $1}'`;
+	echo $BB $AA;
+done
