@@ -41,7 +41,7 @@ void SERVER::resetPrefTable(void) {
 	curNoOfClients = 0;
 	for(int i=0; i<50; i++)
 		for(int j=0; j<4; j++)
-			curPrefTable[i][j];
+			curPrefTable[i][j] = 0;
 }
 
 SERVER::SERVER(void) {

@@ -6,13 +6,15 @@ ROADMAP
 --------------------------
 BUGS
 
-All pairs supplied by server, starting with the 2nd, are the same. Same pairs are supplied 
-to different clients when there are several clients.
-
 Client deletes pair0.dat upon exit.
 
+REOPENED - same crash happens when client is not supplied with prefs for a while
 RESOLVED - had to do with TAU allocation in ENVS constructor
 Client complains something about glibc memory allocation and exits if you're not gentle with it.
+
+RESOLVED - server did not reset its preference table properly before scanning preference files
+All pairs supplied by server, starting with the 2nd, are the same. Same pairs are supplied 
+to different clients when there are several clients.
 
 RESOLVED - client deleted pair0.dat upon start
 Client does not find pair0.dat file if was in the SavedFiles/ before client process start.

@@ -1432,8 +1432,8 @@ void ENVS::Save_All_Pairs_For_Pref(void) {
 	int pid;
 
 	if( server->firstIteration ) { // if we are at the beginning of the service
-		if( server->pairFileNameByPID(fileName, 0) == 0 ) { // if common pair file exists
-			printf("Old common pair file found - another server is possibly running.\nExiting.\n"); // get grumpy and exit
+		if( server->pairFileNameByPID(fileName, 0) == 0 ) { // read common pair file name and check if file exists
+			printf("Old common pair file found - another server is possibly running.\nExiting.\n"); // if yes, get grumpy and exit
 			exit(1);
 		}
 		Save_Pair_For_Pref(fileName); // otherwise, create a common pair file
@@ -1441,7 +1441,7 @@ void ENVS::Save_All_Pairs_For_Pref(void) {
 	else { // if we are not in the beginning of the service
 		for(int i=0; i < server->noOfClients; i++) { // go through the client list
 			pid = server->clientList[i];
-			if( server->pairFileNameByPID(fileName, pid) != 0) // if pair files do not exist
+			if( server->pairFileNameByPID(fileName, pid) != 0 ) // if pair files do not exist
 				Save_Pair_For_Pref(fileName); // create them
 		}
 	}

@@ -253,7 +253,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random(void) {
 
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 
-	while ( genomes[genomeIndex]->fitness == 0.0 )
+	while ( genomes[genomeIndex]->fitness == 0.0 ) // !!!!
 
 		genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 

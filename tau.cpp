@@ -427,7 +427,8 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 
 				secondController = optimizer->Genome_Get_First();
 			else
-				secondController = optimizer->Genome_Get_Best_But_Not(numControllers,controllers);
+				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
+//				secondController = optimizer->Genome_Get_Best_But_Not(numControllers,controllers);
 
 			Controller_Store( secondController );
 		}
@@ -449,7 +450,7 @@ void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
 	firstControllerIndex = numControllers-1;
 
 //	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Second();
-	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Random();
+	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Random_But_Not(firstController);
 
 	Controller_Store( secondController );
 
