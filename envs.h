@@ -9,7 +9,8 @@
 
 #include "optimizer.h"
 #include "environment.h"
-#include "tau.h"
+#include "taus.h"
+//#include "tau.h"
 #include "time.h"
 #include "interactor.h"
 
@@ -22,7 +23,8 @@ public:
 	int numberOfEnvs;
 	ENVIRONMENT **taskEnvironments;
 	OPTIMIZER   *optimizer;
-	TAU *tau;
+//	TAU *tau;
+	TAUS *taus;
 	int recordingVideo;
 	int speed;
 	CLIENT* client;
@@ -92,11 +94,11 @@ public:
 	void Show_Champ(dWorldID world, dSpaceID space);
 	void Speed_Decrease(void);
 	void Speed_Increase(void);
-	NEURAL_NETWORK *TAU_Get_User_Favorite(void);
+//	NEURAL_NETWORK *TAU_Get_User_Favorite(void);
 	int  TAU_Ready_To_Predict(void);
 	double TAU_Score_Get(void);
-	void TAU_Show_Robot_Pair( dWorldID world, dSpaceID space);
-	void TAU_User_Has_Indicated_A_Preference(dWorldID world, dSpaceID space);
+	void TAU_Show_Robot_Pair( dWorldID world, dSpaceID space); // CLIENT code - old-style tau kept
+	void TAU_User_Has_Indicated_A_Preference(dWorldID world, dSpaceID space); // CLIENT code - old-style tau kept
 	void Video_Record(void);
 	void Video_Start_Stop(void);
 	void Viewpoint_Get(void);
@@ -144,20 +146,20 @@ private:
 	void Save_Environments(ofstream *outFile);
 	void Save_Fitness(string);
 	void Save_Optimizer(ofstream *outFile);
-	void Save_Pair_For_Pref(char* filename);
+	void Save_Pair_For_Pref(int pid, char* filename);
 	void Save_All_Pairs_For_Pref(void);
 	void Save_TAU(ofstream *outFile);
 	void SavedFile_FindNext(void);
 	void Sensor_Data_Receive(void);
 	double Sensor_Sum(void);
 	int  Target_Sensor_Values_Recorded(void);
-	void TAU_Get_Controllers_From_Optimizer(void);
-	void TAU_Load_Controller_Pair(ifstream *inFile);
+//	void TAU_Get_Controllers_From_Optimizer(void);
+	void TAU_Load_Controller_Pair(ifstream *inFile); // CLIENT code - old-style tau kept
 	void TAU_Reset_User_Models(void);
-	void TAU_Save_Controller_Pair(ofstream *outFile);
-	void TAU_Send_Controllers_For_Evaluation(dWorldID world, dSpaceID space);
-	void TAU_Store_Sensor_Data(void);
-	void TAU_Store_User_Preference(void);
+	void TAU_Save_Controller_Pair(int pid, ofstream *outFile);
+	void TAU_Send_Controllers_For_Evaluation(dWorldID world, dSpaceID space); // CLIENT code - old-style tau kept
+	void TAU_Store_Sensor_Data(void); // CLIENT code - old-style tau kept
+	void TAU_Store_User_Preference(void); // CLIENT code - old-style tau kept
 	void Video_Start(void);
 	void Video_Stop(void);
 	void Viewpoint_Set(	double x, double y, double z,
