@@ -356,9 +356,25 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 	// and prepare for the evaluation of the next robot.
 	else {
 
-		if( controllerUnderEvaluation != taskEnvironments[0]->robots[0]->neuralNetwork || // purely debugging code
+/*		if( controllerUnderEvaluation != taskEnvironments[0]->robots[0]->neuralNetwork || // purely debugging code
 				controllerUnderEvaluation != optimizer->Genome_Get_Next_To_Evaluate()) {
-			printf("Off by 1. Exiting.\n");
+
+			printf("Off by 1:\ncontrollerUnderEvaluation\t%x\t%d\ntaskEnvNN\t\t\t%x\t%d\noptimizer->GNTE\t\t\t%x\t%d\nExiting.\n",
+					controllerUnderEvaluation, controllerUnderEvaluation->ID,
+					taskEnvironments[0]->robots[0]->neuralNetwork, taskEnvironments[0]->robots[0]->neuralNetwork->ID,
+					optimizer->Genome_Get_Next_To_Evaluate(), optimizer->Genome_Get_Next_To_Evaluate()->ID);
+
+			taskEnvironments[0]->robots[0]->neuralNetwork->Print_All();
+			controllerUnderEvaluation->Print_All();
+			exit(1);
+		}*/
+		if( controllerUnderEvaluation->ID != taskEnvironments[0]->robots[0]->neuralNetwork->ID || // purely debugging code
+				controllerUnderEvaluation->ID != optimizer->Genome_Get_Next_To_Evaluate()->ID) {
+
+			printf("Off by 1:\ncontrollerUnderEvaluation\t%x\t%d\ntaskEnvNN\t\t\t%x\t%d\noptimizer->GNTE\t\t\t%x\t%d\nExiting.\n",
+					controllerUnderEvaluation, controllerUnderEvaluation->ID,
+					taskEnvironments[0]->robots[0]->neuralNetwork, taskEnvironments[0]->robots[0]->neuralNetwork->ID,
+					optimizer->Genome_Get_Next_To_Evaluate(), optimizer->Genome_Get_Next_To_Evaluate()->ID);
 			exit(1);
 		}
 //		double fitness = Fitness_Get();
@@ -1232,13 +1248,13 @@ void ENVS::Load_TAU(ifstream *inFile) {
         int isTAU;
         (*inFile) >> isTAU;
 
-        if ( taus )
+/*        if ( taus )
                 delete taus;
 
         if ( isTAU )
                 taus = new TAUS(inFile);
         else
-                taus = NULL;
+                taus = NULL;*/
 }
 
 void ENVS::Move(double x, double y, double z) {
@@ -1499,11 +1515,11 @@ void ENVS::Save_Optimizer(ofstream *outFile) {
 
 void ENVS::Save_TAU(ofstream *outFile) {
 
-        if ( taus ) {
+/*        if ( taus ) {
                 (*outFile) << "1\n";
                 taus->save(outFile);
         }
-        else
+        else*/
                 (*outFile) << "0\n";
 }
 

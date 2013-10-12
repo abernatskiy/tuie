@@ -33,17 +33,14 @@ TAU::TAU(void) {
 
 TAU::TAU(ifstream *inFile) {
 
-        (*inFile) >> numControllers;
+	(*inFile) >> numControllers;
 
 	int controllersSaved;
 	(*inFile) >> controllersSaved;
 
 	if ( controllersSaved ) {
-
 		controllers = new NEURAL_NETWORK * [numControllers];
-
 		for (int i=0; i<numControllers; i++)
-
 			controllers[i] = new NEURAL_NETWORK(inFile);
 	}
 	else

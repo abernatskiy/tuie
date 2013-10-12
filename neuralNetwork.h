@@ -51,6 +51,7 @@ public:
 	void   Mutate(void);
 	void   Print(void);
 	void   Print_Sensor_Data(void);
+	void   Print_All(void);
 	void   Record_Sensor_Data(int evaluationPeriod);
 	void   Reset(void);
 	void   Save(ofstream *outFile);

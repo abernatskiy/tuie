@@ -353,6 +353,15 @@ void NEURAL_NETWORK::Print_Sensor_Data(void) {
 		sensorTimeSeries->Print(6);
 }
 
+void NEURAL_NETWORK::Print_All(void) {
+
+	Print();
+	printf("Weights:\n");
+	weights->Print(5);
+//	printf("Sensor data:\n");
+//	Print_Sensor_Data();
+}
+
 void NEURAL_NETWORK::Record_Sensor_Data(int evaluationPeriod) {
 
 	if ( !sensorTimeSeries )
