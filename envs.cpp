@@ -392,6 +392,7 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		if( taus->readyToPredict() ) {
 			if( Check_For_Pref() == 0 ) {
 				Rescore_Population();
+				taus->writeScoreType();
 				optimizer->Generation_Create_Next();
 				Create_Robot_To_Evaluate(world, space);
 				Save_All_Pairs_For_Pref();

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cp SavedFiles/score_type.log "arch/logs/score_type`date +%s`.log"

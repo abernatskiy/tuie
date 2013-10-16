@@ -14,6 +14,8 @@ TAUS::TAUS(void) {
 	noOfClients = 0;
 	clientList[0] = 0;
 	clientList[1] = 0;
+
+	typeOfLastScore = 0;
 }
 
 /*
@@ -41,20 +43,39 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 	if( tau[0]->Ready_To_Predict() && tau[1]->Ready_To_Predict() ) {
 		if( tau[0]->Model_Error() > tau[2]->Model_Error() &&
 				tau[1]->Model_Error() > tau[2]->Model_Error() &&
-				tau[2]->Ready_To_Predict() )
+				tau[2]->Ready_To_Predict() ) {
+			typeOfLastScore = 4;
 			return tau[2]->Score_Predict(genome);
-		return fmax( tau[0]->Score_Predict(genome),
-								tau[1]->Score_Predict(genome) );
+		}
+		else {
+			typeOfLastScore = 3;
+			return fmax( tau[0]->Score_Predict(genome),
+									tau[1]->Score_Predict(genome) );
+		}
 	}
 	else {
-		if(tau[0]->Ready_To_Predict())
+		if(tau[0]->Ready_To_Predict()) {
+			typeOfLastScore = 1;
 			return tau[0]->Score_Predict(genome);
-		if(tau[1]->Ready_To_Predict())
+		}
+		if(tau[1]->Ready_To_Predict()) {
+			typeOfLastScore = 2;
 			return tau[1]->Score_Predict(genome);
-		if(tau[2]->Ready_To_Predict())
+		}
+		if(tau[2]->Ready_To_Predict()) {
+			typeOfLastScore = 5;
 			return tau[2]->Score_Predict(genome);
+		}
+		typeOfLastScore = -1;
 		return TAU_NO_SCORE;
 	}
+}
+
+void TAUS::writeScoreType(void) {
+
+	FILE* outFile = fopen("SavedFiles/score_type.log", "a");
+	fprintf(outFile, "%d\n", typeOfLastScore);
+	fclose(outFile);
 }
 
 bool TAUS::readyToPredict(void) {

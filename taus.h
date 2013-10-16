@@ -23,6 +23,9 @@ public:
 //	void userModelsReset(void);
 	void controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile);
 
+	int typeOfLastScore;
+	void writeScoreType(void);
+
 private:
 	int indexByPID(int pid);
 };
