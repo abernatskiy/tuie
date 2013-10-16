@@ -57,7 +57,7 @@ public:
 	~SERVER(void);
 //	bool prefFileExistsByPID(int pid);
 	short pairFileNameByPID(char* strspace, int pid);
-	void updatePreferences(void);
+	int updatePreferences(void);
 };
 
 #endif

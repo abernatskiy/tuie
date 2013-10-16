@@ -739,7 +739,9 @@ int main (int argc, char **argv)
 
 	Parse_Parameters(argc,argv);
 
-	char scr_file_open_mode[4] = "r";	// TBD: fix this
+//	char scr_file_open_mode[4] = "r";	// TBD: fix this
+	char scr_file_open_mode[4];	// TBD: fix this
+	sprintf(scr_file_open_mode, "r");
 
 	srand(randSeed);
 //	srand(time(NULL));

@@ -67,6 +67,7 @@ public:
 	void Draw(void);
 	void EvaluationPeriod_Decrease(dWorldID world, dSpaceID space, dJointGroupID contactgroup);
 	void EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroupID contactgroup);
+	void Continue_Fitness_Calculation(dWorldID world, dSpaceID space);
 	void Evolve(dWorldID world, dSpaceID space);
 	int In_Champ_Mode(void);
 	int In_Design_Mode(void);
@@ -107,7 +108,7 @@ private:
 	void Activate_All(void);
 	void Camera_Position_Load(ifstream *inFile, int showGraphics);
 	void Camera_Position_Save(ofstream *outFile, int showGrahpics);
-	void Check_For_Pref(void);
+	int Check_For_Pref(void);
 	void Check_Whether_To_End(void);
 	void Check_Whether_To_Writeout(void);
 //	void Collect_Pref(char *fileName);

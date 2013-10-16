@@ -63,7 +63,9 @@ void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 int TAU_OPTIMIZER::Ready_To_Predict(void) {
 
 //	if( model != NULL && modelError < TAU_OPTIMIZER_ERROR_ACCEPTABLE );
-	if( model != NULL );
+	if( model != NULL )
+		return true;
+	return false;
 }
 
 void TAU_OPTIMIZER::Save(ofstream *outFile) {

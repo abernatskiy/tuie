@@ -39,7 +39,7 @@ public:
 	NEURAL_NETWORK *Controller_Pair_Get_First(void);
 	NEURAL_NETWORK *Controller_Pair_Get_Second(void);
 	void		Controllers_Load_Pair(ifstream *inFile);
-	void		Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile);
+	NEURAL_NETWORK**		Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile);
  	void    Controllers_Select_From_Optimizer(OPTIMIZER *optimizer); // Pair selection implementation core component
 																																	// Selects varying combinations of ANNs from TAU and from AFPO population depending on
 																																	// value of Controllers_Num_Needed_From_Optimizer()
@@ -70,12 +70,12 @@ public:
 	void		Save(ofstream *outFile);
 	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
 //	void		User_Models_Reset(void); // never really called
+  void    Controller_Store(NEURAL_NETWORK *newController);
 
 private:
 	void  Controller_First_Preferred(void);  // these two functions are called only from
 	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)
 
-  void    Controller_Store(NEURAL_NETWORK *newController);
 	void		Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData);
   int     Controllers_Available_For_Optimization(void); // returns no of controllers with available scores and sensor data
 	void    Controllers_Expand(void);

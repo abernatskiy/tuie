@@ -340,9 +340,9 @@ void ENVS::EvaluationPeriod_Increase(dWorldID world, dSpaceID space, dJointGroup
 */
 }
 
-void ENVS::Evolve( dWorldID world, dSpaceID space ) {
+void ENVS::Continue_Fitness_Calculation( dWorldID world, dSpaceID space ) {
 
-	// called from M3 in evolution mode
+	// called from Evolve()
 
 	// If there is a robot being evaluated, and its time
 	// is not yet up, allow it to move.
@@ -355,19 +355,6 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 	// expired, record its fitness, remove it from the simulator,
 	// and prepare for the evaluation of the next robot.
 	else {
-
-/*		if( controllerUnderEvaluation != taskEnvironments[0]->robots[0]->neuralNetwork || // purely debugging code
-				controllerUnderEvaluation != optimizer->Genome_Get_Next_To_Evaluate()) {
-
-			printf("Off by 1:\ncontrollerUnderEvaluation\t%x\t%d\ntaskEnvNN\t\t\t%x\t%d\noptimizer->GNTE\t\t\t%x\t%d\nExiting.\n",
-					controllerUnderEvaluation, controllerUnderEvaluation->ID,
-					taskEnvironments[0]->robots[0]->neuralNetwork, taskEnvironments[0]->robots[0]->neuralNetwork->ID,
-					optimizer->Genome_Get_Next_To_Evaluate(), optimizer->Genome_Get_Next_To_Evaluate()->ID);
-
-			taskEnvironments[0]->robots[0]->neuralNetwork->Print_All();
-			controllerUnderEvaluation->Print_All();
-			exit(1);
-		}*/
 		if( controllerUnderEvaluation->ID != taskEnvironments[0]->robots[0]->neuralNetwork->ID || // purely debugging code
 				controllerUnderEvaluation->ID != optimizer->Genome_Get_Next_To_Evaluate()->ID) {
 
@@ -377,42 +364,49 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 					optimizer->Genome_Get_Next_To_Evaluate(), optimizer->Genome_Get_Next_To_Evaluate()->ID);
 			exit(1);
 		}
-//		double fitness = Fitness_Get();
 		double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
 		MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
-
-		if( !taus )
-			taus = new TAUS;
 
 		// feed the data obtained in the current simulation to the optimizer
 		controllerUnderEvaluation -> Fitness_Set(fitness);
 		controllerUnderEvaluation -> Store_Sensor_Data(timeSeries);
-		if(TAU_Ready_To_Predict())
-			controllerUnderEvaluation -> Score_Set(TAU_Score_Get());
 
 		timeSeries = NULL;
-
 		Destroy_Simulated_Objects();
 
 		optimizer->Timer_Reset();
 
 		// Set up next robot...
-		if( optimizer->Genomes_All_Evaluated() )
-			optimizer->Generation_Create_Next();
-		Create_Robot_To_Evaluate(world, space);
+		if( !optimizer->Genomes_All_Evaluated() )
+			Create_Robot_To_Evaluate(world, space);
+	}
+}
 
-		evaluationsSinceLastSave++;
+void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 
-		if ( evaluationsSinceLastSave == AFPO_POP_SIZE ) {
+	// called from M3 in SERVER mode
 
-			// SERVER mode master calls
-			selectionLevel = SELECTION_LEVEL_ENVS;
-			Check_For_Pref();
+	if( optimizer->Genomes_All_Evaluated() ) {
+		if( !taus )
+			taus = new TAUS;
+		if( taus->readyToPredict() ) {
+			if( Check_For_Pref() == 0 ) {
+				Rescore_Population();
+				optimizer->Generation_Create_Next();
+				Create_Robot_To_Evaluate(world, space);
+				Save_All_Pairs_For_Pref();
+			}
+		}
+		else {
+		// Generation scoring check here, and Genomes_All_Scored() is not waht you're looking for
 			Save_All_Pairs_For_Pref();
-			server->checkIfFirstIterationAndMakeRecord();
-			evaluationsSinceLastSave = 0;
+			if( Check_For_Pref() == 0 )
+				usleep(100000);
 		}
 	}
+	else
+		Continue_Fitness_Calculation(world, space);
+
 }
 
 int ENVS::In_Champ_Mode(void) {
@@ -888,21 +882,24 @@ void ENVS::Camera_Position_Save(ofstream *outFile, int showGraphics) {
 	(*outFile) << hpr[0] << " " << hpr[1] << " " << hpr[2] << "\n";
 }
 
-void ENVS::Check_For_Pref(void) {
+int ENVS::Check_For_Pref(void) {
 
 	// called from Evolve() in SERVER mode
 
-	server->updatePreferences();
+	int noOfPrefsFound = server->updatePreferences();
 
 	printf("Feeding the obtained preferences to TAU:\n");
 	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in tau
-		taus->storePref( server->clientList[i],
+		if( server->clientList[i] != server->curPrefTable[i][0] ) printf("WARNING! There used to be off by 1 error here.\n");
+		taus->storePref( server->curPrefTable[i][0],
 										server->curPrefTable[i][1], // ID of the first controller as read by server->updatePreferences()
 										server->curPrefTable[i][2], // ID of the second controller
 										server->curPrefTable[i][3] ); // user preference
-		printf("%d\t%d\t%d\n", server->clientList[i], server->curPrefTable[i][1], server->curPrefTable[i][2], server->curPrefTable[i][3] );
-		Rescore_Population();
+		printf("%d\t%d\t%d\t%d\n", server->curPrefTable[i][0], server->curPrefTable[i][1], server->curPrefTable[i][2], server->curPrefTable[i][3] );
+//		Rescore_Population();
 	}
+
+	return noOfPrefsFound;
 }
 
 void ENVS::Check_Whether_To_End(void) {
@@ -1469,6 +1466,8 @@ void ENVS::Save_All_Pairs_For_Pref(void) {
 				Save_Pair_For_Pref(pid, fileName); // create them
 		}
 	}
+
+	server->checkIfFirstIterationAndMakeRecord();
 }
 
 void ENVS::Save_Environments(ofstream *outFile) {

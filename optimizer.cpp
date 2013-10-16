@@ -537,6 +537,11 @@ int OPTIMIZER::Genome_Evaluated(int genomeIndex) {
 	return( genomes[genomeIndex]->Evaluated() );
 }
 
+int OPTIMIZER::Genome_Scored(int genomeIndex) {
+
+	return( genomes[genomeIndex]->Scored() );
+}
+
 NEURAL_NETWORK *OPTIMIZER::Genome_Find_Next_Not_Evaluated(void) {
 
 	int found = false;
@@ -570,13 +575,30 @@ int OPTIMIZER::Genomes_All_Evaluated(void) {
 
 	while ( (allEvaluated) &&
 		(genomeIndex < AFPO_POP_SIZE) ) {
-		if ( !Genome_Evaluated(genomeIndex) )
+		if ( !Genome_Evaluated(genomeIndex) ) {
 			allEvaluated = false;
-		else
-			genomeIndex++;
+			break;
+		}
+		genomeIndex++;
 	}
 
 	return( allEvaluated );
+}
+
+int OPTIMIZER::Genomes_All_Scored(void) {
+
+	int allScored = true;
+	int genomeIndex = 0;
+
+	while ( (allScored) && (genomeIndex < AFPO_POP_SIZE) ) {
+		if ( !Genome_Scored(genomeIndex) ) {
+			allScored = false;
+			break;
+		}
+		genomeIndex++;
+	}
+
+	return( allScored );
 }
 
 void OPTIMIZER::Genomes_Create(void) {

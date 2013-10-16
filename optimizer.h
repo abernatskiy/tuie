@@ -67,6 +67,7 @@ public:
 																										// returns NULL if Genomes_All_Evaluated()
 																										// returns pointer to next not evaluated genome otherwise (by linear search implemented in Genome_Find_Next_Not_Evaluated())
 	int			Genomes_All_Evaluated(void);
+	int			Genomes_All_Scored(void);
 	void		Generation_Create_Next(void); // generational function of AFPO - replaces current population with next gen population
 
 
@@ -77,6 +78,7 @@ private:
 	void    Genome_Create_Random(int genomeIndex);
 	void    Genome_Destroy(int genomeIndex);
 	int  		Genome_Evaluated(int genomeIndex); // returns true if NEURAL_NETWORK::Fitness_Set() was called on genome
+	int  		Genome_Scored(int genomeIndex); // returns true if NEURAL_NETWORK::Score_Set() was called on genome
 	NEURAL_NETWORK *Genome_Find_Next_Not_Evaluated(void);
 	void 		Genome_Load(int genomeIndex, ifstream *inFile);
 	void		Genome_Print(int genomeIndex);

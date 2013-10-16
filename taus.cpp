@@ -73,8 +73,20 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 
 void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile) {
 
-	int idx = indexByPID(pid);
-	tau[idx]->Controllers_Save_Pair(optimizer, outFile);
+	NEURAL_NETWORK** savedControllers;
+	if( pid > 0 ) {
+		int idx = indexByPID(pid);
+		savedControllers = tau[idx]->Controllers_Save_Pair(optimizer, outFile);
+	}
+	else {
+		savedControllers = tau[0]->Controllers_Save_Pair(optimizer, outFile);
+		tau[1]->Controller_Store(savedControllers[0]);
+		tau[1]->Controller_Store(savedControllers[1]);
+	}
+
+	tau[2]->Controller_Store(savedControllers[0]);
+	tau[2]->Controller_Store(savedControllers[1]);
+	delete [] savedControllers;
 }
 
 /*** private methods ***/

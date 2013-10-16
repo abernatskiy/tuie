@@ -66,7 +66,7 @@ short SERVER::pairFileNameByPID(char* strspace, int pid) {
 	return 1;
 }
 
-void SERVER::updatePreferences(void) {
+int SERVER::updatePreferences(void) {
 
 	printf("SERVER: Trying to update preferences\n");
 
@@ -75,7 +75,6 @@ void SERVER::updatePreferences(void) {
 	struct dirent *ent;
 	int prefFiles = 0;
 	int curPID;
-	int i=0;
 
 	FILE* file;
 	int* curRecord;
@@ -90,7 +89,12 @@ void SERVER::updatePreferences(void) {
 			if( !isClient(curPID) )
 				addClient(curPID);
 			curRecord = prefTableByPID(curPID);
-			if( curRecord == NULL ) curRecord = newPrefTableRecord(curPID);
+			if( curRecord == NULL )
+				curRecord = newPrefTableRecord(curPID);
+			else {
+				printf("SERVER: BUG - cannot find freshly added PID in pref table. Exiting.\n");
+				exit(1);
+			}
 
 			sprintf(tmpFileName, "SavedFiles/%s", ent->d_name);
 
@@ -99,7 +103,7 @@ void SERVER::updatePreferences(void) {
 			if( file = fopen(tmpFileName, "r") )
 				printf("SERVER: file successfully opened\n");
 			else {
-				printf("Something has gone very, very wrong\n");
+				printf("SERVER: can list file, but cannot open it. Exiting.\n");
 				exit(1);
 			}
 			fscanf(file, "%d %d %d", curRecord+1, curRecord+2, curRecord+3);
@@ -111,6 +115,7 @@ void SERVER::updatePreferences(void) {
 			prefFiles++;
 		}
 	}
+	return prefFiles;
 }
 
 #endif

@@ -184,11 +184,16 @@ void TAU::Controllers_Load_Pair(ifstream *inFile) {
 	secondControllerIndex = 1;
 }
 
-void TAU::Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile) {
+NEURAL_NETWORK** TAU::Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile) {
 
 	Controllers_Select_From_Optimizer(optimizer);
 	controllers[firstControllerIndex]->Save_ButNotSensorData(outFile);
 	controllers[secondControllerIndex]->Save_ButNotSensorData(outFile);
+
+	NEURAL_NETWORK** savedControllers = new NEURAL_NETWORK*[2];
+	savedControllers[0] = controllers[firstControllerIndex];
+	savedControllers[1] = controllers[secondControllerIndex];
+	return savedControllers;
 }
 
 void TAU::Controllers_Select_From_Optimizer(OPTIMIZER *optimizer) {
@@ -308,8 +313,6 @@ void TAU::User_Models_Reset(void) {
 		tauOptimizer->User_Models_Reset(Controllers_Available_For_Optimization() ,controllers);
 }*/
 
-// --------------------------- Private methods -----------------------------
-
 void TAU::Controller_Store(NEURAL_NETWORK *newController) {
 
         if ( !controllers )
@@ -321,8 +324,11 @@ void TAU::Controller_Store(NEURAL_NETWORK *newController) {
 
 	controllers[numControllers]->fitness = newController->fitness;
 	controllers[numControllers]->sensorTimeSeries = new MATRIX(newController->sensorTimeSeries);
+	controllers[numControllers]->score = TAU_NO_SCORE; // !!!!
   numControllers++;
 }
+
+// --------------------------- Private methods -----------------------------
 
 void TAU::Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData) {
 
@@ -488,6 +494,9 @@ int  TAU::Find_Index(int ID) {
 	for (int i=0; i<numControllers; i++)
 		if ( controllers[i]->ID == ID )
 			return( i );
+	printf("TAU: cannot find index.\n");
+	exit(1);
+	return -10000;
 }
 
 int TAU::Num_Prefs(void) {

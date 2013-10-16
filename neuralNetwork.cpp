@@ -20,6 +20,7 @@ NEURAL_NETWORK::NEURAL_NETWORK(	int myID, int nS, int nM, int myAge ) {
 	ID		= myID;
 	fitness		= 0.0;
 	evaluated	= false;
+	scored = false;
 
 	numSensors	= nS;
 
@@ -45,6 +46,7 @@ NEURAL_NETWORK::NEURAL_NETWORK(	NEURAL_NETWORK *other ) {
 	ID		= other->ID;
 	fitness		= 0.0;
 	evaluated	= false;
+	scored = false;
 
 	numSensors	= other->numSensors;
 
@@ -106,6 +108,8 @@ NEURAL_NETWORK::NEURAL_NETWORK(ifstream *inFile) {
                 sensorTimeSeries = new MATRIX(inFile);
 	else
                 sensorTimeSeries = NULL;
+
+	scored = false;
 }
 
 NEURAL_NETWORK::~NEURAL_NETWORK(void) {
@@ -150,6 +154,11 @@ int    NEURAL_NETWORK::Age_Get(void) {
 int    NEURAL_NETWORK::Evaluated(void) {
 
 	return( evaluated );
+}
+
+int    NEURAL_NETWORK::Scored(void) {
+
+	return( scored );
 }
 
 int    NEURAL_NETWORK::Fitness_Equal_To(double fit) {
@@ -374,6 +383,7 @@ void NEURAL_NETWORK::Reset(void) {
 	fitness = 0.0;
 	score = TAU_NO_SCORE;
 	evaluated = false;
+	scored = false;
 }
 
 void NEURAL_NETWORK::Save(ofstream *outFile) {
@@ -458,6 +468,7 @@ void NEURAL_NETWORK::Score_Reset(void) {
 void NEURAL_NETWORK::Score_Set(double val) {
 
 	score = val;
+	scored = true;
 }
 
 void NEURAL_NETWORK::Sensor_Set(int sensorIndex, double sensorValue) {

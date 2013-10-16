@@ -22,9 +22,8 @@ public:
 	int     age;
 	MATRIX *sensorTimeSeries;
 	int	evaluated;
+	int scored;
 	int     ID;
-
-private:
 	double  score;
 
 public:
@@ -34,6 +33,7 @@ public:
 	~NEURAL_NETWORK();
 	int    Age_Get(void);
 	int    Evaluated(void);
+	int    Scored(void);
 	int    Fitness_Equal_To(double fit);
 	double Fitness_Get(void);
 //	void   Fitness_Sensor_Data_Set(double fit, MATRIX *timeSeries);

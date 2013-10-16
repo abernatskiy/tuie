@@ -65,7 +65,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 		for (int i=0;	i<numControllers;	i++) {
 
 			MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
-			int sensorRow;
+//			int sensorRow;
 			score = controllers[i]->Score_Get();
 
 			int m=0;
@@ -96,7 +96,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
 double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
 
-	int i;
+//	int i;
 	double *in;
 	in = new double[7*1];
 
