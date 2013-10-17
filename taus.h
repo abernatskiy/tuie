@@ -23,7 +23,13 @@ public:
 //	void userModelsReset(void);
 	void controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile);
 
-	int typeOfLastScore;
+	int typeOfLastScore;	// -1	TAU_NO_SCORE
+												// 0	no scores returned yet
+												// 1	score from tau[0]
+												// 2	score from tau[1]
+												// 3	max(score(tau[0]), score(tau[1]))
+												// 4	score from common tau (tau[2])
+												// 5	score from common tau, when other taus are not functional
 	void writeScoreType(void);
 
 private:

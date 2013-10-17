@@ -1,10 +1,14 @@
-ROADMAP
-
-1. Implement AFPO retardation (dl 10/06 14.00)
-2. Reimplement envs.cpp for multiple TAUs (wednesday)
+1. \Theta trick for checking the properties of bcppg
+2. Fix client bug
+3. The Matrix optimization
+4. Examine bcppg directly
+5. Show that method converges correctly for approximate users
+6. (IMPORTANT) Add novely to pair generation algorithm
 
 --------------------------
 BUGS
+
+Random server segfaults.
 
 Client deletes pair0.dat upon exit.
 

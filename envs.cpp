@@ -107,6 +107,8 @@ ENVS::ENVS(int rs) {
 		system(command);
 		sprintf(command,"rm SavedFiles/pref*.dat");
 		system(command);
+		sprintf(command,"rm SavedFiles/score_type.log");
+		system(command);
 	}
 }
 
