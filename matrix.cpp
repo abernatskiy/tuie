@@ -204,7 +204,7 @@ void MATRIX::AddColumn(double val) {
 			else
 				temp->Set(i,j,Get(i,j));
 
-	delete vals;
+	delete [] vals;
 	vals = temp->vals;
 	temp->vals = NULL;
 
@@ -228,7 +228,7 @@ void MATRIX::AddRow(double val) {
                         else
                                 temp->Set(i,j,Get(i,j));
 
-        delete vals;
+        delete [] vals;
         vals = temp->vals;
         temp->vals = NULL;
 

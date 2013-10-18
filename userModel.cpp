@@ -26,7 +26,7 @@ USER_MODEL::USER_MODEL(int numS) {
 
 	ANN = new CBackProp(3,layerSizes,0.1,0.1);
 
-	delete layerSizes;
+	delete [] layerSizes;
 	layerSizes = NULL;
 }
 
@@ -88,8 +88,8 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 		}
 	}
 
-	delete in;
-	delete target;
+	delete [] in;
+	delete [] target;
 
 	return( totalError / ((double) numControllers) );
 }
@@ -109,7 +109,7 @@ double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
 	in[m] = 1.0; // Bias neuron
 
   ANN->ffwd(in);
-	delete in;
+	delete [] in;
 	return( pow(ANN->Out(0),0.3) ); // artificial bias introduced to avoid underestimating individuals with low predicted score
 }
 

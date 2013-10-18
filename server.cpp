@@ -114,6 +114,7 @@ int SERVER::updatePreferences(void) {
 
 			prefFiles++;
 		}
+		closedir(dir);
 	}
 	return prefFiles;
 }

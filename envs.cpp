@@ -893,7 +893,7 @@ int ENVS::Check_For_Pref(void) {
 
 	printf("Feeding the obtained preferences to TAU:\n");
 	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in tau
-		if( server->clientList[i] != server->curPrefTable[i][0] ) printf("WARNING! There used to be off by 1 error here.\n");
+//		if( server->clientList[i] != server->curPrefTable[i][0] ) printf("WARNING! There used to be off by 1 error here.\n");
 		taus->storePref( server->curPrefTable[i][0],
 										server->curPrefTable[i][1], // ID of the first controller as read by server->updatePreferences()
 										server->curPrefTable[i][2], // ID of the second controller

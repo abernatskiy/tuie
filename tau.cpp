@@ -362,7 +362,7 @@ void TAU::Controllers_Expand(void) {
 
 	temp[numControllers] = NULL;
 
-	delete controllers;
+	delete [] controllers;
 	controllers = temp;
 
 	temp = NULL;
