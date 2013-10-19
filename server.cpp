@@ -119,4 +119,18 @@ int SERVER::updatePreferences(void) {
 	return prefFiles;
 }
 
+void SERVER::tempFileName(char* strspace) {
+
+	sprintf(strspace, "SavedFiles/tmp0");
+}
+
+void SERVER::deployPairFile(int pid) {
+
+	char fn[100], command[200];
+	pairFileNameByPID(fn, pid);
+	tempFileName(tmpFileName);
+	sprintf(command, "mv %s %s", tmpFileName, fn);
+	system(command);
+}
+
 #endif

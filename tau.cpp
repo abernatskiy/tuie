@@ -179,7 +179,7 @@ void TAU::Controllers_Load_Pair(ifstream *inFile) {
 
 	for (int i=0; i<numControllers; i++) {
 		controllers[i] = new NEURAL_NETWORK(inFile);
-		printf("CLIENT: TAU: 0th controller loaded successfully, ID %d\n", controllers[i]->ID);
+//		printf("CLIENT: TAU: 0th controller loaded successfully, ID %d\n", controllers[i]->ID);
 	}
 
 	firstControllerIndex = 0;

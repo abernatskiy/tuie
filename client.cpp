@@ -54,7 +54,6 @@ short CLIENT::pairFileName(char* strspace) {
 short CLIENT::prefFileName(char* strspace) {
 
 	sprintf(strspace, "SavedFiles/pref%d.dat", getPID());
-//	sprintf(strspace, "SavedFiles/pref0.dat");
 	if( fileExists(strspace) )
 		return 0;
 	return 1;
@@ -65,6 +64,20 @@ void CLIENT::deletePairFile(void) {
 	if( firstIteration ) return;
 	if( pairFileName(tmpFileName) == 0 && strstr(tmpFileName, "pair0.dat") == NULL )
 		deleteFile(tmpFileName);
+}
+
+void CLIENT::tempFileName(char* strspace) {
+
+	sprintf(strspace, "SavedFiles/tmp%d", getPID());
+}
+
+void CLIENT::deployPrefFile(void) {
+
+	char fn[100], command[200];
+	prefFileName(fn);
+	tempFileName(tmpFileName);
+	sprintf(command, "mv %s %s", tmpFileName, fn);
+	system(command);
 }
 
 #endif

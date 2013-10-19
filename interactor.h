@@ -19,7 +19,6 @@ public:
 
 	INTERACTOR(void);
 	void checkIfFirstIterationAndMakeRecord(void);
-
 };
 
 class CLIENT : public INTERACTOR {
@@ -33,6 +32,8 @@ public:
 	short pairFileName(char* strspace); // returns 0 if pair file is found, nonzero otherwise
 	short prefFileName(char* strspace);
 	void deletePairFile(void);
+	void tempFileName(char* strspace);
+	void deployPrefFile(void);
 };
 
 class SERVER : public INTERACTOR {
@@ -58,6 +59,9 @@ public:
 //	bool prefFileExistsByPID(int pid);
 	short pairFileNameByPID(char* strspace, int pid);
 	int updatePreferences(void);
+
+	void tempFileName(char* strspace);
+	void deployPairFile(int pid);
 };
 
 #endif

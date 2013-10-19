@@ -94,8 +94,8 @@ ENVS::ENVS(int rs) {
 
 	timeSinceLastWriteout = startTime;
 
-	client = new CLIENT();
-	server = new SERVER();
+	client = new CLIENT;
+	server = new SERVER;
 
 	controllerUnderEvaluation = NULL;
 
@@ -1220,19 +1220,19 @@ void ENVS::Load_Pair(void) {
 	// called from M3 in CLIENT mode
 	char fileName[100];
 	client->pairFileName(fileName);
-	printf("CLIENT: loading pairs from %s\n", fileName);
+//	printf("CLIENT: loading pairs from %s\n", fileName);
 	ifstream *inFile = new ifstream(fileName);
 
 	Camera_Position_Load(inFile,true);
 	Load_Environments(inFile);
-	printf("CLIENT: camera position and environments loaded\n");
+//	printf("CLIENT: camera position and environments loaded\n");
 	TAU_Load_Controller_Pair(inFile);
-	printf("CLIENT: controller pair loaded\n");
+//	printf("CLIENT: controller pair loaded\n");
 
 	inFile->close();
 	delete inFile;
 	inFile = NULL;
-	printf("CLIENT: pair load successful\n");
+//	printf("CLIENT: pair load successful\n");
 }
 
 void ENVS::Load_Environments(ifstream *inFile) {
@@ -1455,7 +1455,10 @@ void ENVS::Save(int showGraphics) {
 
 void ENVS::Save_Pair_For_Pref(int pid, char* fileName) {
 
-	ofstream *outFile = new ofstream(fileName);
+	char tmpfn[100];
+	server->tempFileName(tmpfn);
+
+	ofstream *outFile = new ofstream(tmpfn);
 
 	Camera_Position_Save(outFile,false);
 	Save_Environments(outFile);
@@ -1464,6 +1467,8 @@ void ENVS::Save_Pair_For_Pref(int pid, char* fileName) {
 	outFile->close();
 	delete outFile;
 	outFile = NULL;
+
+	server->deployPairFile(pid);
 }
 
 void ENVS::Save_All_Pairs_For_Pref(void) {
@@ -1643,13 +1648,13 @@ void ENVS::TAU_Store_Sensor_Data(void) {
 
 void ENVS::TAU_Store_User_Preference(void) {
 
-	char fileName[100];
-	client->prefFileName(fileName);
+	char tmpfn[100];
+	client->tempFileName(tmpfn);
 
-	ofstream *outFile = new ofstream(fileName);
+	ofstream *outFile = new ofstream(tmpfn);
 
 	(*outFile) << tau->controllers[0]->ID << " ";
-	(*outFile) << tau->controllers[1]->ID << " "; // !!!!
+	(*outFile) << tau->controllers[1]->ID << " ";
 
   // mmm Get an automated preference, rather than one from the human user.
 	//
@@ -1667,6 +1672,8 @@ void ENVS::TAU_Store_User_Preference(void) {
 	outFile->close();
 	delete outFile;
 	outFile = NULL;
+
+	client->deployPrefFile();
 }
 
 void ENVS::Video_Start(void) {
