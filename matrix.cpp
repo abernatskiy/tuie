@@ -282,11 +282,11 @@ int  MATRIX::BinaryToDecimal(int i, int j, int ln) {
 
 	int totalValue = 0;
 	int placeValue = 128;
-	int temp;
+//	int temp;
 
 	for (int wd=j;wd<(j+ln);wd++) {
 
-		temp = int(Get(i,wd));
+//		temp = int(Get(i,wd));
 
 		totalValue = totalValue + placeValue*int(Get(i,wd));
 		placeValue = placeValue/2;

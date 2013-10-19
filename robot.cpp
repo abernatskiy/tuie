@@ -129,11 +129,11 @@ void ROBOT::Activate(void) {
 
 void ROBOT::Activate_Component(void) {
 
-	if ( activeComponent < 0 ) 
+	if ( activeComponent < 0 )
 		activeComponent = 0;
 
-	if ( (numObjects > 0) || (numJoints > 0) )
-		if ( activeComponent < numObjects ) 
+	if ( (numObjects > 0) || (numJoints > 0) ) {
+		if ( activeComponent < numObjects )
 			objects[activeComponent]->Activate();
 		else {
 			joints[activeComponent - numObjects]->Activate();
@@ -142,6 +142,7 @@ void ROBOT::Activate_Component(void) {
 //			       joints[activeComponent-numObjects]->obj1Index,
 //			       joints[activeComponent-numObjects]->obj2Index);
 		}
+	}
 }
 
 void ROBOT::Active_Component_Copy(void) {
@@ -482,7 +483,7 @@ double ROBOT::Get_Compass_Sensor_Value(void) {
         const dReal *leftElbowPos  = dBodyGetPosition(objects[0]->body);
         const dReal *rightElbowPos = dBodyGetPosition(objects[2]->body);
 
-        double vect1[2], vect2[2];
+        double vect1[2]; //, vect2[2];
 
         vect1[0] = rightElbowPos[0] - leftElbowPos[0];
         vect1[1] = rightElbowPos[1] - leftElbowPos[1];
@@ -509,7 +510,7 @@ double ROBOT::Get_Compass_Sensor_Value(void) {
 	theta = theta / (2.0*3.14159);
 
 	return( theta );
-	
+
 	/*
         vect2[0] = 1;
         vect2[1] = 0;

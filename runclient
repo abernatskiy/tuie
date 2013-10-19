@@ -1,2 +1,2 @@
 #!/bin/bash
-optirun ./M3client -cp
+optirun ./M3 -cp

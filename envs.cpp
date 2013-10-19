@@ -78,7 +78,7 @@ ENVS::ENVS(int rs) {
 	targetSensorValuesRecorded = false;
 	recordingVideo = false;
 
-//	tau = new TAU();
+	tau = NULL;
 	taus = NULL;
 
 	savedFileIndex = -1;
@@ -128,6 +128,11 @@ ENVS::~ENVS(void) {
 	}
 	delete[] taskEnvironments;
 	taskEnvironments = NULL;
+
+	if ( tau ) {
+		delete tau;
+		tau = NULL;
+	}
 
 	if ( taus ) {
 		delete taus;
@@ -612,6 +617,10 @@ void ENVS::Reset(void) {
 	if ( In_Evolution_Mode() ) {
 		if ( optimizer )
 			optimizer->Reset();
+		if ( tau ) {
+			delete tau;
+			tau = NULL;
+		}
 		if ( taus ) {
 			delete taus;
 			taus = NULL;
@@ -619,6 +628,10 @@ void ENVS::Reset(void) {
 	}
 
 	else if ( In_TAU_Mode() ) {
+		if ( tau ) {
+			delete tau;
+			tau = NULL;
+		}
 		if ( taus ) {
 			delete taus;
 			taus = NULL;
@@ -749,7 +762,7 @@ double ENVS::TAU_Score_Get(void) {
 
 void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 
-/*	if ( tau->timer<1000 ) {
+	if ( tau->timer<1000 ) {
 
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
@@ -771,14 +784,14 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 		tau->timer=0;
 
 		TAU_Send_Controllers_For_Evaluation(world, space);
-	}*/
+	}
 }
 
 void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space ) {
 
 	// called from M3 upon pressing the spacebar in CLIENT mode
 
-/*	// Only accept a user's preference if in TAU mode.
+	// Only accept a user's preference if in TAU mode.
 	if ( In_TAU_Mode() ) {
 
 		TAU_Store_User_Preference(); // into a file
@@ -791,7 +804,7 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 
 		client->deletePairFile();
 		client->checkIfFirstIterationAndMakeRecord();
-	}*/
+	}
 }
 
 void ENVS::Video_Record(void) {
@@ -892,7 +905,7 @@ int ENVS::Check_For_Pref(void) {
 	int noOfPrefsFound = server->updatePreferences();
 
 	printf("Feeding the obtained preferences to TAU:\n");
-	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in tau
+	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in taus
 //		if( server->clientList[i] != server->curPrefTable[i][0] ) printf("WARNING! There used to be off by 1 error here.\n");
 		taus->storePref( server->curPrefTable[i][0],
 										server->curPrefTable[i][1], // ID of the first controller as read by server->updatePreferences()
@@ -922,7 +935,7 @@ void ENVS::Check_Whether_To_Writeout(void) {
 
 	clock_t currTime = clock();
 	double CPUSecondsSinceLastWriteout = ((double) (currTime - timeSinceLastWriteout)) / CLOCKS_PER_SEC;
-	double CPUMinutesSinceLastWriteout = CPUSecondsSinceLastWriteout/60.0;
+//	double CPUMinutesSinceLastWriteout = CPUSecondsSinceLastWriteout/60.0;
 
 	// Write an update every 5 minutes.
 	if ( CPUSecondsSinceLastWriteout > 5 ) {
@@ -1207,15 +1220,19 @@ void ENVS::Load_Pair(void) {
 	// called from M3 in CLIENT mode
 	char fileName[100];
 	client->pairFileName(fileName);
+	printf("CLIENT: loading pairs from %s\n", fileName);
 	ifstream *inFile = new ifstream(fileName);
 
 	Camera_Position_Load(inFile,true);
 	Load_Environments(inFile);
+	printf("CLIENT: camera position and environments loaded\n");
 	TAU_Load_Controller_Pair(inFile);
+	printf("CLIENT: controller pair loaded\n");
 
 	inFile->close();
 	delete inFile;
 	inFile = NULL;
+	printf("CLIENT: pair load successful\n");
 }
 
 void ENVS::Load_Environments(ifstream *inFile) {
@@ -1569,18 +1586,19 @@ void ENVS::TAU_Get_Controllers_From_Optimizer(void) {
 
 void ENVS::TAU_Load_Controller_Pair(ifstream *inFile) {
 
-/*	if ( !tau )
+	if ( !tau )
 		tau = new TAU;
-	tau->Controllers_Load_Pair(inFile);*/
+	tau->Controllers_Load_Pair(inFile);
 }
 
+/*
 void ENVS::TAU_Reset_User_Models(void) {
 
 	if ( optimizer )
 		optimizer->Scores_Reset();
 //	if ( taus )
 //		taus->userModelsReset();
-}
+}*/
 
 void ENVS::TAU_Save_Controller_Pair(int pid, ofstream *outFile) {
 
@@ -1591,7 +1609,7 @@ void ENVS::TAU_Save_Controller_Pair(int pid, ofstream *outFile) {
 
 void ENVS::TAU_Send_Controllers_For_Evaluation(dWorldID world, dSpaceID space) {
 
-/*	taskEnvironments[0]->Prepare_For_Simulation(world,space);
+	taskEnvironments[0]->Prepare_For_Simulation(world,space);
 	taskEnvironments[0]->Label(tau->Controller_Pair_Get_First(),0);
 	taskEnvironments[0]->Record_Sensor_Data(STARTING_EVALUATION_TIME); // into RAM matrix
 
@@ -1602,12 +1620,12 @@ void ENVS::TAU_Send_Controllers_For_Evaluation(dWorldID world, dSpaceID space) {
 	// There are contact resolution errors if the non-robot objects in both
 	// environments are created. So, remove the non-robot objects from
 	// the second environment.
-	taskEnvironments[1]->Make_NonRobotObjects_Incorporeal();*/
+	taskEnvironments[1]->Make_NonRobotObjects_Incorporeal();
 }
 
 void ENVS::TAU_Store_Sensor_Data(void) {
 
-/*        // Store the sensor time series data generated by the
+        // Store the sensor time series data generated by the
         // two controllers.
 
         MATRIX *timeSeries = taskEnvironments[0]->Get_Sensor_Data();
@@ -1620,12 +1638,12 @@ void ENVS::TAU_Store_Sensor_Data(void) {
 
         tau->Controller_Second_Store_Sensor_Data(timeSeries);
 
-        timeSeries = NULL;*/
+        timeSeries = NULL;
 }
 
 void ENVS::TAU_Store_User_Preference(void) {
 
-/*	char fileName[100];
+	char fileName[100];
 	client->prefFileName(fileName);
 
 	ofstream *outFile = new ofstream(fileName);
@@ -1649,7 +1667,6 @@ void ENVS::TAU_Store_User_Preference(void) {
 	outFile->close();
 	delete outFile;
 	outFile = NULL;
-*/
 }
 
 void ENVS::Video_Start(void) {

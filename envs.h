@@ -23,7 +23,7 @@ public:
 	int numberOfEnvs;
 	ENVIRONMENT **taskEnvironments;
 	OPTIMIZER   *optimizer;
-//	TAU *tau;
+	TAU *tau;
 	TAUS *taus;
 	int recordingVideo;
 	int speed;
@@ -156,7 +156,7 @@ private:
 	int  Target_Sensor_Values_Recorded(void);
 //	void TAU_Get_Controllers_From_Optimizer(void);
 	void TAU_Load_Controller_Pair(ifstream *inFile); // CLIENT code - old-style tau kept
-	void TAU_Reset_User_Models(void);
+//	void TAU_Reset_User_Models(void);
 	void TAU_Save_Controller_Pair(int pid, ofstream *outFile);
 	void TAU_Send_Controllers_For_Evaluation(dWorldID world, dSpaceID space); // CLIENT code - old-style tau kept
 	void TAU_Store_Sensor_Data(void); // CLIENT code - old-style tau kept

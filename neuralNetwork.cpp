@@ -304,9 +304,9 @@ int  NEURAL_NETWORK::Is_The_Same_As(NEURAL_NETWORK *other) {
 
 double NEURAL_NETWORK::Min_Distance_To(int numControllers, NEURAL_NETWORK **controllers) {
 
-	int closestControllerIndex;
+//	int closestControllerIndex;
 	double minDistance = 1000.0;
-	NEURAL_NETWORK *closestController = NULL;
+//	NEURAL_NETWORK *closestController = NULL;
 
 	for (int i=0; i<numControllers; i++) {
 
@@ -327,11 +327,11 @@ double NEURAL_NETWORK::Min_Distance_To(int numControllers, NEURAL_NETWORK **cont
 			currDistance = currDistance/6.0;
 
 			if ( currDistance < minDistance ) {
-				
+
 				minDistance = currDistance;
-				closestControllerIndex = i;
-				closestController = controllers[i];
-			}	
+	//			closestControllerIndex = i;
+	//			closestController = controllers[i];
+			}
 		}
 	}
 

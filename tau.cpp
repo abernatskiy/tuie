@@ -79,7 +79,7 @@ TAU::~TAU(void) {
 				controllers[i] = NULL;
 			}
 		}
-		delete controllers;
+		delete [] controllers;
 		controllers = NULL;
 	}
 
@@ -177,8 +177,10 @@ void TAU::Controllers_Load_Pair(ifstream *inFile) {
 	int numControllers = 2;
 	controllers = new NEURAL_NETWORK * [numControllers];
 
-	for (int i=0; i<numControllers; i++)
+	for (int i=0; i<numControllers; i++) {
 		controllers[i] = new NEURAL_NETWORK(inFile);
+		printf("CLIENT: TAU: 0th controller loaded successfully, ID %d\n", controllers[i]->ID);
+	}
 
 	firstControllerIndex = 0;
 	secondControllerIndex = 1;

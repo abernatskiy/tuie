@@ -176,7 +176,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_First(void) {
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different(int numControllers, NEURAL_NETWORK **controllers) {
 
-	int chosenGenomeIndex;
+//	int chosenGenomeIndex;
 	NEURAL_NETWORK *chosenGenome = NULL;
 	double maxDistance = -1000.0;
 
@@ -189,23 +189,21 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different(int numControllers, NEURAL_
 
 			if ( currDistance > maxDistance ) {
 				maxDistance = currDistance;
-				chosenGenomeIndex = i;
+//				chosenGenomeIndex = i;
 				chosenGenome = genomes[i];
 			}
 		}
 	}
 
 	if ( !chosenGenome )
-	
 		return( controllers[0] );
-
 	else
 		return( chosenGenome );
 }
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers) {
 
-        int chosenGenomeIndex;
+//        int chosenGenomeIndex;
         NEURAL_NETWORK *chosenGenome = NULL;
         double maxDistance = -1000.0;
 
@@ -219,7 +217,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thi
 
                         if ( currDistance > maxDistance ) {
                                 maxDistance = currDistance;
-                                chosenGenomeIndex = i;
+//                                chosenGenomeIndex = i;
                                 chosenGenome = genomes[i];
                         }
                 }
