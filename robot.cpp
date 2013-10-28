@@ -696,15 +696,15 @@ void ROBOT::Mark_Component(void) {
 
 double ROBOT::Preference_Get(ROBOT *otherRobot) {
 
-        double pos0 = neuralNetwork->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),11);
-        double pos1 = neuralNetwork->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),12);
+	double pos0 = neuralNetwork->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),11);
+	double pos1 = neuralNetwork->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),12);
 
-        double xDiff = fabs(pos0-(+4.50));
-        double yDiff = fabs(pos1-(+3.00));
+	double xDiff = fabs(pos0-(+4.50));
+	double yDiff = fabs(pos1-(+3.00));
 
-        double halfway = (xDiff+yDiff)/2.0;
+	double halfway = (xDiff+yDiff)/2.0;
 
-       	return( -halfway );
+	return( -halfway );
 }
 
 double ROBOT::Sensor_Sum(void) {

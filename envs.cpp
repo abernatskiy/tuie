@@ -774,16 +774,16 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 	else {
 
 		// mmm Modification to allow for automated preferences.
-		// TAU_User_Has_Indicated_A_Preference(world,space);
+		TAU_User_Has_Indicated_A_Preference(world,space);
 
 		// mmm Modification to allow for automated preferences.
 		//TAU_Store_Sensor_Data();
 
-		Destroy_Simulated_Objects();
+//		Destroy_Simulated_Objects();
 
-		tau->timer=0;
+//		tau->timer=0;
 
-		TAU_Send_Controllers_For_Evaluation(world, space);
+//		TAU_Send_Controllers_For_Evaluation(world, space);
 	}
 }
 
@@ -907,7 +907,7 @@ int ENVS::Check_For_Pref(void) {
 	printf("Feeding the obtained preferences to TAU:\n");
 	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in taus
 //		if( server->clientList[i] != server->curPrefTable[i][0] ) printf("WARNING! There used to be off by 1 error here.\n");
-		taus->storePref( server->curPrefTable[i][0],
+		taus->storePref( server->curPrefTable[i][0], // PID
 										server->curPrefTable[i][1], // ID of the first controller as read by server->updatePreferences()
 										server->curPrefTable[i][2], // ID of the second controller
 										server->curPrefTable[i][3] ); // user preference
@@ -1656,16 +1656,17 @@ void ENVS::TAU_Store_User_Preference(void) {
 	(*outFile) << tau->controllers[0]->ID << " ";
 	(*outFile) << tau->controllers[1]->ID << " ";
 
-  // mmm Get an automated preference, rather than one from the human user.
-	//
-  //      double prefFirst  = taskEnvironments[0]->robots[0]->Preference_Get(taskEnvironments[0]->robots[1],2);
-  //     double prefSecond = taskEnvironments[1]->robots[0]->Preference_Get(taskEnvironments[0]->robots[1],2);
-	//
-  //      if ( prefFirst > prefSecond )
-  //      	(*outFile) << "0";
-  //      else
-  //      	(*outFile) << "1";
-	//
+	// SURROGATE USER
+	// mmm Get an automated preference, rather than one from the human user.
+
+	double prefFirst  = taskEnvironments[0]->robots[0]->Preference_Get(NULL);
+	double prefSecond = taskEnvironments[1]->robots[0]->Preference_Get(NULL);
+
+	if ( prefFirst > prefSecond )
+		(*outFile) << "0";
+	else
+		(*outFile) << "1";
+
 	// mmm
 	(*outFile) << activeEnvironment;
 
