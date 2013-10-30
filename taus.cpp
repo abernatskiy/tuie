@@ -6,6 +6,7 @@
 #include "taus.h"
 
 extern double TAU_NO_SCORE;
+extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
 
 TAUS::TAUS(void) {
 
@@ -40,31 +41,46 @@ void TAUS::save(ofstream* outFile) {
 
 double TAUS::score(NEURAL_NETWORK* genome) {
 
-	if( tau[0]->Ready_To_Predict() && tau[1]->Ready_To_Predict() ) {
-		if( tau[0]->Model_Error() > tau[2]->Model_Error() &&
-				tau[1]->Model_Error() > tau[2]->Model_Error() &&
-				tau[2]->Ready_To_Predict() ) {
+	double score[3];
+	double error[3];
+	bool ready[3];
+
+	for(int i=0; i<3; i++) {
+		ready[i] = tau[i]->Ready_To_Predict();
+		if( ready[i] ) {
+			score[i] = tau[i]->Score_Predict(genome);
+			error[i] = tau[i]->Model_Error();
+		}
+		else {
+			score[i] = TAU_NO_SCORE;
+			error[i] = TAU_OPTIMIZER_ERROR_UNDEFINED;
+		}
+	}
+
+	if( ready[0] && ready[1] ) {
+		if( ready[2] &&
+				error[0] > error[2] &&
+				error[1] > error[2] ) {
 			typeOfLastScore = 4;
-			return tau[2]->Score_Predict(genome);
+			return score[2];
 		}
 		else {
 			typeOfLastScore = 3;
-			return fmax( tau[0]->Score_Predict(genome),
-									tau[1]->Score_Predict(genome) );
+			return fmax( score[0], score[1] );
 		}
 	}
 	else {
-		if(tau[0]->Ready_To_Predict()) {
+		if(ready[0]) {
 			typeOfLastScore = 1;
-			return tau[0]->Score_Predict(genome);
+			return score[0];
 		}
-		if(tau[1]->Ready_To_Predict()) {
+		if(ready[1]) {
 			typeOfLastScore = 2;
-			return tau[1]->Score_Predict(genome);
+			return score[1];
 		}
-		if(tau[2]->Ready_To_Predict()) {
+		if(ready[2]) {
 			typeOfLastScore = 5;
-			return tau[2]->Score_Predict(genome);
+			return score[2];
 		}
 		typeOfLastScore = -1;
 		return TAU_NO_SCORE;

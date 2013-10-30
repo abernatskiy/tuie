@@ -68,6 +68,13 @@ int TAU_OPTIMIZER::Ready_To_Predict(void) {
 	return false;
 }
 
+double TAU_OPTIMIZER::Model_Error(void) {
+
+	if( model != NULL)
+		return modelError;
+	return TAU_OPTIMIZER_ERROR_UNDEFINED;
+}
+
 void TAU_OPTIMIZER::Save(ofstream *outFile) {
 
 	if ( model ) {

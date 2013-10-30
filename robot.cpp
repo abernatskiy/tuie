@@ -1317,7 +1317,6 @@ void ROBOT::Neural_Network_Set_Sensors(void) {
 			if ( objects[i]->lightSensor ) {
 
 				sensorValue = objects[i]->lightSensor->Get_Value();
-				
 				neuralNetwork->Sensor_Set(sensorIndex,sensorValue);
 
 				sensorIndex++;
@@ -1342,8 +1341,8 @@ void ROBOT::Neural_Network_Set_Sensors(void) {
 	// Store the position of the robot's main body.
 	const dReal *pos = dBodyGetPosition(objects[1]->body);
 	neuralNetwork->Sensor_Set(sensorIndex++,pos[0]);
-	neuralNetwork->Sensor_Set(sensorIndex++,pos[1]);	
-        neuralNetwork->Sensor_Set(sensorIndex++,pos[2]);       
+	neuralNetwork->Sensor_Set(sensorIndex++,pos[1]);
+        neuralNetwork->Sensor_Set(sensorIndex++,pos[2]);
 
 /*
 	for (int j=1;	j<numJoints;	j++) {

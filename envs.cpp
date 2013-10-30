@@ -534,6 +534,8 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
+	speed = 3;
+
 	simulateMode = MODE_SIMULATE_TAU;
 
 	// In TAU mode, there are always two environments;
@@ -1668,7 +1670,7 @@ void ENVS::TAU_Store_User_Preference(void) {
 		(*outFile) << "1";
 
 	// mmm
-	(*outFile) << activeEnvironment;
+//	(*outFile) << activeEnvironment;
 
 	outFile->close();
 	delete outFile;

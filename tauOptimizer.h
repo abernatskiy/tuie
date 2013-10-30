@@ -18,7 +18,7 @@ public:
 	void   Optimize(int numControllers, NEURAL_NETWORK **controllers);
 	void   Print_Predictions(USER_MODEL *model, int numControllers, NEURAL_NETWORK **controllers);
 	int    Ready_To_Predict(void);
-	double Model_Error(void) {return modelError;}
+	double Model_Error(void);
 	void   Save(ofstream *outFile);
 	double Score_Predict( NEURAL_NETWORK *neuralNetwork);
 	double Score_Predict1(NEURAL_NETWORK *neuralNetwork);
