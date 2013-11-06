@@ -104,7 +104,9 @@ bool TAUS::readyToPredict(void) {
 void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 
 	int idx = indexByPID(pid);
+	printf("TAUS: feeding %d %d %d to tau[%d]\n", firstID, secondID, pref, idx);
 	tau[idx]->Store_Pref(firstID, secondID, pref);
+	printf("TAUS: feeding %d %d %d to the common TAU\n", firstID, secondID, pref);
 	tau[2]->Store_Pref(firstID, secondID, pref);
 }
 

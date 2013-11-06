@@ -70,11 +70,11 @@ public:
 	void		Save(ofstream *outFile);
 	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
 //	void		User_Models_Reset(void); // never really called
-  void    Controller_Store(NEURAL_NETWORK *newController);
+  void    Controller_Store(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] unconditionally
 
 private:
-	void  Controller_First_Preferred(void);  // these two functions are called only from
-	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)
+//	void  Controller_First_Preferred(void);  // these two functions are called only from
+//	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)
 
 	void		Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData);
   int     Controllers_Available_For_Optimization(void); // returns no of controllers with available scores and sensor data

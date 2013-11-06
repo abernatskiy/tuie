@@ -72,9 +72,11 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 			for (int k=0;k<=10;k=k+2) {
 				//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
 				in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+//				in[m] = 0;
 				m++;
 			}
-			in[m] = 1.0; // Bias node
+			in[m] = 1.0; // Bias node, in[6]
+//			in[5] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 10);
 
 			target[0] = score;
 
@@ -82,7 +84,8 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
 			scorePrediction = ANN->Out(0); // raw, unbiased prediction
 
-			totalError = totalError + fabs(score-scorePrediction);
+			if( j == TAU_BACK_PROP_TRAINING_ITERATIONS-1)
+				totalError = totalError + fabs(score-scorePrediction);
 
 			sensorTimeSeries = NULL;
 		}

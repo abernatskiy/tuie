@@ -102,26 +102,14 @@ int  TAU::All_Required_Preferences_Supplied(void) {
 		return( false );
 }
 
-void TAU::Controller_First_Preferred(void) {
-
-	// Fill the row corresponding to the winner with +1 values.
-	for (int j=0;j<numControllers;j++)
-		if (	(preferences->Get(firstControllerIndex,j)==0) &&
-			(j != firstControllerIndex) )
-			preferences->Set(firstControllerIndex,j,+1.0);
-
-	// Fill the column corresponding to the winner with -1 values.
-	for (int i=0;i<numControllers;i++)
-		if (	(preferences->Get(i,firstControllerIndex)==0) &&
-			(i != firstControllerIndex) )
-			preferences->Set(i,firstControllerIndex,-1.0);
-
-	Scores_Update();
-}
-
 void TAU::Controller_First_Store_Sensor_Data(MATRIX *sensorData) {
 
 	Controller_Store_Sensor_Data(firstControllerIndex,sensorData);
+}
+
+void TAU::Controller_Second_Store_Sensor_Data(MATRIX *sensorData) {
+
+  Controller_Store_Sensor_Data(secondControllerIndex,sensorData);
 }
 
 NEURAL_NETWORK *TAU::Controller_Get_Best(void) {
@@ -148,28 +136,6 @@ NEURAL_NETWORK *TAU::Controller_Pair_Get_Second(void) {
 
 	// Get the second of the two controllers about to be evaluated.
 	return( controllers[secondControllerIndex] );
-}
-
-void TAU::Controller_Second_Preferred(void) {
-
-        // Fill the row corresponding to the winner with +1 values.
-        for (int j=0;j<numControllers;j++)
-                if (    (preferences->Get(secondControllerIndex,j)==0) &&
-                        (j != secondControllerIndex) )
-                        preferences->Set(secondControllerIndex,j,+1.0);
-
-        // Fill the column corresponding to the winner with -1 values.
-        for (int i=0;i<numControllers;i++)
-                if (    (preferences->Get(i,secondControllerIndex)==0) &&
-                        (i != secondControllerIndex) )
-                        preferences->Set(i,secondControllerIndex,-1.0);
-
-        Scores_Update();
-}
-
-void TAU::Controller_Second_Store_Sensor_Data(MATRIX *sensorData) {
-
-        Controller_Store_Sensor_Data(secondControllerIndex,sensorData);
 }
 
 void TAU::Controllers_Load_Pair(ifstream *inFile) {
@@ -302,10 +268,53 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 	firstControllerIndex = Find_Index(firstID);
 	secondControllerIndex = Find_Index(secondID);
 
-	if ( pref==0 )
-		Controller_First_Preferred();
-	else
-		Controller_Second_Preferred();
+	// print out the entire situation for debug
+	printf("TAU::Store_Pref: storing preference %d(%d) %d(%d) %d into the following preference matrix:\n", firstControllerIndex, firstID,
+		secondControllerIndex, secondID, pref);
+	preferences->Print(2);
+	printf("TAU::Store_Pref: listing of all familiar controllers:\n");
+	for( int j=0; j<numControllers; j++ )
+		printf("%d\t%d\t%le\n", j, controllers[j]->ID, controllers[j]->Score_Get());
+	printf("\n");
+
+	// baseline algorithm - won't work unless controllers are fed into it in correct order
+	// common tau breaks the correct order
+	int newbieIdx, seniorIdx;
+	bool newbiePreferred;
+
+	if( firstControllerIndex == numControllers-1 ) {
+		newbieIdx = firstControllerIndex;
+		seniorIdx = secondControllerIndex;
+		newbiePreferred = (pref == 0);
+	}
+	else if( secondControllerIndex == numControllers-1 ) {
+		newbieIdx = secondControllerIndex;
+		seniorIdx = firstControllerIndex;
+		newbiePreferred = (pref != 0);
+	}
+	else {
+		printf("TAU::Store_Pref: preference table filling error - exiting.\n");
+		exit(1);
+	}
+
+	double seniorScore = controllers[seniorIdx]->Score_Get();
+
+	for( int j=0; j<numControllers-1; j++ ) {
+		if(	preferences->Get(newbieIdx, j) == 0 ) {
+			if( newbiePreferred &&
+					controllers[j]->Score_Get() <= seniorScore ) {
+				preferences->Set(newbieIdx, j, +1.0);
+				preferences->Set(j, newbieIdx, -1.0);
+			}
+			if( (!newbiePreferred) &&
+					controllers[j]->Score_Get() >= seniorScore ) {
+				preferences->Set(newbieIdx, j, -1.0);
+				preferences->Set(j, newbieIdx, +1.0);
+			}
+		}
+	}
+
+	Scores_Update();
 }
 
 /*
@@ -317,13 +326,17 @@ void TAU::User_Models_Reset(void) {
 
 void TAU::Controller_Store(NEURAL_NETWORK *newController) {
 
-        if ( !controllers )
-                Storage_Initialize();
-        else
-                Storage_Expand();
+	if ( !controllers )
+		Storage_Initialize();
+  else {
+		for( int i=0; i<numControllers; i++ ) {
+			if( newController->ID == controllers[i]->ID )
+				return;
+		}
+		Storage_Expand();
+	}
 
-        controllers[numControllers] = new NEURAL_NETWORK(newController);
-
+	controllers[numControllers] = new NEURAL_NETWORK(newController);
 	controllers[numControllers]->fitness = newController->fitness;
 	controllers[numControllers]->sensorTimeSeries = new MATRIX(newController->sensorTimeSeries);
 	controllers[numControllers]->score = TAU_NO_SCORE; // !!!!
@@ -415,21 +428,19 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 
 		double bestScore = -1000.0;
 
-		for (int i=0;i<numControllers;i++)
-
+		for (int i=0;i<numControllers;i++) {
 			if ( controllers[i]->Score_Get() > bestScore ) {
 
 				bestScore = controllers[i]->Score_Get();
 				firstControllerIndex = i;
 			}
+		}
 
 		// Choose second controller from optimizer.
 		if ( numControllers > 0 ) {
 
 			NEURAL_NETWORK *secondController = NULL;
-
 			if ( !tauOptimizer )
-
 				secondController = optimizer->Genome_Get_First();
 			else
 				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
@@ -439,8 +450,7 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 		}
 		else
 			Controller_Store( optimizer->Genome_Get_First() );
-
-                secondControllerIndex = numControllers-1;
+    secondControllerIndex = numControllers-1;
 }
 
 void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
@@ -468,30 +478,64 @@ void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
 void TAU::Controllers_Select_Two_From_TAU(void) {
 
 	// Choose the most recently-added controller.
-
 	secondControllerIndex = numControllers-1;
+	printf("\nTwo controllers from TAU requested\n");
+	printf("Second one is the recently added %d with %le score\n", controllers[secondControllerIndex]->ID, controllers[secondControllerIndex]->Score_Get());
+	printf("Hunting the first. Conditions:\n");
+	printf("\nidx\tscr\tprf\tid\n");
 
+	/**** Choose most information-rich comparison in dichotomic manner ****/
+	double left_ev		= INFINITY;				// min score among uncompared controllers
+	double right_ev		= (-1)*INFINITY;	// max score among uncompared controllers
+	double left_unev	= INFINITY;				// min score among compared controllers
+	double right_unev	= (-1)*INFINITY;	// max score among compared controllers
+	int left_unev_idx, right_unev_idx;
+	int num_unev			= 0;							// no of uncompared controllers
+	double curscore;
 
-	// Choose best controller from TAU.
+	// make a pass through the corresponding row in preferences matrix and calculate all values above
+	for( int i=0; i<numControllers-1; i++ ) {
+		curscore = controllers[i]->Score_Get();
+		printf("%d\t%le\t%lf\t%d\n", i, curscore, preferences->Get(i,secondControllerIndex), controllers[i]->ID);
+		if( preferences->Get(i,secondControllerIndex) == 0 ) {
+			if( curscore < left_unev ) {
+				left_unev = curscore;
+				left_unev_idx = i;
+			}
+			if( curscore > right_unev ) {
+				right_unev = curscore;
+				right_unev_idx = i;
+			}
+			num_unev++;
+		}
+		else {
+			if( curscore < left_ev ) left_ev = curscore;
+			if( curscore > right_ev ) right_ev = curscore;
+		}
+	}
 
-	double bestScore = -1000.0;
+	printf("Found bounds: [(%le, %d) .. (%le, %d)] unevaluated, [%le .. %le] evaluated.\n", left_unev, left_unev_idx, right_unev, right_unev_idx, left_ev, right_ev);
 
-	for (int i=0;i<numControllers-1;i++)
+	// find a sensible comparison
+	// if the newbie wasn't compared agains the best or the worst controller of TAU, do that immediately
+	if( right_unev > right_ev )
+		firstControllerIndex = right_unev_idx;
+	else if( left_unev < left_unev )
+		firstControllerIndex = left_unev_idx;
+	// if the newbie is somewhere in between, hunt it dichotomically
+	num_unev /= 2;
+	for( int i=0; i<numControllers-1; i++ ) {
+		if( preferences->Get(i,secondControllerIndex) == 0 ) {
+			num_unev -= 1;
+			if( num_unev < 0 )
+				firstControllerIndex = i;
+		}
+	}
 
-		// Find the best controller...
-		if (	(controllers[i]->Score_Get() > bestScore) &&
-
-			// ...that hasn't yet been evaluated against
-			// the new controller.
-
-			(preferences->Get(i,secondControllerIndex)==0) ) {
-
-                	bestScore = controllers[i]->Score_Get();
-                        firstControllerIndex = i;
-                }
+	printf("Decision: %d with id %d, score %le\n\n", firstControllerIndex, controllers[firstControllerIndex]->ID, controllers[firstControllerIndex]->Score_Get());
 }
 
-int  TAU::Find_Index(int ID) {
+int TAU::Find_Index(int ID) {
 
 	for (int i=0; i<numControllers; i++)
 		if ( controllers[i]->ID == ID )
