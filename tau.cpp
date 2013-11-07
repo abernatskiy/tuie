@@ -275,50 +275,50 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 	printf("TAU::Store_Pref: listing of all familiar controllers:\n");
 	for( int j=0; j<numControllers; j++ )
 		printf("%d\t%d\t%le\n", j, controllers[j]->ID, controllers[j]->Score_Get());
-	printf("\n");
+//	printf("\n");
 
-	// baseline algorithm - won't work unless controllers are fed into it in correct order
-	// common tau breaks the correct order
-	int newbieIdx, seniorIdx;
-	bool newbiePreferred;
+	// compressing 3 arguments into two to simplify the code
+	int winnerIndex = (pref == 0) ? firstControllerIndex : secondControllerIndex;
+	int loserIndex = (pref != 0) ? firstControllerIndex : secondControllerIndex;
 
-	if( firstControllerIndex == numControllers-1 ) {
-		newbieIdx = firstControllerIndex;
-		seniorIdx = secondControllerIndex;
-		newbiePreferred = (pref == 0);
-	}
-	else if( secondControllerIndex == numControllers-1 ) {
-		newbieIdx = secondControllerIndex;
-		seniorIdx = firstControllerIndex;
-		newbiePreferred = (pref != 0);
-	}
-	else {
-		printf("TAU::Store_Pref: preference table filling error - exiting.\n");
-		exit(1);
-	}
+	// obtaining some scores in advance to optimize things a bit
+	double winnerScore = controllers[winnerIndex]->Score_Get();
+	double loserScore = controllers[loserIndex]->Score_Get();
+	double currentScore;
 
-	double seniorScore = controllers[seniorIdx]->Score_Get();
+	// table filling itself
+	preferences->SetAntiSymm(winnerIndex, loserIndex, 1.0);
+	for( int j=0; j<numControllers; j++ ) {
+		currentScore = controllers[j]->Score_Get();
+		if( currentScore == TAU_NO_SCORE )
+			continue;
 
-	for( int j=0; j<numControllers-1; j++ ) {
-		if(	preferences->Get(newbieIdx, j) == 0 ) {
-			if( newbiePreferred &&
-					controllers[j]->Score_Get() <= seniorScore ) {
-				preferences->Set(newbieIdx, j, +1.0);
-				preferences->Set(j, newbieIdx, -1.0);
-			}
-			if( (!newbiePreferred) &&
-					controllers[j]->Score_Get() >= seniorScore ) {
-				preferences->Set(newbieIdx, j, -1.0);
-				preferences->Set(j, newbieIdx, +1.0);
-			}
+		if( loserScore != TAU_NO_SCORE &&
+				currentScore <= loserScore ) {
+			if( preferences->Get(winnerIndex, j) == 0.0 )
+				preferences->SetAntiSymm(winnerIndex, j, 1.0);
+			else if( preferences->Get(winnerIndex, j) == -1.0 )
+				printf("TAU::Store_Pref: WARNING! Preferences may be insane\n");
+		}
+
+		if( winnerScore != TAU_NO_SCORE &&
+				currentScore >= winnerScore ) {
+			if( preferences->Get(loserIndex, j) == 0.0 )
+				preferences->SetAntiSymm(loserIndex, j, -1.0);
+			else if( preferences->Get(loserIndex, j) == 1.0 )
+				printf("TAU::Store_Pref: WARNING! Preferences may be insane\n");
 		}
 	}
 
+	printf("TAU::Store_Pref: Resulting matrix:\n");
+	preferences->Print(2);
+
+	printf("\n");
 	Scores_Update();
 }
 
 /*
-void TAU::User_Models_Reset(void) {
+void TAU::User_Models_Reset(vowid) {
 
 	if ( tauOptimizer )
 		tauOptimizer->User_Models_Reset(Controllers_Available_For_Optimization() ,controllers);
@@ -482,7 +482,7 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 	printf("\nTwo controllers from TAU requested\n");
 	printf("Second one is the recently added %d with %le score\n", controllers[secondControllerIndex]->ID, controllers[secondControllerIndex]->Score_Get());
 	printf("Hunting the first. Conditions:\n");
-	printf("\nidx\tscr\tprf\tid\n");
+	printf("\nidx\tscr\t\tprf\t\tid\n");
 
 	/**** Choose most information-rich comparison in dichotomic manner ****/
 	double left_ev		= INFINITY;				// min score among uncompared controllers
@@ -491,13 +491,14 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 	double right_unev	= (-1)*INFINITY;	// max score among compared controllers
 	int left_unev_idx, right_unev_idx;
 	int num_unev			= 0;							// no of uncompared controllers
+	double avg_unev		= 0;							// average score of nonevaluated controllers
 	double curscore;
 
 	// make a pass through the corresponding row in preferences matrix and calculate all values above
 	for( int i=0; i<numControllers-1; i++ ) {
 		curscore = controllers[i]->Score_Get();
-		printf("%d\t%le\t%lf\t%d\n", i, curscore, preferences->Get(i,secondControllerIndex), controllers[i]->ID);
-		if( preferences->Get(i,secondControllerIndex) == 0 ) {
+		printf("%d\t%le\t%lf\t%d\n", i, curscore, preferences->Get(secondControllerIndex, i), controllers[i]->ID);
+		if( preferences->Get(secondControllerIndex, i) == 0 ) {
 			if( curscore < left_unev ) {
 				left_unev = curscore;
 				left_unev_idx = i;
@@ -506,6 +507,7 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 				right_unev = curscore;
 				right_unev_idx = i;
 			}
+			avg_unev += curscore;
 			num_unev++;
 		}
 		else {
@@ -513,22 +515,32 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 			if( curscore > right_ev ) right_ev = curscore;
 		}
 	}
+	avg_unev /= ((double) num_unev);
 
-	printf("Found bounds: [(%le, %d) .. (%le, %d)] unevaluated, [%le .. %le] evaluated.\n", left_unev, left_unev_idx, right_unev, right_unev_idx, left_ev, right_ev);
+	printf("Found bounds: [(%le, %d) .. (%le, %d)] unevaluated (avg %le), [%le .. %le] evaluated.\n", left_unev, left_unev_idx, right_unev, right_unev_idx, avg_unev, left_ev, right_ev);
 
 	// find a sensible comparison
 	// if the newbie wasn't compared agains the best or the worst controller of TAU, do that immediately
 	if( right_unev > right_ev )
 		firstControllerIndex = right_unev_idx;
-	else if( left_unev < left_unev )
+	else if( left_unev < left_ev )
 		firstControllerIndex = left_unev_idx;
-	// if the newbie is somewhere in between, hunt it dichotomically
-	num_unev /= 2;
-	for( int i=0; i<numControllers-1; i++ ) {
-		if( preferences->Get(i,secondControllerIndex) == 0 ) {
-			num_unev -= 1;
-			if( num_unev < 0 )
+	else {	// if the newbie is somewhere in between, hunt it dichotomically
+/*		num_unev /= 2;
+		for( int i=0; i<numControllers-1; i++ ) {
+			if( preferences->Get(secondControllerIndex, i) == 0 ) {
+				num_unev -= 1;
+				if( num_unev < 0 )
+					firstControllerIndex = i;
+			}
+		}*/
+		double min_dist_to_avg = INFINITY;
+		for( int i=0; i<numControllers-1; i++ ) {
+			if( preferences->Get(secondControllerIndex, i) == 0 &&
+					fabs( controllers[i]->Score_Get() - avg_unev ) <= min_dist_to_avg ) {
+				min_dist_to_avg = fabs( controllers[i]->Score_Get() - avg_unev );
 				firstControllerIndex = i;
+			}
 		}
 	}
 

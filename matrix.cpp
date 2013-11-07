@@ -1449,6 +1449,16 @@ void MATRIX::Set(int i, int j, double val) {
 	vals[i*width + j] = val;
 }
 
+void MATRIX::SetAntiSymm(int i, int j, double val) {
+
+	if( i==j )
+		Set(i,j,0);
+	else {
+		Set(i,j,val);
+		Set(j,i,(-1)*val);
+	}
+}
+
 void MATRIX::SetAllTo(double val) {
 
 	for (int i=0;i<length;i++)

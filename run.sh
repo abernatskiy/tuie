@@ -1,4 +1,5 @@
 #!/bin/bash
-./M3 -cp &
-./M3 -null -r 20
+./runclient &
+./runclient &
+./M3 -null
 

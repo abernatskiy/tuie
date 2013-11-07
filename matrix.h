@@ -125,6 +125,7 @@ public:
 	int	 RowsEqual(void);
 	void	 SelectUniquelyFrom(int maxVal);
 	void	 Set(int i, int j, double val);
+	void	 SetAntiSymm(int i, int j, double val);
 	void	 SetAllTo(double val);
 	void     SetRow(int i, int val);
 	double   Size(void);
