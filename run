@@ -1,0 +1,6 @@
+#!/bin/bash
+./runclient &
+./runclient &
+./M3 -null
+
+#fff=2; sed -i -e "s/\(layerSizes\[1\] = \).*/\1${fff};/" userModel.cpp

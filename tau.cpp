@@ -94,7 +94,7 @@ TAU::~TAU(void) {
 	}
 }
 
-int  TAU::All_Required_Preferences_Supplied(void) {
+int TAU::All_Required_Preferences_Supplied(void) {
 
 	if ( preferences )
 		return( !preferences->ValFoundOffTheDiagonal(0.0) );
@@ -269,13 +269,13 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 	secondControllerIndex = Find_Index(secondID);
 
 	// print out the entire situation for debug
-	printf("TAU::Store_Pref: storing preference %d(%d) %d(%d) %d into the following preference matrix:\n", firstControllerIndex, firstID,
+/*	printf("TAU::Store_Pref: storing preference %d(%d) %d(%d) %d into the following preference matrix:\n", firstControllerIndex, firstID,
 		secondControllerIndex, secondID, pref);
 	preferences->Print(2);
 	printf("TAU::Store_Pref: listing of all familiar controllers:\n");
 	for( int j=0; j<numControllers; j++ )
 		printf("%d\t%d\t%le\n", j, controllers[j]->ID, controllers[j]->Score_Get());
-//	printf("\n");
+*/
 
 	// compressing 3 arguments into two to simplify the code
 	int winnerIndex = (pref == 0) ? firstControllerIndex : secondControllerIndex;
@@ -310,10 +310,10 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 		}
 	}
 
-	printf("TAU::Store_Pref: Resulting matrix:\n");
+/*	printf("TAU::Store_Pref: Resulting matrix:\n");
 	preferences->Print(2);
+	printf("\n");*/
 
-	printf("\n");
 	Scores_Update();
 }
 
@@ -479,10 +479,11 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 
 	// Choose the most recently-added controller.
 	secondControllerIndex = numControllers-1;
-	printf("\nTwo controllers from TAU requested\n");
+
+/*	printf("\nTwo controllers from TAU requested\n");
 	printf("Second one is the recently added %d with %le score\n", controllers[secondControllerIndex]->ID, controllers[secondControllerIndex]->Score_Get());
 	printf("Hunting the first. Conditions:\n");
-	printf("\nidx\tscr\t\tprf\t\tid\n");
+	printf("\nidx\tscr\t\tprf\t\tid\n");*/
 
 	/**** Choose most information-rich comparison in dichotomic manner ****/
 	double left_ev		= INFINITY;				// min score among uncompared controllers
@@ -497,7 +498,7 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 	// make a pass through the corresponding row in preferences matrix and calculate all values above
 	for( int i=0; i<numControllers-1; i++ ) {
 		curscore = controllers[i]->Score_Get();
-		printf("%d\t%le\t%lf\t%d\n", i, curscore, preferences->Get(secondControllerIndex, i), controllers[i]->ID);
+//		printf("%d\t%le\t%lf\t%d\n", i, curscore, preferences->Get(secondControllerIndex, i), controllers[i]->ID);
 		if( preferences->Get(secondControllerIndex, i) == 0 ) {
 			if( curscore < left_unev ) {
 				left_unev = curscore;
@@ -517,7 +518,7 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 	}
 	avg_unev /= ((double) num_unev);
 
-	printf("Found bounds: [(%le, %d) .. (%le, %d)] unevaluated (avg %le), [%le .. %le] evaluated.\n", left_unev, left_unev_idx, right_unev, right_unev_idx, avg_unev, left_ev, right_ev);
+//	printf("Found bounds: [(%le, %d) .. (%le, %d)] unevaluated (avg %le), [%le .. %le] evaluated.\n", left_unev, left_unev_idx, right_unev, right_unev_idx, avg_unev, left_ev, right_ev);
 
 	// find a sensible comparison
 	// if the newbie wasn't compared agains the best or the worst controller of TAU, do that immediately
@@ -526,14 +527,6 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 	else if( left_unev < left_ev )
 		firstControllerIndex = left_unev_idx;
 	else {	// if the newbie is somewhere in between, hunt it dichotomically
-/*		num_unev /= 2;
-		for( int i=0; i<numControllers-1; i++ ) {
-			if( preferences->Get(secondControllerIndex, i) == 0 ) {
-				num_unev -= 1;
-				if( num_unev < 0 )
-					firstControllerIndex = i;
-			}
-		}*/
 		double min_dist_to_avg = INFINITY;
 		for( int i=0; i<numControllers-1; i++ ) {
 			if( preferences->Get(secondControllerIndex, i) == 0 &&
@@ -544,7 +537,7 @@ void TAU::Controllers_Select_Two_From_TAU(void) {
 		}
 	}
 
-	printf("Decision: %d with id %d, score %le\n\n", firstControllerIndex, controllers[firstControllerIndex]->ID, controllers[firstControllerIndex]->Score_Get());
+//	printf("Decision: %d with id %d, score %le\n\n", firstControllerIndex, controllers[firstControllerIndex]->ID, controllers[firstControllerIndex]->Score_Get());
 }
 
 int TAU::Find_Index(int ID) {

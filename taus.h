@@ -30,7 +30,7 @@ public:
 												// 3	max(score(tau[0]), score(tau[1]))
 												// 4	score from common tau (tau[2])
 												// 5	score from common tau, when other taus are not functional
-	void writeScoreType(void);
+	void writeScoreType(int generation);
 
 private:
 	int indexByPID(int pid);

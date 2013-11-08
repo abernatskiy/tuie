@@ -399,11 +399,14 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		if( taus->readyToPredict() ) {
 			if( Check_For_Pref() == 0 ) {
 				Rescore_Population();
-				taus->writeScoreType();
+
+				taus->writeScoreType(optimizer->generation);
+				Write_Log_Record();
+
 				optimizer->Generation_Create_Next();
 				Create_Robot_To_Evaluate(world, space);
-				Save_All_Pairs_For_Pref();
 			}
+			Save_All_Pairs_For_Pref();
 		}
 		else {
 		// Generation scoring check here, and Genomes_All_Scored() is not waht you're looking for
@@ -873,6 +876,13 @@ void ENVS::Viewpoint_Get(void) {
 
 	printf("%3.3f %3.3f %3.3f %3.3f %3.3f %3.3f\n",
 		xyz[0],xyz[1],xyz[2],hpr[0],hpr[1],hpr[2]);
+}
+
+void ENVS::Write_Log_Record(void) {
+
+	FILE* outFile = fopen("SavedFiles/summary.log", "a");
+	fprintf(outFile, "%d\t%le\t%le\t%d\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age);
+	fclose(outFile);
 }
 
 // ---------------- Private methods -------------------

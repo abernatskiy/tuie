@@ -87,10 +87,10 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 	}
 }
 
-void TAUS::writeScoreType(void) {
+void TAUS::writeScoreType(int generation) {
 
 	FILE* outFile = fopen("SavedFiles/score_type.log", "a");
-	fprintf(outFile, "%le\t%le\t%le\t%d\n", tau[0]->Model_Error(), tau[1]->Model_Error(), tau[2]->Model_Error(), typeOfLastScore);
+	fprintf(outFile, "%d\t%le\t%le\t%le\t%d\n", generation, tau[0]->Model_Error(), tau[1]->Model_Error(), tau[2]->Model_Error(), typeOfLastScore);
 	fclose(outFile);
 }
 

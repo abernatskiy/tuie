@@ -103,6 +103,7 @@ public:
 	void Video_Record(void);
 	void Video_Start_Stop(void);
 	void Viewpoint_Get(void);
+	void Write_Log_Record(void);
 
 private:
 	void Activate_All(void);
