@@ -1,6 +1,67 @@
 #!/bin/bash
-./runclient &
-./runclient &
-./M3 -null
 
-#fff=2; sed -i -e "s/\(layerSizes\[1\] = \).*/\1${fff};/" userModel.cpp
+print_usage () {
+	echo "Usage:"
+	echo "  run [ <mode> [ <no_of_hidden_nodes> ] ]"
+	echo "where mode=0 runs interactive evolution with allied surrogate users"
+	echo "      mode=1 runs with opposing surrogate users"
+}
+
+OPPOSING_USERS=0
+HIDDEN_NODES=2
+
+# parsing arguments
+case $# in
+2)
+	case $2 in
+	0)
+		echo Zero hidden nodes makes no sense
+		print_usage
+		exit 1
+		;;
+	[0-9]*)
+		HIDDEN_NODES=$2
+		;;
+	*)
+		print_usage
+		exit 1
+		;;
+	esac
+	;&
+1)
+	case $1 in
+	0)
+		;;
+	1)
+		OPPOSING_USERS=1
+		;;
+	*)
+		print_usage
+		exit 1
+		;;
+	esac
+	;;
+0)
+	;;
+*)
+	print_usage
+	exit 1
+	;;
+esac
+
+# recompiling the code with appropriate no of hidden nodes
+sed -i -e "s/\(layerSizes\[1\] = \).*/\1${HIDDEN_NODES};/" userModel.cpp
+if [ $OPPOSING_USERS -eq 1 ]; then
+	make M3-opposing
+fi
+make -j4
+
+# running clients & server
+if [ $OPPOSING_USERS -eq 1 ]; then
+	./runclient 1 > /dev/null 2>&1 &
+else
+	./runclient > /dev/null 2>&1 &
+fi
+./runclient > /dev/null 2>&1 &
+./M3 -null > SavedFiles/server_output.log 2>&1 &
+

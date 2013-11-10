@@ -1,2 +1,8 @@
 #!/bin/bash
-optirun ./M3 -cp
+if [ $# -eq 1 ]; then
+	if [ $1 -eq 1 ]; then
+		optirun ./M3-opposing -cp
+	fi
+else
+	optirun ./M3 -cp
+fi

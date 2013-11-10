@@ -68,7 +68,7 @@ short SERVER::pairFileNameByPID(char* strspace, int pid) {
 
 int SERVER::updatePreferences(void) {
 
-	printf("SERVER: Trying to update preferences\n");
+//	printf("SERVER: Trying to update preferences\n");
 
 	resetPrefTable();
 	DIR* dir;
@@ -98,19 +98,19 @@ int SERVER::updatePreferences(void) {
 
 			sprintf(tmpFileName, "SavedFiles/%s", ent->d_name);
 
-			printf("SERVER: Trying to open %s\n", tmpFileName);
+//			printf("SERVER: Trying to open %s\n", tmpFileName);
 
-			if( file = fopen(tmpFileName, "r") )
-				printf("SERVER: file successfully opened\n");
-			else {
+			if( !(file = fopen(tmpFileName, "r")) ) {
 				printf("SERVER: can list file, but cannot open it. Exiting.\n");
 				exit(1);
 			}
+//			else
+//				printf("SERVER: file successfully opened\n");
 			fscanf(file, "%d %d %d", curRecord+1, curRecord+2, curRecord+3);
 			fclose(file);
 			deleteFile(tmpFileName);
 
-			printf("SERVER: file %s processed successfully.\n", tmpFileName);
+//			printf("SERVER: file %s processed successfully.\n", tmpFileName);
 
 			prefFiles++;
 		}

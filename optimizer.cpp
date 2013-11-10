@@ -207,9 +207,8 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thi
         NEURAL_NETWORK *chosenGenome = NULL;
         double maxDistance = -1000.0;
 
-        for (int i=0;i<AFPO_POP_SIZE;i++) {
-
-                if ( 	genomes[i]->evaluated && 
+	for (int i=0;i<AFPO_POP_SIZE;i++) {
+		if ( 	genomes[i]->evaluated && 
 			genomes[i]->sensorTimeSeries && 
 			(!genomes[i]->Is_The_Same_As(thisOne)) ) {
 
@@ -486,7 +485,7 @@ void OPTIMIZER::Generation_Create_Next() {
 
 	Genomes_Sort();
 
-	Print();
+//	Print();
 
 	Genomes_Delete_Dominated();
 

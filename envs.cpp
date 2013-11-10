@@ -109,6 +109,8 @@ ENVS::ENVS(int rs) {
 		system(command);
 		sprintf(command,"rm SavedFiles/score_type.log");
 		system(command);
+		sprintf(command,"rm SavedFiles/summary.log");
+		system(command);
 	}
 }
 
@@ -916,14 +918,14 @@ int ENVS::Check_For_Pref(void) {
 
 	int noOfPrefsFound = server->updatePreferences();
 
-	printf("Feeding the obtained preferences to TAU:\n");
+//	printf("Feeding the obtained preferences to TAU:\n");
 	for( int i=0; i < server->curNoOfClients; i++ ) { // for all client processes which updatePreferences() managed to find store prefs in taus
 //		if( server->clientList[i] != server->curPrefTable[i][0] ) printf("WARNING! There used to be off by 1 error here.\n");
 		taus->storePref( server->curPrefTable[i][0], // PID
 										server->curPrefTable[i][1], // ID of the first controller as read by server->updatePreferences()
 										server->curPrefTable[i][2], // ID of the second controller
 										server->curPrefTable[i][3] ); // user preference
-		printf("%d\t%d\t%d\t%d\n", server->curPrefTable[i][0], server->curPrefTable[i][1], server->curPrefTable[i][2], server->curPrefTable[i][3] );
+//		printf("%d\t%d\t%d\t%d\n", server->curPrefTable[i][0], server->curPrefTable[i][1], server->curPrefTable[i][2], server->curPrefTable[i][3] );
 //		Rescore_Population();
 	}
 
