@@ -2,11 +2,15 @@
 
 IFS=$'\n'
 for i in `seq -w 1 10`; do
-	./run 0 2;
+	rm SavedFiles/pair*.dat
+	rm SavedFiles/pref*.dat
+	rm SavedFiles/*.log
+	./run 0 3;
 	sleep 1h && killall M3 && sleep 5s;
+#	killall M3-opposing && sleep 5s;
 	if [ `ps aux | grep M3 | wc -l` -gt 1 ]; then
-		echo Sorry, I couldn't kill IT...
+		echo "Sorry, I couldn't kill IT..."
 		exit 1
 	fi
-	cp -a ./SavedFiles ./arch/tau2/$i
+	cp -a ./SavedFiles ./arch/tau3/$i
 done

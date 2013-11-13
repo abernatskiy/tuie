@@ -21,7 +21,7 @@ USER_MODEL::USER_MODEL(int numS) {
 	int *layerSizes = new int[3];
 
 	layerSizes[0] = 7*1;
-	layerSizes[1] = 2;
+	layerSizes[1] = 3;
 	layerSizes[2] = 1;
 
 	ANN = new CBackProp(3,layerSizes,0.1,0.1);
