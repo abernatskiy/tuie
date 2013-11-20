@@ -2,15 +2,23 @@
 
 RANK_REC::RANK_REC(int nid, double opinion0, double opinion1)
 {
-	if( (opinion0 != -1 && (opinion0 < 0.0 || opinion0 > 1.0)) ||
-			(opinion1 != -1 && (opinion1 < 0.0 || opinion1 > 1.0)) )
+	if( (opinion0 != UND_SCR && (opinion0 < 0.0 || opinion0 > 1.0)) ||
+			(opinion1 != UND_SCR && (opinion1 < 0.0 || opinion1 > 1.0)) )
 	{
+		printf("RANKINGS: id=%d, opinion0=%2.2f, opinion1=%2.2f\n", nid, opinion0, opinion1);
 		printf("RANKINGS: these kinds of opinions will not be tolerated\n");
 		exit(1);
 	}
 	id = nid;
 	opinions[0] = opinion0;
 	opinions[1] = opinion1;
+}
+
+RANK_REC::RANK_REC(RANK_REC* other)
+{
+	id = other->id;
+	opinions[0] = other->opinions[0];
+	opinions[1] = other->opinions[1];
 }
 
 int RANK_REC::src()
@@ -114,6 +122,8 @@ RANKING::RANKING(int space_req)
 RANKING::~RANKING()
 {
 	//! default destructor - frees the momory
+	for(int i=0; i<size; i++)
+		delete list[i];
 	delete [] list;
 }
 
@@ -219,7 +229,7 @@ void RANKING::autoInsert(RANK_REC* newSubj)
 	else if(constraints[0] == INT_MIN)
 		ins_idx = possible_indices[1]+1;
 	else
-		ins_idx = 1 + (possible_indices[0] + possible_indices[1])/2;
+		ins_idx = 1 + ((possible_indices[0] + possible_indices[1])/2);
 
 //	printf("Inserting to %d\n", ins_idx);
 
@@ -231,6 +241,26 @@ void RANKING::autoInsert(RANK_REC* newSubj)
 	delete [] constraints;
 }
 
+void RANKING::autoInsert(int id, double scr, int src)
+{
+	RANK_REC* rrec;
+
+	switch(src)
+	{
+	case 0:
+		rrec = new RANK_REC(id, scr, UND_SCR);
+		break;
+	case 1:
+		rrec = new RANK_REC(id, UND_SCR, scr);
+		break;
+	default:
+		printf("RANKINGS: src must be either 0 or 1\n");
+		exit(1);
+	}
+
+	autoInsert(rrec);
+}
+
 void RANKING::merge(RANKING* other)
 {
 	if(size + other->size > space)
@@ -239,8 +269,13 @@ void RANKING::merge(RANKING* other)
 		exit(1);
 	}
 
+	RANK_REC* rrec;
+
 	for(int i=0; i<(other->size); i++)
-		autoInsert(other->list[i]);
+	{
+		rrec = new RANK_REC(other->list[i]);
+		autoInsert(rrec);
+	}
 }
 
 int RANKING::conflicts()

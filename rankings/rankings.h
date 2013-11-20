@@ -13,6 +13,7 @@ public:
 	int id;
 	double opinions[2];
 
+	RANK_REC(RANK_REC* other);
 	RANK_REC(int id, double opinion1, double opinion2);
 	int src();
 	void print();
@@ -33,6 +34,7 @@ public:
 	void insert(RANK_REC* newSubj, int pos);
 	int* findConstraints(RANK_REC* newSubj);
 	void autoInsert(RANK_REC* newSubj);
+	void autoInsert(int id, double scr, int src);
 	void merge(RANKING* other); // heuristic merge - does not guarantee conflict no minimization
 	int conflicts();
 	int ambiguities();

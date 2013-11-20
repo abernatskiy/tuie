@@ -5,6 +5,7 @@
 #include "stdlib.h"
 #include "tau.h"
 #include "tauOptimizer.h"
+#include "rankings/rankings.h"
 
 extern double TAU_NO_SCORE;
 extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
@@ -28,10 +29,14 @@ TAU::TAU(void) {
 	scoreMin = +1000000.0;
 	scoreMax = -1000000.0;
 
+	commonTAU = false;
+
 	timer = 0;
 }
 
 TAU::TAU(ifstream *inFile) {
+
+	commonTAU = false;
 
 	(*inFile) >> numControllers;
 
@@ -68,6 +73,75 @@ TAU::TAU(ifstream *inFile) {
         (*inFile) >> nextControllerForTraining;
         (*inFile) >> scoreMin;
         (*inFile) >> scoreMax;
+}
+
+TAU::TAU(TAU* tau0, TAU* tau1) {
+
+	commonTAU = true;
+
+	RANKING* ranking0 = new RANKING(tau0->numControllers + tau1->numControllers);
+	RANKING* ranking1 = new RANKING(tau1->numControllers);
+
+	for(int i=0; i<tau0->numControllers; i++)
+		if(tau0->controllers[i]->Score_Get() != TAU_NO_SCORE)
+		{
+//			printf("TAU: Inserting an opinion from tau0: id=%d scr=%2.2f src=%d\n", tau0->controllers[i]->ID, tau0->controllers[i]->Score_Get(), 0);
+			ranking0->autoInsert(tau0->controllers[i]->ID, tau0->controllers[i]->Score_Get(), 0);
+		}
+	for(int i=0; i<tau1->numControllers; i++)
+		if(tau1->controllers[i]->Score_Get() != TAU_NO_SCORE)
+		{
+//			printf("TAU: Inserting an opinion from tau1: id=%d scr=%2.2f src=%d\n", tau1->controllers[i]->ID, tau1->controllers[i]->Score_Get(), 1);
+			ranking1->autoInsert(tau1->controllers[i]->ID, tau1->controllers[i]->Score_Get(), 1);
+		}
+
+	ranking0->merge(ranking1);
+	delete ranking1;
+
+	ranking0->print();
+	printf("TAU: Constructing common TAU. Conflicts: %d, ambiguities: %d\n\n", ranking0->conflicts(), ranking0->ambiguities());
+
+	ranking0->rescore();
+
+	numControllers = 0;
+	int curidx;
+	NEURAL_NETWORK* curctr;
+	controllers = NULL;
+	for(int i=0; i<ranking0->size; i++)
+	{
+		if(tau0->Find_Index(ranking0->list[i]->id) >= 0)
+		{
+			curidx = tau0->Find_Index(ranking0->list[i]->id);
+			curctr = tau0->controllers[curidx];
+		}
+		else if(tau1->Find_Index(ranking0->list[i]->id) >= 0)
+		{
+			curidx = tau1->Find_Index(ranking0->list[i]->id);
+			curctr = tau1->controllers[curidx];
+		}
+		else
+		{
+			printf("TAU: error - found an id in ranking which is not in either tau. Exiting.\n");
+			exit(1);
+		}
+
+		Controller_Store_Without_ID_Check(curctr);
+		controllers[i]->Score_Set(ranking0->list[i]->opinions[0]);
+	}
+
+	delete ranking0;
+
+	tauOptimizer = NULL;
+
+	scoreMin = 0.0;
+	scoreMax = 1.0;
+
+	// those are irrelevant to merged TAUs
+	preferences = NULL;
+	firstControllerIndex  = -1;
+	secondControllerIndex = -1;
+	timer = 0;
+	nextControllerForTraining = 0;
 }
 
 TAU::~TAU(void) {
@@ -326,15 +400,19 @@ void TAU::User_Models_Reset(vowid) {
 
 void TAU::Controller_Store(NEURAL_NETWORK *newController) {
 
+	for( int i=0; i<numControllers; i++ )
+		if( newController->ID == controllers[i]->ID )
+			return;
+
+	Controller_Store_Without_ID_Check(newController);
+}
+
+void TAU::Controller_Store_Without_ID_Check(NEURAL_NETWORK *newController) {
+
 	if ( !controllers )
 		Storage_Initialize();
-  else {
-		for( int i=0; i<numControllers; i++ ) {
-			if( newController->ID == controllers[i]->ID )
-				return;
-		}
+  else
 		Storage_Expand();
-	}
 
 	controllers[numControllers] = new NEURAL_NETWORK(newController);
 	controllers[numControllers]->fitness = newController->fitness;
@@ -545,8 +623,8 @@ int TAU::Find_Index(int ID) {
 	for (int i=0; i<numControllers; i++)
 		if ( controllers[i]->ID == ID )
 			return( i );
-	printf("TAU: cannot find index.\n");
-	exit(1);
+//	printf("TAU: cannot find index.\n");
+//	exit(1);
 	return -10000;
 }
 
@@ -579,6 +657,10 @@ void TAU::Preferences_Print(void) {
 }
 
 int  TAU::Ready_For_Optimization(void) {
+
+	// optimization can occur if TAU is a common TAU, obtained by merging
+	if ( commonTAU )
+		return true;
 
 	// If the user has not indicated any preferences yet,
 	// there is nothing to optimize.

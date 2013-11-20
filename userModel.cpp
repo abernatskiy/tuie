@@ -55,6 +55,7 @@ USER_MODEL::~USER_MODEL(void) {
 
 double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
+	printf("USER_MODEL: Evaluating %d controllers\n", numControllers);
 	double score, scorePrediction;
 	double totalError = 0.0;
 	double *in;

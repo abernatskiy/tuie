@@ -10,20 +10,27 @@
 class TAU {
 
 public:
-	int	timer;
+	int	timer; // used in CLIENT mode
 	int numControllers;
 	NEURAL_NETWORK **controllers;
 	MATRIX *preferences;
+
+	// used in CLIENT mode for addressing the controllers when starting simulation
+	// AND in SERVER mode when generating a new pair of controllers to send to the client
 	int		 firstControllerIndex;
 	int		 secondControllerIndex;
+
 	TAU_OPTIMIZER   *tauOptimizer;
 	int		 nextControllerForTraining;
 	double scoreMin;
 	double scoreMax;
 
+	bool commonTAU;
+
 public:
 	TAU(void);
 	TAU(ifstream *inFile);
+	TAU(TAU* tau0, TAU* tau1);
 	~TAU(void);
 
 	void	Store_Pref(int firstID, int secondID, int pref); // Is called from ENVS when reading preferences supplied by clients
@@ -70,7 +77,8 @@ public:
 	void		Save(ofstream *outFile);
 	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
 //	void		User_Models_Reset(void); // never really called
-  void    Controller_Store(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] unconditionally
+  void    Controller_Store(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] if there are none present with such ID
+  void    Controller_Store_Without_ID_Check(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] unconditionally
 
 private:
 //	void  Controller_First_Preferred(void);  // these two functions are called only from
