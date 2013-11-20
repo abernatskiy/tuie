@@ -696,6 +696,8 @@ void ROBOT::Mark_Component(void) {
 
 double ROBOT::Preference_Get(ROBOT *otherRobot) {
 
+	// essential function for SURROGATE USER mode
+
 	double pos0 = neuralNetwork->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),11);
 //	double pos1 = neuralNetwork->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),12);
 

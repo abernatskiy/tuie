@@ -17,17 +17,7 @@ extern int    TAU_BACK_PROP_TRAINING_ITERATIONS;
 USER_MODEL::USER_MODEL(int numS) {
 
 	numSensors = numS;
-
-	int *layerSizes = new int[3];
-
-	layerSizes[0] = 7*1;
-	layerSizes[1] = 3;
-	layerSizes[2] = 1;
-
-	ANN = new CBackProp(3,layerSizes,0.1,0.1);
-
-	delete [] layerSizes;
-	layerSizes = NULL;
+	Allocate_ANN();
 }
 
 USER_MODEL::USER_MODEL(ifstream *inFile) {
@@ -53,14 +43,31 @@ USER_MODEL::~USER_MODEL(void) {
 	}
 }
 
+void USER_MODEL::Allocate_ANN(void) {
+
+	int *layerSizes = new int[3];
+
+	layerSizes[0] = 7*1;
+	layerSizes[1] = 2;
+	layerSizes[2] = 1;
+
+	ANN = new CBackProp(3,layerSizes,0.1,0.1);
+
+	delete [] layerSizes;
+	layerSizes = NULL;
+}
+
 double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
-	printf("USER_MODEL: Evaluating %d controllers\n", numControllers);
+	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
 	double score, scorePrediction;
 	double totalError = 0.0;
 	double *in;
 	in = new double[7*1];
 	double *target = new double[1];
+
+	delete ANN;
+	Allocate_ANN();
 
 	for (int j=0; j<TAU_BACK_PROP_TRAINING_ITERATIONS; j++) {
 		for (int i=0;	i<numControllers;	i++) {
@@ -69,15 +76,21 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 //			int sensorRow;
 			score = controllers[i]->Score_Get();
 
-			int m=0;
-			for (int k=0;k<=10;k=k+2) {
-				//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
-				in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
-//				in[m] = 0;
-				m++;
-			}
-			in[m] = 1.0; // Bias node, in[6]
-//			in[5] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 10);
+//			int m=0;
+//			for (int k=0;k<=10;k=k+2) {
+//				//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
+//				in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+//				m++;
+//			}
+//			in[m] = 1.0; // Bias node, in[6]
+
+			in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
+			in[1] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 12);
+			in[2] = 0;
+			in[3] = 0;
+			in[4] = 0;
+			in[5] = 0;
+			in[6] = 1.0;
 
 			target[0] = score;
 

@@ -14,6 +14,7 @@ public:
 	USER_MODEL(int numS);
 	USER_MODEL(ifstream *inFile);
 	~USER_MODEL(void);
+	void Allocate_ANN(void);
 	double Evaluate(int numControllers, NEURAL_NETWORK **controllers); //backpropagates
 	double Predict(MATRIX *sensorTimeSeries);
 	void   Save(ofstream *outFile);
