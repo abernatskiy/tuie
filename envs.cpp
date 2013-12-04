@@ -780,6 +780,7 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 	// If the time limit for the robot pair has expired, replay it.
 	else {
 
+		// SURROGATE USER CODE
 		// mmm Modification to allow for automated preferences.
 		TAU_User_Has_Indicated_A_Preference(world,space);
 

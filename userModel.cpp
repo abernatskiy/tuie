@@ -45,13 +45,20 @@ USER_MODEL::~USER_MODEL(void) {
 
 void USER_MODEL::Allocate_ANN(void) {
 
-	int *layerSizes = new int[3];
+/*	int *layerSizes = new int[3];
 
-	layerSizes[0] = 7*1;
+	layerSizes[0] = 7;
 	layerSizes[1] = 2;
 	layerSizes[2] = 1;
 
-	ANN = new CBackProp(3,layerSizes,0.1,0.1);
+	ANN = new CBackProp(3,layerSizes,0.1,0.1);*/
+
+	int *layerSizes = new int[2];
+
+	layerSizes[0] = 1;
+	layerSizes[1] = 1;
+
+	ANN = new CBackProp(2,layerSizes,0.1,0.1);
 
 	delete [] layerSizes;
 	layerSizes = NULL;
@@ -62,9 +69,8 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
 	double score, scorePrediction;
 	double totalError = 0.0;
-	double *in;
-	in = new double[7*1];
-	double *target = new double[1];
+	double* in = new double[1];
+	double* target = new double[1];
 
 	delete ANN;
 	Allocate_ANN();
@@ -85,12 +91,12 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 //			in[m] = 1.0; // Bias node, in[6]
 
 			in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
-			in[1] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 12);
-			in[2] = 0;
-			in[3] = 0;
-			in[4] = 0;
-			in[5] = 0;
-			in[6] = 1.0;
+//			in[1] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 12);
+//			in[2] = 0;
+//			in[3] = 0;
+//			in[4] = 0;
+//			in[5] = 0;
+//			in[6] = 1.0;
 
 			target[0] = score;
 
@@ -100,6 +106,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
 			if( j == TAU_BACK_PROP_TRAINING_ITERATIONS-1)
 				totalError = totalError + fabs(score-scorePrediction);
+//				totalError += ANN->mse(target);
 
 			sensorTimeSeries = NULL;
 		}
@@ -115,15 +122,16 @@ double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
 
 //	int i;
 	double *in;
-	in = new double[7*1];
+	in = new double[1];
+	in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
 
-	int m=0;
+/*	int m=0;
 	for (int k=0;k<=10;k=k+2) {
 		//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
 		in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
 		m++;
   }
-	in[m] = 1.0; // Bias neuron
+	in[m] = 1.0; // Bias neuron*/
 
   ANN->ffwd(in);
 	delete [] in;

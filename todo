@@ -1,11 +1,28 @@
+-1001!. Sanity check
+-1000!. Examine bcppg directly
+-999!. Make it record relative intervals
+-100!. Ambiguity maximization
 1. \Theta trick for checking the properties of bcppg
-2. The n lg n Matrix optimization
-3. Examine bcppg directly
 4. Show that method converges correctly for approximate users
 5. (IMPORTANT) Add novely to pair generation algorithm
 
 --------------------------
+TOPICS
+
+Emergent mappings
+
+--------------------------
+INVESTIGATIONS
+
+Output learning gaps - are due to user indicating a new preference. For one run number of generations between surrogate user 
+preference indications was measured and turned out to be 8.51 on average with stddev of 0.82.
+
+--------------------------
 BUGS
+
+006 Client-server pair sometimes hangs - something writes tmp0.. file, then no deployment 
+happens. Evolution continues, and if you erase this file, it reappears. The fun part is 
+that the pairs are deployed just fine after I kill CLIENTS.
 
 RESOLVED - its actually a feature
 005 Client deletes pair0.dat upon exit.
