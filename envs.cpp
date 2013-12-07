@@ -367,10 +367,10 @@ void ENVS::Continue_Fitness_Calculation( dWorldID world, dSpaceID space ) {
 		if( controllerUnderEvaluation->ID != taskEnvironments[0]->robots[0]->neuralNetwork->ID || // purely debugging code
 				controllerUnderEvaluation->ID != optimizer->Genome_Get_Next_To_Evaluate()->ID) {
 
-			printf("Off by 1:\ncontrollerUnderEvaluation\t%x\t%d\ntaskEnvNN\t\t\t%x\t%d\noptimizer->GNTE\t\t\t%x\t%d\nExiting.\n",
-					controllerUnderEvaluation, controllerUnderEvaluation->ID,
-					taskEnvironments[0]->robots[0]->neuralNetwork, taskEnvironments[0]->robots[0]->neuralNetwork->ID,
-					optimizer->Genome_Get_Next_To_Evaluate(), optimizer->Genome_Get_Next_To_Evaluate()->ID);
+			printf("Off by 1:\ncontrollerUnderEvaluation\t%p\t%d\ntaskEnvNN\t\t\t%p\t%d\noptimizer->GNTE\t\t\t%p\t%d\nExiting.\n",
+					(void*) controllerUnderEvaluation, controllerUnderEvaluation->ID,
+					(void*) taskEnvironments[0]->robots[0]->neuralNetwork, taskEnvironments[0]->robots[0]->neuralNetwork->ID,
+					(void*) optimizer->Genome_Get_Next_To_Evaluate(), optimizer->Genome_Get_Next_To_Evaluate()->ID);
 			exit(1);
 		}
 		double fitness = taskEnvironments[0]->robots[0]->Fitness_Get(taskEnvironments[0]->robots[1]);
@@ -411,7 +411,7 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 			Save_All_Pairs_For_Pref();
 		}
 		else {
-		// Generation scoring check here, and Genomes_All_Scored() is not waht you're looking for
+		// Generation scoring check here, and Genomes_All_Scored() is not what you're looking for
 			Save_All_Pairs_For_Pref();
 			if( Check_For_Pref() == 0 )
 				usleep(100000);
@@ -1470,6 +1470,10 @@ void ENVS::Save(int showGraphics) {
 
 void ENVS::Save_Pair_For_Pref(int pid, char* fileName) {
 
+//	char strrr[200];
+//	server->tempFileName(strrr);
+//	printf("ENVS: reporting - I'm in server mode and temporary file name I'll use is %s\n", strrr);
+
 	char tmpfn[100];
 	server->tempFileName(tmpfn);
 
@@ -1662,6 +1666,12 @@ void ENVS::TAU_Store_Sensor_Data(void) {
 }
 
 void ENVS::TAU_Store_User_Preference(void) {
+
+	// CLIENT code
+
+//	char strrr[200];
+//	client->tempFileName(strrr);
+//	printf("ENVS: reporting - I'm in client mode and temporary file name I'll use is %s\n", strrr);
 
 	char tmpfn[100];
 	client->tempFileName(tmpfn);

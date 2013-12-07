@@ -109,16 +109,18 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 	int idx = indexByPID(pid);
 	printf("TAUS: feeding %d %d %d to tau[%d]\n", firstID, secondID, pref, idx);
 	tau[idx]->Store_Pref(firstID, secondID, pref);
+//	tau[idx]->Scores_Check();
 
 	int otherIdx = idx==0 ? 1 : 0;
-//	if(tau[otherIdx]->Ready_To_Predict())
-//	{
+	if(tau[otherIdx]->Ready_To_Predict())
+	{
 		printf("TAUS: merging individual TAUs to produce a common one\n");
+//		tau[otherIdx]->Scores_Check();
 		tau[2] = new TAU(tau[0], tau[1]);
 		// normally Optimize() function (which performs backpropagation) is called form Store_Pref, but it's never used on common TAU
 		// this is the reason why it is called here
 		tau[2]->Optimize();
-//	}
+	}
 
 //	printf("TAUS: feeding %d %d %d to the common TAU\n", firstID, secondID, pref);
 //	tau[2]->Store_Pref(firstID, secondID, pref);

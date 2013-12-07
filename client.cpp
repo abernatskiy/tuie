@@ -73,6 +73,7 @@ void CLIENT::tempFileName(char* strspace) {
 
 void CLIENT::deployPrefFile(void) {
 
+	printf("CLIENT: deployPrefFile() called\n");
 	char fn[100], command[200];
 	prefFileName(fn);
 	tempFileName(tmpFileName);

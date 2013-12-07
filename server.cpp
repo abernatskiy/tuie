@@ -126,6 +126,7 @@ void SERVER::tempFileName(char* strspace) {
 
 void SERVER::deployPairFile(int pid) {
 
+	printf("SERVER: deployPairFile() called\n");
 	char fn[100], command[200];
 	pairFileNameByPID(fn, pid);
 	tempFileName(tmpFileName);

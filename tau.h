@@ -80,6 +80,8 @@ public:
   void    Controller_Store(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] if there are none present with such ID
   void    Controller_Store_Without_ID_Check(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] unconditionally
 
+	void		Scores_Check(void);
+
 private:
 //	void  Controller_First_Preferred(void);  // these two functions are called only from
 //	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)

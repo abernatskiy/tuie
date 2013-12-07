@@ -388,7 +388,8 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 	preferences->Print(2);
 	printf("\n");*/
 
-	Scores_Update();
+	if( !preferences->ValFoundOffTheDiagonal(0.0) )
+		Scores_Update();
 }
 
 /*
@@ -688,7 +689,8 @@ double TAU::Scale(double value, double min1, double max1,
 void TAU::Scores_Print(void) {
 
 	for (int i=0; i<numControllers; i++)
-		printf("%0.0f ",controllers[i]->Score_Get() );
+		printf("%2.2f ",controllers[i]->Score_Get() );
+//		printf("%0.0f ",controllers[i]->Score_Get() );
 	printf("\n");
 }
 
@@ -715,6 +717,21 @@ void TAU::Scores_Update(void) {
 	}
 
 	Optimize();
+}
+
+void TAU::Scores_Check(void) {
+
+	double known_scores[numControllers];
+	for ( int i=0; i<numControllers; i++ ) {
+		for ( int j=0; j<i; j++ ) {
+			if ( known_scores[j] == controllers[i]->Score_Get() ) {
+				preferences->Print();
+				Scores_Print();
+				exit(1);
+			}
+		}
+		known_scores[i] = controllers[i]->Score_Get();
+	}
 }
 
 void TAU::Storage_Expand(void) {

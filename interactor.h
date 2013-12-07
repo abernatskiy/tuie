@@ -7,7 +7,7 @@
 #ifndef _INTERACTOR_H
 #define _INTERACTOR_H
 
-class INTERACTOR {
+class INTERACTOR { // interactor.cpp
 
 protected:
 	char tmpFileName[100];
@@ -21,7 +21,7 @@ public:
 	void checkIfFirstIterationAndMakeRecord(void);
 };
 
-class CLIENT : public INTERACTOR {
+class CLIENT : public INTERACTOR { // client.cpp
 
 protected:
 	int getPID(void);
@@ -36,7 +36,7 @@ public:
 	void deployPrefFile(void);
 };
 
-class SERVER : public INTERACTOR {
+class SERVER : public INTERACTOR { // server.cpp
 
 protected:
 	int* prefTableByPID(int pid);

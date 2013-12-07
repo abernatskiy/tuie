@@ -234,7 +234,7 @@ void Simulator_Destroy(void) {
 	dCloseODE();
 }
 
-void Simulate(int pause) { // "main" function, always called
+void Simulate(int pause) { // "main" function, repeatedly called by ODE in every execution
 
 	if ( showGraphics )
 		envs->Draw();

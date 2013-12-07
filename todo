@@ -1,7 +1,5 @@
--1001!. Sanity check
--1000!. Examine bcppg directly
--999!. Make it record relative intervals
--100!. Ambiguity maximization
+-100!. Ambiguity reduction OR maximization
+-10!. Examine bcppg directly
 1. \Theta trick for checking the properties of bcppg
 4. Show that method converges correctly for approximate users
 5. (IMPORTANT) Add novely to pair generation algorithm
@@ -20,9 +18,13 @@ preference indications was measured and turned out to be 8.51 on average with st
 --------------------------
 BUGS
 
-006 Client-server pair sometimes hangs - something writes tmp0.. file, then no deployment 
-happens. Evolution continues, and if you erase this file, it reappears. The fun part is 
-that the pairs are deployed just fine after I kill CLIENTS.
+006 Client-server pair sometimes hangs - something writes tmp0.. file (with a pair-like 
+contents), then no deployment happens. Evolution continues, and if you erase this file, 
+it reappears. The fun part is that the pairs are deployed just fine after I kill clients.
+
+RESOLVED - no check for the matrix fullness was applied in TAU::Store_Pref()'s n log n code
+007 Sometimes TAU merger reports two controllers with the same score in one of TAUs. This 
+is not an expected behaviour.
 
 RESOLVED - its actually a feature
 005 Client deletes pair0.dat upon exit.
