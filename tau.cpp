@@ -30,8 +30,13 @@ TAU::TAU(void) {
 	scoreMax = -1000000.0;
 
 	commonTAU = false;
+	ambiguities = -1;
+	conflicts = -1;
 
 	timer = 0;
+
+	requestFromCommonTAU = false;
+	remoteController = NULL;
 }
 
 TAU::TAU(ifstream *inFile) {
@@ -73,6 +78,13 @@ TAU::TAU(ifstream *inFile) {
         (*inFile) >> nextControllerForTraining;
         (*inFile) >> scoreMin;
         (*inFile) >> scoreMax;
+
+	commonTAU = false;
+	ambiguities = -1;
+	conflicts = -1;
+
+	requestFromCommonTAU = false;
+	remoteController = NULL;
 }
 
 TAU::TAU(TAU* tau0, TAU* tau1) {
@@ -84,22 +96,47 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 
 	for(int i=0; i<tau0->numControllers; i++)
 		if(tau0->controllers[i]->Score_Get() != TAU_NO_SCORE)
-		{
-//			printf("TAU: Inserting an opinion from tau0: id=%d scr=%2.2f src=%d\n", tau0->controllers[i]->ID, tau0->controllers[i]->Score_Get(), 0);
 			ranking0->autoInsert(tau0->controllers[i]->ID, tau0->controllers[i]->Score_Get(), 0);
-		}
 	for(int i=0; i<tau1->numControllers; i++)
 		if(tau1->controllers[i]->Score_Get() != TAU_NO_SCORE)
-		{
-//			printf("TAU: Inserting an opinion from tau1: id=%d scr=%2.2f src=%d\n", tau1->controllers[i]->ID, tau1->controllers[i]->Score_Get(), 1);
 			ranking1->autoInsert(tau1->controllers[i]->ID, tau1->controllers[i]->Score_Get(), 1);
-		}
 
 	ranking0->merge(ranking1);
 	delete ranking1;
 
-	ranking0->print();
-	printf("TAU: Constructing common TAU. Conflicts: %d, ambiguities: %d\n\n", ranking0->conflicts(), ranking0->ambiguities());
+	ambiguities = ranking0->ambiguities();
+	conflicts = ranking0->conflicts();
+//	if( ambiguities > 0 )
+		ranking0->print();
+	printf("TAU: Common TAU ranking constructed. Conflicts: %d, ambiguities: %d\n\n", conflicts, ambiguities);
+
+	if(ambiguities > 0) {
+
+		int* ambiguousIDs = ranking0->ambiguousIDs();
+		int IDToEval;
+		TAU* resolverTAU;
+		TAU* nonResolverTAU;
+//		if( currentTAUToUseForAmbiguityResolution == 0 ) {
+			IDToEval = ambiguousIDs[1];
+			resolverTAU = tau0;
+			nonResolverTAU = tau1;
+/*		}
+		else {
+			IDToEval = ambiguousIDs[0];
+			resolverTAU = tau1;
+			nonResolverTAU = tau0;
+		}*/
+		delete [] ambiguousIDs;
+
+		printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d\n", IDToEval);
+		int idxToEval = nonResolverTAU->Find_Index(IDToEval);
+		if( idxToEval < 0 ) {
+			printf("TAU: ID determination error\n");
+			exit(1);
+		}
+		resolverTAU->remoteController = nonResolverTAU->controllers[idxToEval];
+		resolverTAU->requestFromCommonTAU = true;
+	}
 
 	ranking0->rescore();
 
@@ -142,6 +179,12 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 	secondControllerIndex = -1;
 	timer = 0;
 	nextControllerForTraining = 0;
+
+	requestFromCommonTAU = false;
+	remoteController = NULL;
+
+	// batteries included
+	Optimize();
 }
 
 TAU::~TAU(void) {
@@ -166,6 +209,9 @@ TAU::~TAU(void) {
 		delete tauOptimizer;
 		tauOptimizer = NULL;
 	}
+
+	if( requestFromCommonTAU )
+		delete remoteController;
 }
 
 int TAU::All_Required_Preferences_Supplied(void) {
@@ -500,22 +546,22 @@ void TAU::Controllers_Print(void) {
 
 void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer) {
 
-    // Choose the best controller stored in TAU to be compared against
-    // a new controller drawn from the optimizer.
-
-		// Choose best controller from TAU.
-
-		double bestScore = -1000.0;
-
-		for (int i=0;i<numControllers;i++) {
-			if ( controllers[i]->Score_Get() > bestScore ) {
-
-				bestScore = controllers[i]->Score_Get();
-				firstControllerIndex = i;
-			}
+	// Choose best controller from TAU
+	double bestScore = -1000.0;
+	for (int i=0;i<numControllers;i++) {
+		if ( controllers[i]->Score_Get() > bestScore ) {
+			bestScore = controllers[i]->Score_Get();
+			firstControllerIndex = i;
 		}
+	}
 
-		// Choose second controller from optimizer.
+	if( requestFromCommonTAU ) {
+		// If common TAU has requested ambiguity resolution compare it against the ambiguous controller
+		Controller_Store( remoteController );
+		requestFromCommonTAU = false;
+	}
+	else {
+		// Otherwise, get a new controller from the optimizer.
 		if ( numControllers > 0 ) {
 
 			NEURAL_NETWORK *secondController = NULL;
@@ -529,7 +575,8 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 		}
 		else
 			Controller_Store( optimizer->Genome_Get_First() );
-    secondControllerIndex = numControllers-1;
+	}
+	secondControllerIndex = numControllers-1;
 }
 
 void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {

@@ -315,6 +315,31 @@ int RANKING::ambiguities()
 	return ambiguities;
 }
 
+int* RANKING::ambiguousIDs()
+{
+	int* ambiguousIDs = new int[2*ambiguities()];
+	int* rel;
+	int aidx = 0;
+
+	for(int i=0; i<size-1; i++)
+	{
+		rel = list[i]->compare(list[i+1]);
+		if( rel[0] == 0 && rel[1] == 0 ) {
+			if( list[i]->opinions[0] != UND_SCR ) {
+				ambiguousIDs[aidx] = list[i]->id;
+				ambiguousIDs[aidx+1] = list[i+1]->id;
+			}
+			else {
+				ambiguousIDs[aidx+1] = list[i]->id;
+				ambiguousIDs[aidx] = list[i+1]->id;
+			}
+			aidx += 2;
+		}
+		delete [] rel;
+	}
+	return ambiguousIDs;
+}
+
 void RANKING::rescore()
 {
 	for(int i=0; i<size-1; i++)

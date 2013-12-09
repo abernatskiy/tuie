@@ -26,6 +26,11 @@ public:
 	double scoreMax;
 
 	bool commonTAU;
+	int conflicts;
+	int ambiguities;
+
+	bool requestFromCommonTAU;
+	NEURAL_NETWORK* remoteController;
 
 public:
 	TAU(void);
@@ -82,6 +87,8 @@ public:
 
 	void		Scores_Check(void);
 
+	int			Find_Index(int ID);
+
 private:
 //	void  Controller_First_Preferred(void);  // these two functions are called only from
 //	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)
@@ -95,7 +102,6 @@ private:
 	void		Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer);
 	void		Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer);
 	void		Controllers_Select_Two_From_TAU(void);
-	int			Find_Index(int ID);
 	int			Num_Prefs(void);
 	void		Preferences_Expand(void);
 	void		Preferences_Initialize(void);

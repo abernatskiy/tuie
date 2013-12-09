@@ -35,9 +35,10 @@ public:
 	int* findConstraints(RANK_REC* newSubj);
 	void autoInsert(RANK_REC* newSubj);
 	void autoInsert(int id, double scr, int src);
-	void merge(RANKING* other); // heuristic merge - does not guarantee conflict no minimization
+	void merge(RANKING* other); // heuristic merge - does not guarantee conflict number minimization
 	int conflicts();
 	int ambiguities();
+	int* ambiguousIDs(); // warning - returns a pointer to an array on heap, may cause memory leaks if the array is not deleted properly
 	void rescore();
 
 	void printWithComparison();

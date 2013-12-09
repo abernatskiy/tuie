@@ -116,14 +116,9 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 	{
 		printf("TAUS: merging individual TAUs to produce a common one\n");
 //		tau[otherIdx]->Scores_Check();
-		tau[2] = new TAU(tau[0], tau[1]);
-		// normally Optimize() function (which performs backpropagation) is called form Store_Pref, but it's never used on common TAU
-		// this is the reason why it is called here
-		tau[2]->Optimize();
+		tau[2] = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+		// no need to optimize anything - common TAU comes with batteries included
 	}
-
-//	printf("TAUS: feeding %d %d %d to the common TAU\n", firstID, secondID, pref);
-//	tau[2]->Store_Pref(firstID, secondID, pref);
 }
 
 void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile) {
