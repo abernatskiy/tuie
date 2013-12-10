@@ -112,12 +112,23 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 //	tau[idx]->Scores_Check();
 
 	int otherIdx = idx==0 ? 1 : 0;
+
 	if(tau[otherIdx]->Ready_To_Predict())
 	{
 		printf("TAUS: merging individual TAUs to produce a common one\n");
 //		tau[otherIdx]->Scores_Check();
-		tau[2] = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+//		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+		TAU* commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		// no need to optimize anything - common TAU comes with batteries included
+
+		if( commonTAU->ambiguities == 0 ) {
+			delete tau[2];
+			tau[2] = commonTAU;
+		}
+		else {
+			printf("TAUS: ditching ambiguous TAU till it gets better\n");
+			delete commonTAU;
+		}
 	}
 }
 

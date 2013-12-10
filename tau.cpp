@@ -113,29 +113,18 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 	if(ambiguities > 0) {
 
 		int* ambiguousIDs = ranking0->ambiguousIDs();
-		int IDToEval;
-		TAU* resolverTAU;
-		TAU* nonResolverTAU;
-//		if( currentTAUToUseForAmbiguityResolution == 0 ) {
-			IDToEval = ambiguousIDs[1];
-			resolverTAU = tau0;
-			nonResolverTAU = tau1;
-/*		}
-		else {
-			IDToEval = ambiguousIDs[0];
-			resolverTAU = tau1;
-			nonResolverTAU = tau0;
-		}*/
+		int IDToEval = ambiguousIDs[1];
 		delete [] ambiguousIDs;
 
-		printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d\n", IDToEval);
-		int idxToEval = nonResolverTAU->Find_Index(IDToEval);
+		int idxToEval = tau1->Find_Index(IDToEval);
 		if( idxToEval < 0 ) {
 			printf("TAU: ID determination error\n");
 			exit(1);
 		}
-		resolverTAU->remoteController = nonResolverTAU->controllers[idxToEval];
-		resolverTAU->requestFromCommonTAU = true;
+
+		printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d from the first TAU in constructor argument list\n", IDToEval);
+		tau0->remoteController = tau1->controllers[idxToEval];
+		tau0->requestFromCommonTAU = true;
 	}
 
 	ranking0->rescore();
@@ -448,8 +437,10 @@ void TAU::User_Models_Reset(vowid) {
 void TAU::Controller_Store(NEURAL_NETWORK *newController) {
 
 	for( int i=0; i<numControllers; i++ )
-		if( newController->ID == controllers[i]->ID )
+		if( newController->ID == controllers[i]->ID ) {
+			printf("TAU: warning - attempt to store the controller already in TAU detected\n");
 			return;
+		}
 
 	Controller_Store_Without_ID_Check(newController);
 }

@@ -1,5 +1,5 @@
--100!. Ambiguity reduction OR maximization
 -10!. Examine bcppg directly
+-1. Ambiguity reductor optimization - ambiguities tend to occur at the edges of the interval, which allows for some optimization 
 1. \Theta trick for checking the properties of bcppg
 4. Show that method converges correctly for approximate users
 5. (IMPORTANT) Add novely to pair generation algorithm
@@ -7,12 +7,11 @@
 --------------------------
 TOPICS
 
-Emergent mappings
-
 --------------------------
 INVESTIGATIONS
 
-Output learning gaps - are due to user indicating a new preference. For one run number of generations between surrogate user 
+
+(CLOSED) Output learning gaps - are due to user indicating a new preference. For one run number of generations between surrogate user 
 preference indications was measured and turned out to be 8.51 on average with stddev of 0.82.
 
 --------------------------
