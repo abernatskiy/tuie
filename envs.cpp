@@ -1687,6 +1687,11 @@ void ENVS::TAU_Store_User_Preference(void) {
 	double prefFirst  = taskEnvironments[0]->robots[0]->Preference_Get(NULL);
 	double prefSecond = taskEnvironments[1]->robots[0]->Preference_Get(NULL);
 
+	sprintf(tmpfn, "SavedFiles/surrogate%d.log", client->getPID());
+	FILE* logFile = fopen(tmpfn, "a");
+  fprintf(logFile, "%d\t%d\t%le\t%le\t%d\n", tau->controllers[0]->ID, tau->controllers[1]->ID, prefFirst, prefSecond, prefFirst > prefSecond ? 0 : 1);
+  fclose(logFile);
+
 	if ( prefFirst > prefSecond )
 		(*outFile) << "0";
 	else

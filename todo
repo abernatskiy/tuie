@@ -10,12 +10,15 @@ TOPICS
 --------------------------
 INVESTIGATIONS
 
+Why do two individual TAUs always pick the same controller as their 3rd?
 
 (CLOSED) Output learning gaps - are due to user indicating a new preference. For one run number of generations between surrogate user 
 preference indications was measured and turned out to be 8.51 on average with stddev of 0.82.
 
 --------------------------
 BUGS
+
+008 Conflicts happen spontaneously in rankings.
 
 006 Client-server pair sometimes hangs - something writes tmp0.. file (with a pair-like 
 contents), then no deployment happens. Evolution continues, and if you erase this file, 

@@ -23,10 +23,12 @@ public:
 
 class CLIENT : public INTERACTOR { // client.cpp
 
-protected:
-	int getPID(void);
+//protected:
 
 public:
+
+	int getPID(void); // used to be protected, published for debug
+
 	bool pairFileExists(void);
 	bool prefFileExists(void);
 	short pairFileName(char* strspace); // returns 0 if pair file is found, nonzero otherwise
