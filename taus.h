@@ -12,6 +12,8 @@ protected:
 	int clientList[2]; // 0 - user1, 1 - user2
 	int noOfClients;
 
+	int recentAmbiguities, recentConflicts;
+
 public:
 	TAUS(void);
 //	TAUS(ifstream* inFile);

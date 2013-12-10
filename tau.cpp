@@ -304,6 +304,7 @@ void TAU::Optimize(void) {
 	if ( !tauOptimizer )
 		tauOptimizer = new TAU_OPTIMIZER();
 
+	printf("TAU::Optimize: optimizing for %d controllers, numControllers %d\n", Controllers_Available_For_Optimization(), numControllers);
 	tauOptimizer->Optimize( Controllers_Available_For_Optimization() , controllers );
 }
 
@@ -374,6 +375,8 @@ double TAU::Score_Predict(NEURAL_NETWORK *controller) {
 
 void TAU::Store_Pref(int firstID, int secondID, int pref) {
 
+	printf("TAU::Store_Pref: receiving preference %d %d %d\n", firstID, secondID, pref);
+
 	firstControllerIndex = Find_Index(firstID);
 	secondControllerIndex = Find_Index(secondID);
 
@@ -425,6 +428,11 @@ void TAU::Store_Pref(int firstID, int secondID, int pref) {
 
 	if( !preferences->ValFoundOffTheDiagonal(0.0) )
 		Scores_Update();
+
+	printf("TAU::Store_Pref: result is a TAU with %d controllers, IDs: ", numControllers);
+	for(int i=0; i<numControllers; i++)
+		printf("%d(%2.2f) ", controllers[i]->ID, controllers[i]->Score_Get());
+	printf("\n");
 }
 
 /*
@@ -474,7 +482,8 @@ int TAU::Controllers_Available_For_Optimization(void) {
 	for (int i=0;	i<numControllers;	i++) {
 		if (	 controllers[i] &&
 			 controllers[i]->Score_Available() &&
-			(controllers[i]->Get_Sensor_Data()!=NULL) )
+			(controllers[i]->Get_Sensor_Data() != NULL) &&
+			(controllers[i]->Score_Get() != TAU_NO_SCORE) )
 
 			numAvailable++;
 	}

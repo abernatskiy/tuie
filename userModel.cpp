@@ -66,7 +66,12 @@ void USER_MODEL::Allocate_ANN(void) {
 
 double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
-	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
+//	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
+	printf("USER_MODEL: Backpropagating on  %d controllers, IDs: ", numControllers);
+	  for(int i=0; i<numControllers; i++)
+    printf("%d(%2.2f) ", controllers[i]->ID, controllers[i]->Score_Get());
+  printf("\n");
+
 	double score, scorePrediction;
 	double totalError = 0.0;
 	double* in = new double[1];
@@ -81,6 +86,11 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 			MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
 //			int sensorRow;
 			score = controllers[i]->Score_Get();
+
+			if( score < 0 || score > 1 ) {
+				printf("USER_MODEL: error - bad score of %2.2f detected for ID %d, exiting\n", score, controllers[i]->ID);
+				exit(1);
+			}
 
 //			int m=0;
 //			for (int k=0;k<=10;k=k+2) {

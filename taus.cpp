@@ -17,6 +17,9 @@ TAUS::TAUS(void) {
 	clientList[1] = 0;
 
 	typeOfLastScore = 0;
+
+	recentAmbiguities = 0;
+	recentConflicts = 0;
 }
 
 /*
@@ -90,9 +93,10 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 void TAUS::writeScoreType(int generation) {
 
 	FILE* outFile = fopen("SavedFiles/score_type.log", "a");
-	fprintf(outFile, "%d\t%le\t%le\t%le\t%le\t%le\t%le\t%d\n", generation,
+	fprintf(outFile, "%d\t%le\t%le\t%le\t%le\t%le\t%le\t%d\t%d\t%d\n", generation,
 		tau[0]->Model_Error(), tau[1]->Model_Error(), tau[2]->Model_Error(),
-		1.0/((double) tau[0]->numControllers), 1.0/((double) tau[1]->numControllers), 1.0/((double) tau[2]->numControllers),
+		1.0/((double) tau[0]->Controllers_Available_For_Optimization()), 1.0/((double) tau[1]->Controllers_Available_For_Optimization()), 1.0/((double) tau[2]->numControllers),
+		recentAmbiguities, recentConflicts,
 		typeOfLastScore);
 	fclose(outFile);
 }
@@ -121,12 +125,14 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 		TAU* commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		// no need to optimize anything - common TAU comes with batteries included
 
+		recentAmbiguities = commonTAU->ambiguities;
+		recentConflicts = commonTAU->conflicts;
 		if( commonTAU->ambiguities == 0 ) {
 			delete tau[2];
 			tau[2] = commonTAU;
 		}
 		else {
-			printf("TAUS: ditching ambiguous TAU till it gets better\n");
+			printf("TAUS: ditching ambiguous common TAU till it gets better\n");
 			delete commonTAU;
 		}
 	}

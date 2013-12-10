@@ -89,12 +89,13 @@ public:
 
 	int			Find_Index(int ID);
 
+  int     Controllers_Available_For_Optimization(void); // returns no of controllers with available scores (good scores) and sensor data
+
 private:
 //	void  Controller_First_Preferred(void);  // these two functions are called only from
 //	void	Controller_Second_Preferred(void); // Store_Pref(int, int, int)
 
 	void		Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData);
-  int     Controllers_Available_For_Optimization(void); // returns no of controllers with available scores and sensor data
 	void    Controllers_Expand(void);
 	void    Controllers_Initialize(void);
 	int		  Controllers_Num_Needed_From_Optimizer(void); // read this function before rewriting Controllers_Select_From_Optimizer()
