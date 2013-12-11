@@ -401,7 +401,16 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 		if( !taus )
 			taus = new TAUS;
 		if( taus->readyToPredict() ) {
+
+//			printf("ENVS: taus are ready. Party hard!\n");
+//			for(int i=0; i<AFPO_POP_SIZE; i++) {
+//				printf("ID %d, fitness %2.2f, evaluated %d\n", optimizer->genomes[i]->ID, optimizer->genomes[i]->fitness, optimizer->genomes[i]->evaluated);
+//			}
+//			printf("ENVS: checking for pref..\n");
+
 			if( Check_For_Pref() == 0 ) {
+
+				Save_All_Pairs_For_Pref(); // TAU expansion mostly happens here
 				Rescore_Population();
 
 				taus->writeScoreType(optimizer->generation);
@@ -410,9 +419,9 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 				optimizer->Generation_Create_Next();
 				Create_Robot_To_Evaluate(world, space);
 			}
-			Save_All_Pairs_For_Pref();
 		}
 		else {
+//			printf("ENVS: taus are not ready, too bad\n");
 		// Generation scoring check here, and Genomes_All_Scored() is not what you're looking for
 			Save_All_Pairs_For_Pref();
 			if( Check_For_Pref() == 0 )

@@ -264,7 +264,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(NEURAL_NETWORK *other) {
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 	int numberOfTries = 0;
 
-	while (	(genomes[genomeIndex]==other) ||
+	while (	(genomes[genomeIndex] == other) ||
 		(genomes[genomeIndex]->fitness == 0.0) ||
 		(genomes[genomeIndex]->fitness == other->fitness) )
 	{
@@ -291,49 +291,42 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 	// supplied as a parameter.
 
 	printf("OPTIMIZER: getting but not controllers\n");
-
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
-
 	int found = false;
-
 	int numberOfTries = 0;
 
+	int otherIndex = 0;
+	int equal = false;
+
 	printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
-
 	while ( !found  ) {
-
 		// The genome has not yet been evaluated.
-
-		if ( genomes[genomeIndex]->fitness == 0.0 )
-
-			genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
-
-		else {
-			int otherIndex = 0;
-			int equal = false;
+//		if ( genomes[genomeIndex]->fitness == 0.0 ) {
+//			printf("here\n");
+//			genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
+//		}
+//		else {
+			otherIndex = 0;
+			equal = false;
 
 			while ( (otherIndex<numControllers) && (!equal) ) {
-	
-				if ( 	(genomes[genomeIndex]==controllers[otherIndex]) ||
-					(genomes[genomeIndex]->fitness==controllers[otherIndex]->fitness) )
-
+				if ( (genomes[genomeIndex]->ID == controllers[otherIndex]->ID) )// ||
+//					(genomes[genomeIndex]->fitness == controllers[otherIndex]->fitness) )
 					equal = true;
 				else
 					otherIndex++;
 			}
 
 			if ( equal ) {
-
 				// The controller is evaluated, but it's equal
 				// another controller in the external list.
-
 				genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 			}
 			else {
 				// The controller is evaluated, and it's unique.
 				found = true;
 			}
-		}
+//		}
 
 		printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
 
@@ -355,7 +348,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Second(void) {
 
-        return( genomes[1] );
+	return( genomes[1] );
 }
 
 void OPTIMIZER::Genome_Put_At_End(NEURAL_NETWORK *other) {
