@@ -111,6 +111,8 @@ ENVS::ENVS(int rs) {
 		system(command);
 		sprintf(command,"rm SavedFiles/summary.log");
 		system(command);
+		sprintf(command,"rm SavedFiles/surrogate*.log");
+		system(command);
 	}
 }
 
@@ -928,6 +930,7 @@ int ENVS::Check_For_Pref(void) {
 										server->curPrefTable[i][3] ); // user preference
 //		printf("%d\t%d\t%d\t%d\n", server->curPrefTable[i][0], server->curPrefTable[i][1], server->curPrefTable[i][2], server->curPrefTable[i][3] );
 //		Rescore_Population();
+		printf("\n");
 	}
 
 	return noOfPrefsFound;

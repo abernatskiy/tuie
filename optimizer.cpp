@@ -248,12 +248,11 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(void) {
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random(void) {
 
+//	printf("OPTIMIZER::Genome_Get_Random: calling RandInt(%d, %d)\n", 0, AFPO_POP_SIZE-1);
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
-
-	while ( genomes[genomeIndex]->fitness == 0.0 ) // !!!!
-
+//	printf("OPTIMIZER::Genome_Get_Random: got %d\n", genomeIndex);
+	while ( genomes[genomeIndex]->fitness == 0.0 )
 		genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
-
 	return( genomes[genomeIndex] );
 }
 
@@ -267,7 +266,8 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(NEURAL_NETWORK *other) {
 
 	while (	(genomes[genomeIndex]==other) ||
 		(genomes[genomeIndex]->fitness == 0.0) ||
-		(genomes[genomeIndex]->fitness == other->fitness) ) {
+		(genomes[genomeIndex]->fitness == other->fitness) )
+	{
 
 		genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 
@@ -276,8 +276,9 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(NEURAL_NETWORK *other) {
 		// If no appropriate controller can be found,
 		// return a random one.
 
-		if ( numberOfTries >= 10000 )
+		if ( numberOfTries >= 10000 ) {
 			return( genomes[genomeIndex] );
+		}
 	}
 
 	return( genomes[genomeIndex] );
@@ -289,11 +290,15 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 	// the same fitness as any in the external list of controllers
 	// supplied as a parameter.
 
+	printf("OPTIMIZER: getting but not controllers\n");
+
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 
 	int found = false;
 
 	int numberOfTries = 0;
+
+	printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
 
 	while ( !found  ) {
 
@@ -330,6 +335,8 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 			}
 		}
 
+		printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
+
 		numberOfTries++;
 
 		// If no appropriate controllers can be found,
@@ -337,10 +344,12 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 
 		if ( numberOfTries >= 10000 ) {
 
+			printf("OPTIMIZER: returning %d\n", genomes[genomeIndex]->ID);
 			return( Genome_Get_Random_But_Not(controllers[0]) );
 		}
 	}
 
+	printf("OPTIMIZER: returning %d\n", genomes[genomeIndex]->ID);
 	return( genomes[genomeIndex] );
 }
 
@@ -773,8 +782,9 @@ double OPTIMIZER::Rand(double min, double max) {
 
 int OPTIMIZER::RandInt(int min, int max) {
 
-	if ( min == max )
+	if ( min == max ) {
 		return( min );
+	}
 	else {
 		int val = (rand() % (max-min+1)) + min;
 		if ( val > max )

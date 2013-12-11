@@ -108,7 +108,9 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 	conflicts = ranking0->conflicts();
 //	if( ambiguities > 0 )
 		ranking0->print();
-	printf("TAU: Common TAU ranking constructed. Conflicts: %d, ambiguities: %d\n\n", conflicts, ambiguities);
+	printf("TAU: Common TAU ranking constructed. Conflicts: %d, ambiguities: %d\n", conflicts, ambiguities);
+
+	/**************** Ambiguity removal - slated for rewrite ****************/
 
 	if(ambiguities > 0) {
 
@@ -122,10 +124,33 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 			exit(1);
 		}
 
-		printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d from the first TAU in constructor argument list\n", IDToEval);
-		tau0->remoteController = tau1->controllers[idxToEval];
-		tau0->requestFromCommonTAU = true;
+		if(!tau0->requestFromCommonTAU) {
+			printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d from the first TAU in constructor argument list\n", IDToEval);
+			tau0->remoteController = tau1->controllers[idxToEval];
+			tau0->requestFromCommonTAU = true;
+		}
 	}
+
+	if(ambiguities > 1) {
+
+		int* ambiguousIDs = ranking0->ambiguousIDs();
+		int IDToEval = ambiguousIDs[0];
+		delete [] ambiguousIDs;
+
+		int idxToEval = tau0->Find_Index(IDToEval);
+		if( idxToEval < 0 ) {
+			printf("TAU: ID determination error\n");
+			exit(1);
+		}
+
+		if(!tau1->requestFromCommonTAU) {
+			printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d from the second TAU in constructor argument list\n", IDToEval);
+			tau1->remoteController = tau0->controllers[idxToEval];
+			tau1->requestFromCommonTAU = true;
+		}
+	}
+
+	/*********************** End of ambiguity removal ***********************/
 
 	ranking0->rescore();
 
@@ -304,7 +329,7 @@ void TAU::Optimize(void) {
 	if ( !tauOptimizer )
 		tauOptimizer = new TAU_OPTIMIZER();
 
-	printf("TAU::Optimize: optimizing for %d controllers, numControllers %d\n", Controllers_Available_For_Optimization(), numControllers);
+//	printf("TAU::Optimize: optimizing for %d controllers, numControllers %d\n", Controllers_Available_For_Optimization(), numControllers);
 	tauOptimizer->Optimize( Controllers_Available_For_Optimization() , controllers );
 }
 
@@ -555,28 +580,42 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 		}
 	}
 
+	printf("TAU: Controllers_Select_One_From_TAU_One_From_Optimizer func called, first controller %d, idx %d\n", controllers[firstControllerIndex]->ID, firstControllerIndex);
+
 	if( requestFromCommonTAU ) {
 		// If common TAU has requested ambiguity resolution compare it against the ambiguous controller
 		Controller_Store( remoteController );
 		requestFromCommonTAU = false;
+		printf("TAU: common TAU request found\n");
 	}
+
 	else {
 		// Otherwise, get a new controller from the optimizer.
 		if ( numControllers > 0 ) {
 
 			NEURAL_NETWORK *secondController = NULL;
-			if ( !tauOptimizer )
-				secondController = optimizer->Genome_Get_First();
-			else
+			if ( !tauOptimizer ) {
+				printf("TAU: no tauOptimizer, getting random genome\n");
+				secondController = optimizer->Genome_Get_Random();
+//				secondController = optimizer->Genome_Get_First();
+			}
+			else {
+				printf("TAU: no tauOptimizer, getting random genome but not\n");
 				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
 //				secondController = optimizer->Genome_Get_Best_But_Not(numControllers,controllers);
+			}
 
 			Controller_Store( secondController );
 		}
-		else
-			Controller_Store( optimizer->Genome_Get_First() );
+		else {
+			printf("TAU: nunControllers<=0, getting random genome\n");
+			Controller_Store( optimizer->Genome_Get_Random() );
+//			Controller_Store( optimizer->Genome_Get_First() );
+		}
 	}
 	secondControllerIndex = numControllers-1;
+
+	printf("TAU: second controller %d, idx %d\n", controllers[secondControllerIndex]->ID, secondControllerIndex);
 }
 
 void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
