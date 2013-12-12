@@ -1,10 +1,11 @@
--1000. OPTIMIZER::Genome_Get_Random_But_Not
--100. Fix stupid behaviour of ambiguity resolver.
+-100. \gamma fix
+-50. Optimize TAUS code - no need to bppgt every time an individual TAU got a preference, it is enough to do that only when no of truly evaluated controllers has changed.
+-20. OPTIMIZER::Get_Most_Different_But_Not
 -10. Examine bcppg directly
--1. Ambiguity reductor optimization - ambiguities tend to occur at the edges of the interval, which allows for some optimization 
 1. \Theta trick for checking the properties of bcppg
 4. Show that method converges correctly for approximate users
 5. (IMPORTANT) Add novely to pair generation algorithm
+100. Ambiguity reductor optimization - ambiguities tend to occur at the edges of the interval, which allows for some optimization 
 
 --------------------------
 TOPICS
@@ -20,14 +21,19 @@ preference indications was measured and turned out to be 8.51 on average with st
 --------------------------
 BUGS
 
-009 OPTIMIZER::Genome_Get_Random_But_Not is buggy
+009 In the presence of a conflict ambiguity resolver feeds individual TAUs controllers 
+they already know - due to dual presence of the controller in rankings.
 
 008 Conflicts happen spontaneously in rankings.
 Upd. seems like an ODE indeterminism problem - see "arch/bad run 2".
+Upd. confirmed by another observation.
 
 006 Client-server pair sometimes hangs - something writes tmp0.. file (with a pair-like 
 contents), then no deployment happens. Evolution continues, and if you erase this file, 
 it reappears. The fun part is that the pairs are deployed just fine after I kill clients.
+
+RESOLVED - see commit 3e0c5849d94dc00763caa74607f16e5f7b87bd03
+009 OPTIMIZER::Genome_Get_Random_But_Not is buggy
 
 RESOLVED - no check for the matrix fullness was applied in TAU::Store_Pref()'s n log n code
 007 Sometimes TAU merger reports two controllers with the same score in one of TAUs. This 

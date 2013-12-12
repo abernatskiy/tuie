@@ -30,6 +30,7 @@ public:
 	int ambiguities;
 
 	bool requestFromCommonTAU;
+	bool currentJobFromCommonTAU;
 	NEURAL_NETWORK* remoteController;
 
 public:

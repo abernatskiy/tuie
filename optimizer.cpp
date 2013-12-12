@@ -290,7 +290,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 	// the same fitness as any in the external list of controllers
 	// supplied as a parameter.
 
-	printf("OPTIMIZER: getting but not controllers\n");
+//	printf("OPTIMIZER: getting but not controllers\n");
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 	int found = false;
 	int numberOfTries = 0;
@@ -298,20 +298,19 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 	int otherIndex = 0;
 	int equal = false;
 
-	printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
+//	printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
 	while ( !found  ) {
 		// The genome has not yet been evaluated.
-//		if ( genomes[genomeIndex]->fitness == 0.0 ) {
-//			printf("here\n");
-//			genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
-//		}
-//		else {
+		if ( genomes[genomeIndex]->fitness == 0.0 ) {
+			genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
+		}
+		else {
 			otherIndex = 0;
 			equal = false;
 
 			while ( (otherIndex<numControllers) && (!equal) ) {
-				if ( (genomes[genomeIndex]->ID == controllers[otherIndex]->ID) )// ||
-//					(genomes[genomeIndex]->fitness == controllers[otherIndex]->fitness) )
+				if ( (genomes[genomeIndex]->ID == controllers[otherIndex]->ID)  ||
+							(genomes[genomeIndex]->fitness == controllers[otherIndex]->fitness) )
 					equal = true;
 				else
 					otherIndex++;
@@ -326,9 +325,9 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 				// The controller is evaluated, and it's unique.
 				found = true;
 			}
-//		}
+		}
 
-		printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
+//		printf("OPTIMIZER: %d\n", genomes[genomeIndex]->ID);
 
 		numberOfTries++;
 
@@ -336,13 +335,12 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(int numControllers, NEURAL_
 		// return a random one that has at least been evaluated.
 
 		if ( numberOfTries >= 10000 ) {
-
-			printf("OPTIMIZER: returning %d\n", genomes[genomeIndex]->ID);
+//			printf("OPTIMIZER: returning %d\n", genomes[genomeIndex]->ID);
 			return( Genome_Get_Random_But_Not(controllers[0]) );
 		}
 	}
 
-	printf("OPTIMIZER: returning %d\n", genomes[genomeIndex]->ID);
+//	printf("OPTIMIZER: returning %d\n", genomes[genomeIndex]->ID);
 	return( genomes[genomeIndex] );
 }
 

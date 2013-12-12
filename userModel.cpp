@@ -66,7 +66,8 @@ void USER_MODEL::Allocate_ANN(void) {
 
 double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
-	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
+//	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
+
 //	printf("USER_MODEL: Backpropagating on  %d controllers, IDs: ", numControllers);
 //	  for(int i=0; i<numControllers; i++)
 //	   printf("%d(%2.2f) ", controllers[i]->ID, controllers[i]->Score_Get());
