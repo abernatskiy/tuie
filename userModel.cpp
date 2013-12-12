@@ -75,13 +75,15 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
 	double score, scorePrediction;
 	double totalError = 0.0;
+	double return_val = 0.0;
 	double* in = new double[1];
 	double* target = new double[1];
 
 	delete ANN;
 	Allocate_ANN();
 
-	for (int j=0; j<TAU_BACK_PROP_TRAINING_ITERATIONS; j++) {
+//	for (int j=0; j<TAU_BACK_PROP_TRAINING_ITERATIONS; j++) {
+	for (int j=0; j<1000000; j++) {
 		for (int i=0;	i<numControllers;	i++) {
 
 			MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
@@ -115,18 +117,24 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 
 			scorePrediction = ANN->Out(0); // raw, unbiased prediction
 
-			if( j == TAU_BACK_PROP_TRAINING_ITERATIONS-1)
-				totalError = totalError + fabs(score-scorePrediction);
+			totalError = totalError + fabs(score-scorePrediction);
 //				totalError += ANN->mse(target);
 
 			sensorTimeSeries = NULL;
+		}
+
+		if(totalError<0.5)
+			break;
+		else {
+			return_val = totalError;
+			totalError = 0.0;
 		}
 	}
 
 	delete [] in;
 	delete [] target;
 
-	return( totalError / ((double) numControllers) );
+	return( return_val / ((double) numControllers) );
 }
 
 double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {

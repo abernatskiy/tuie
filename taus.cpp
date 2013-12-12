@@ -117,7 +117,8 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 
 	int otherIdx = idx==0 ? 1 : 0;
 
-	if(tau[otherIdx]->Ready_To_Predict())
+	if( tau[otherIdx]->Ready_To_Predict() &&
+			tau[idx]->numControllers == tau[idx]->Controllers_Available_For_Optimization() )
 	{
 		printf("TAUS: merging individual TAUs to produce a common one\n");
 //		tau[otherIdx]->Scores_Check();

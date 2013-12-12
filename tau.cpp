@@ -597,11 +597,11 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 		}
 	}
 
-//	printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: func called, first controller %d, idx %d\n", controllers[firstControllerIndex]->ID, firstControllerIndex);
+	printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: func called, first controller %d, idx %d\n", controllers[firstControllerIndex]->ID, firstControllerIndex);
 
 	if( requestFromCommonTAU ) { // will be turned off when job is done
 		// If common TAU has requested ambiguity resolution compare it against the ambiguous controller
-//		printf("TAU: common TAU request found\n");
+		printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: common TAU request found\n");
 		Controller_Store( remoteController );
 		currentJobFromCommonTAU = true;
 	}
@@ -612,24 +612,24 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 
 			NEURAL_NETWORK *secondController = NULL;
 			if ( !tauOptimizer ) {
-//				printf("TAU: no tauOptimizer, getting random genome\n");
+				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: no tauOptimizer, getting random genome\n");
 				secondController = optimizer->Genome_Get_Random();
 			}
 			else {
-//				printf("TAU: tauOptimizer is here, getting random genome but not\n");
+				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting random genome but not\n");
 				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
 			}
 
 			Controller_Store( secondController );
 		}
 		else {
-//			printf("TAU: numControllers<=0, getting random genome\n");
+			printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: numControllers<=0, getting random genome\n");
 			Controller_Store( optimizer->Genome_Get_Random() );
 		}
 	}
 	secondControllerIndex = numControllers-1;
 
-//	printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: second controller %d, idx %d\n", controllers[secondControllerIndex]->ID, secondControllerIndex);
+	printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: second controller %d, idx %d\n", controllers[secondControllerIndex]->ID, secondControllerIndex);
 }
 
 void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
