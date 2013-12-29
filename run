@@ -63,5 +63,5 @@ else
 	./runclient > /dev/null 2>&1 &
 fi
 ./runclient > /dev/null 2>&1 &
-./M3 -null > SavedFiles/server_output.log 2>&1 &
-
+#./M3 -null > SavedFiles/server_output.log 2>&1 &
+./M3 -null
