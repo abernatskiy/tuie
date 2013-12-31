@@ -43,6 +43,7 @@ public:
 	NEURAL_NETWORK *Genome_Get_First(void);
 	NEURAL_NETWORK *Genome_Get_Most_Different(int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers);
+	NEURAL_NETWORK *Genome_Get_Most_Different_But_Not(int numExiles, NEURAL_NETWORK **exiles, int numControllers, NEURAL_NETWORK **controllers);
 	NEURAL_NETWORK *Genome_Get_Random(void);
 	NEURAL_NETWORK *Genome_Get_Random_But_Not(NEURAL_NETWORK *other);
 	NEURAL_NETWORK *Genome_Get_Random_But_Not(int numControllers, NEURAL_NETWORK **controllers);

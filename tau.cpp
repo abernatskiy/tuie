@@ -612,12 +612,16 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 
 			NEURAL_NETWORK *secondController = NULL;
 			if ( !tauOptimizer ) {
-				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: no tauOptimizer, getting random genome\n");
-				secondController = optimizer->Genome_Get_Random();
+//				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: no tauOptimizer, getting random genome\n");
+//				secondController = optimizer->Genome_Get_Random();
+				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: no tauOptimizer, getting most different genome\n");
+				secondController = optimizer->Genome_Get_Most_Different(numControllers, controllers);
 			}
 			else {
-				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting random genome but not\n");
-				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
+//				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting random genome but not\n");
+//				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
+				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting most different genome but not\n");
+				secondController = optimizer->Genome_Get_Most_Different_But_Not(numControllers, controllers, numControllers, controllers);
 			}
 
 			Controller_Store( secondController );

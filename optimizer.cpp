@@ -176,56 +176,76 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_First(void) {
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different(int numControllers, NEURAL_NETWORK **controllers) {
 
-//	int chosenGenomeIndex;
 	NEURAL_NETWORK *chosenGenome = NULL;
-	double maxDistance = -1000.0;
+	double maxDistance = -1.0*INFINITY;
 
-	for (int i=0;i<AFPO_POP_SIZE;i++) {
-
-                if (    genomes[i]->evaluated &&
-                        genomes[i]->sensorTimeSeries ) {
-
-			double currDistance = genomes[i]->Min_Distance_To(numControllers,controllers);
-
-			if ( currDistance > maxDistance ) {
-				maxDistance = currDistance;
-//				chosenGenomeIndex = i;
+	for ( int i=0; i<AFPO_POP_SIZE; i++ ) {
+		if ( genomes[i]->evaluated &&
+				 genomes[i]->sensorTimeSeries ) {
+			double curDistance = genomes[i]->Min_Distance_To(numControllers,controllers);
+			if ( curDistance > maxDistance ) {
+				maxDistance = curDistance;
 				chosenGenome = genomes[i];
 			}
 		}
 	}
 
-	if ( !chosenGenome )
+	if ( !chosenGenome ) {
+		printf("NEURAL_NETWORK: WARNING: finding most different genome failed, returning the best one\n");
 		return( controllers[0] );
+	}
 	else
 		return( chosenGenome );
 }
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(NEURAL_NETWORK *thisOne, int numControllers, NEURAL_NETWORK **controllers) {
 
-//        int chosenGenomeIndex;
-        NEURAL_NETWORK *chosenGenome = NULL;
-        double maxDistance = -1000.0;
+	NEURAL_NETWORK *chosenGenome = NULL;
+	double maxDistance = -1.0*INFINITY;
 
-	for (int i=0;i<AFPO_POP_SIZE;i++) {
-		if ( 	genomes[i]->evaluated && 
-			genomes[i]->sensorTimeSeries && 
-			(!genomes[i]->Is_The_Same_As(thisOne)) ) {
+	for ( int i=0; i<AFPO_POP_SIZE; i++ ) {
+		if ( genomes[i]->evaluated &&
+				 genomes[i]->sensorTimeSeries &&
+				 (!genomes[i]->Is_The_Same_As(thisOne)) ) {
+			double currDistance = genomes[i]->Min_Distance_To(numControllers,controllers);
+			if ( currDistance > maxDistance ) {
+				maxDistance = currDistance;
+				chosenGenome = genomes[i];
+			}
+		}
+	}
 
-                        double currDistance = genomes[i]->Min_Distance_To(numControllers,controllers);
+	if ( !chosenGenome ) {
+		printf("NEURAL_NETWORK: WARNING: finding most different genome failed, returning the best one\n");
+		return( controllers[0] );
+	}
+	else
+		return( chosenGenome );
+}
 
-                        if ( currDistance > maxDistance ) {
-                                maxDistance = currDistance;
-//                                chosenGenomeIndex = i;
-                                chosenGenome = genomes[i];
-                        }
-                }
-        }
+NEURAL_NETWORK *OPTIMIZER::Genome_Get_Most_Different_But_Not(int numExiles, NEURAL_NETWORK **exiles, int numControllers, NEURAL_NETWORK **controllers) {
 
-        if ( !chosenGenome )
-                return( controllers[0] );
-        else
-                return( chosenGenome );
+	NEURAL_NETWORK *chosenGenome = NULL;
+	double maxDistance = -1.0*INFINITY;
+
+	for ( int i=0; i<AFPO_POP_SIZE; i++ ) {
+		if ( genomes[i]->evaluated &&
+				 genomes[i]->sensorTimeSeries &&
+				 (!genomes[i]->Is_One_Of(numExiles, exiles)) ) {
+			double currDistance = genomes[i]->Min_Distance_To(numControllers,controllers);
+			if ( currDistance > maxDistance ) {
+				maxDistance = currDistance;
+				chosenGenome = genomes[i];
+			}
+		}
+	}
+
+	if ( !chosenGenome ) {
+		printf("NEURAL_NETWORK: WARNING: finding most different genome failed, returning the best one\n");
+		return( controllers[0] );
+	}
+	else
+		return( chosenGenome );
 }
 
 NEURAL_NETWORK *OPTIMIZER::Genome_Get_Next_To_Evaluate(void) {
@@ -264,7 +284,7 @@ NEURAL_NETWORK *OPTIMIZER::Genome_Get_Random_But_Not(NEURAL_NETWORK *other) {
 	int genomeIndex = RandInt(0,AFPO_POP_SIZE-1);
 	int numberOfTries = 0;
 
-	while (	(genomes[genomeIndex] == other) ||
+	while (	(genomes[genomeIndex]->ID == other->ID) ||
 		(genomes[genomeIndex]->fitness == 0.0) ||
 		(genomes[genomeIndex]->fitness == other->fitness) )
 	{
@@ -356,7 +376,7 @@ void OPTIMIZER::Genome_Put_At_End(NEURAL_NETWORK *other) {
 	genomes[AFPO_POP_SIZE-1] = new NEURAL_NETWORK(other);
 }
 
-int  OPTIMIZER::Genomes_Num_Of_Evaluated(void) {
+int OPTIMIZER::Genomes_Num_Of_Evaluated(void) {
 
         if ( !genomes )
 
@@ -371,7 +391,7 @@ int  OPTIMIZER::Genomes_Num_Of_Evaluated(void) {
 
         return( num );
 }
- 
+
 void OPTIMIZER::MutationProbability_Decrease(void) {
 
 	mutationProbability = mutationProbability /2.0;

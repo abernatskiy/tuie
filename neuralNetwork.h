@@ -47,6 +47,7 @@ public:
 	int    Is_Dominated_By(NEURAL_NETWORK *other);
 	int    Is_Inferior_To(NEURAL_NETWORK *other);
 	int    Is_The_Same_As(NEURAL_NETWORK *other);
+	int    Is_One_Of(int numControllers, NEURAL_NETWORK **controllers);
 	double Min_Distance_To(int numControllers, NEURAL_NETWORK **controllers);
 	void   Mutate(void);
 	void   Print(void);

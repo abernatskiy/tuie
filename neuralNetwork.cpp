@@ -297,37 +297,37 @@ int  NEURAL_NETWORK::Is_Inferior_To(NEURAL_NETWORK *other) {
 		return( (dominated) && (!other->dominated) );
 }
 
-int  NEURAL_NETWORK::Is_The_Same_As(NEURAL_NETWORK *other) {
+int NEURAL_NETWORK::Is_The_Same_As(NEURAL_NETWORK *other) {
 
 	return( ID == other->ID );
 }
 
+int NEURAL_NETWORK::Is_One_Of(int numControllers, NEURAL_NETWORK **controllers) {
+
+	for (int i=0; i<numControllers; i++)
+		if (this->Is_The_Same_As(controllers[i]))
+			return true;
+	return false;
+}
+
 double NEURAL_NETWORK::Min_Distance_To(int numControllers, NEURAL_NETWORK **controllers) {
 
-//	int closestControllerIndex;
-	double minDistance = 1000.0;
-//	NEURAL_NETWORK *closestController = NULL;
+	double minDistance = INFINITY;
 
 	for (int i=0; i<numControllers; i++) {
+		if (controllers[i] &&
+				controllers[i]->sensorTimeSeries &&
+				(!controllers[i]->Is_The_Same_As(this))) {
 
-		if (	  controllers[i] &&
-			  controllers[i]->sensorTimeSeries &&
-			(!controllers[i]->Is_The_Same_As(this)) ) {
-
-			int    timeStep = int(double(STARTING_EVALUATION_TIME)/2.0);
-
+			int timeStep = int(double(STARTING_EVALUATION_TIME)/2.0);
 			double currDistance = 0.0;
 
 			for (int j=0;j<11;j=j+2)
-
-				currDistance = currDistance + 
-						fabs(                 sensorTimeSeries->Get(timeStep,j) - 
-						      controllers[i]->sensorTimeSeries->Get(timeStep,j) );
+				currDistance += fabs( sensorTimeSeries->Get(timeStep,j) - controllers[i]->sensorTimeSeries->Get(timeStep,j) );
 
 			currDistance = currDistance/6.0;
 
 			if ( currDistance < minDistance ) {
-
 				minDistance = currDistance;
 	//			closestControllerIndex = i;
 	//			closestController = controllers[i];
