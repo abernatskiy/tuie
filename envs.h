@@ -104,6 +104,7 @@ public:
 	void Video_Start_Stop(void);
 	void Viewpoint_Get(void);
 	void Write_Log_Record(void);
+	void Write_Best_Individual(void);
 
 private:
 	void Activate_All(void);

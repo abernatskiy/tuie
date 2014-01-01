@@ -70,15 +70,6 @@ void OPTIMIZER::EvaluationPeriod_Increase(void) {
 	evaluationPeriod++;
 }
 
-//void OPTIMIZER::Data_Receive( double fitness,
-//															double score,
-//															MATRIX* timeSeries,
-//															NEURAL_NETWORK *userFavorite,
-//															bool startAFPO ) {
-//
-//		Genome_Get_Next_To_Evaluate(userFavorite, startAFPO)->Fitness_Sensor_Data_Score_Set(fitness, timeSeries, score);
-//}
-
 void OPTIMIZER::Genome_Discard_Being_Evaluated(void) {
 
 	if ( genomeUnderEvaluation ) {

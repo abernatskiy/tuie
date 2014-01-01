@@ -416,6 +416,9 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 				taus->writeScoreType(optimizer->generation);
 				Write_Log_Record();
 
+				if(optimizer-> generation % 100 == 0)
+					Write_Best_Individual();
+
 				optimizer->Generation_Create_Next();
 				Create_Robot_To_Evaluate(world, space);
 			}
@@ -550,7 +553,7 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
-	speed = 3;
+	speed = 1;
 
 	simulateMode = MODE_SIMULATE_TAU;
 
@@ -892,10 +895,28 @@ void ENVS::Viewpoint_Get(void) {
 		xyz[0],xyz[1],xyz[2],hpr[0],hpr[1],hpr[2]);
 }
 
+void ENVS::Write_Best_Individual(void) {
+
+	char filename[200];
+	sprintf(filename, "SavedFiles/bestIndividuals/%05d.dat", optimizer->generation);
+	ofstream *outFile = new ofstream(filename);
+
+	Camera_Position_Save(outFile,false);
+	Save_Environments(outFile);
+
+	optimizer->genomes[0]->Save_ButNotSensorData(outFile);
+	optimizer->genomes[0]->Save_ButNotSensorData(outFile);
+
+	outFile->close();
+	delete outFile;
+	outFile = NULL;
+
+}
+
 void ENVS::Write_Log_Record(void) {
 
 	FILE* outFile = fopen("SavedFiles/summary.log", "a");
-	fprintf(outFile, "%d\t%le\t%le\t%d\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age);
+	fprintf(outFile, "%d\t%le\t%le\t%d\t%d\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age, No_Robots_Above_The_Barrier());
 	fclose(outFile);
 }
 
@@ -1310,17 +1331,18 @@ void ENVS::Move(double x, double y, double z) {
 
 int ENVS::No_Robots_Above_The_Barrier(void) {
 
-        if ( !optimizer )
-                return( true );
+	if ( !optimizer )
+		return( true );
 
-				int noRobotsAboveTheBarrier = true;
-        for (int i=0; i<AFPO_POP_SIZE; i++) {
-                if ( optimizer->Genome_Get(i)->sensorTimeSeries ) {
-                        if ( optimizer->Genome_Get(i)->sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,12) > 3.0 )
-                                noRobotsAboveTheBarrier = false;
-                }
-        }
-        return( noRobotsAboveTheBarrier );
+	int noRobotsAboveTheBarrier = true;
+	for (int i=0; i<AFPO_POP_SIZE; i++) {
+		if ( optimizer->Genome_Get(i)->sensorTimeSeries ) {
+			if ( optimizer->Genome_Get(i)->sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,12) > 3.0 )
+				noRobotsAboveTheBarrier = false;
+			}
+		}
+
+	return( noRobotsAboveTheBarrier );
 }
 
 void ENVS::Optimizer_Initialize(void) {

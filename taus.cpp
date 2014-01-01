@@ -142,18 +142,16 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile) {
 
 	NEURAL_NETWORK** savedControllers;
-	if( pid > 0 ) {
+	if( pid > 0 ) { // if we are not at the first iteration, ignore pointers to saved controllers returned by Controllers_Save_Pair()
 		int idx = indexByPID(pid);
 		savedControllers = tau[idx]->Controllers_Save_Pair(optimizer, outFile);
 	}
-	else {
+	else { // if we are at the first iteration, use pointers to store the controllers in another tau
 		savedControllers = tau[0]->Controllers_Save_Pair(optimizer, outFile);
 		tau[1]->Controller_Store(savedControllers[0]);
 		tau[1]->Controller_Store(savedControllers[1]);
 	}
 
-//	tau[2]->Controller_Store(savedControllers[0]);
-//	tau[2]->Controller_Store(savedControllers[1]);
 	delete [] savedControllers;
 }
 
