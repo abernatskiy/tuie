@@ -48,7 +48,7 @@ void USER_MODEL::Allocate_ANN(void) {
 	int *layerSizes = new int[3];
 
 	layerSizes[0] = 7;
-	layerSizes[1] = 3;
+	layerSizes[1] = 4;
 	layerSizes[2] = 1;
 
 	ANN = new CBackProp(3,layerSizes,0.1,0.1);
@@ -56,7 +56,7 @@ void USER_MODEL::Allocate_ANN(void) {
 /*	int *layerSizes = new int[2];
 
 	layerSizes[0] = 1;
-	layerSizes[1] = 3;
+	layerSizes[1] = 4;
 
 	ANN = new CBackProp(2,layerSizes,0.1,0.1);*/
 
@@ -122,7 +122,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 			sensorTimeSeries = NULL;
 		}
 
-		if(totalError<0.2)
+		if(totalError<0.4)
 			break;
 		else {
 			return_val = totalError;

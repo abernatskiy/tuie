@@ -50,14 +50,16 @@ case $# in
 esac
 
 # recompiling the code with appropriate no of hidden nodes
-echo -n "Compiling the code with ${HIDDEN_NODES} hidden nodes in TAU ... "
 sed -i -e "s/\(layerSizes\[1\] = \).*/\1${HIDDEN_NODES};/" userModel.cpp
-make -j4 > /dev/null 2>&1 && echo "done"
 
 if [ $OPPOSING_USERS -eq 1 ]; then
 	echo -n "Recompiling the opposing client ... "
 	make M3-opposing > /dev/null 2>&1 && echo "done"
 fi
+
+echo -n "Compiling the code with ${HIDDEN_NODES} hidden nodes in TAU ... "
+make -j4 > /dev/null 2>&1 && echo "done"
+
 
 # running clients & server
 ./M3 -null > SavedFiles/server_output.log 2>&1 &
