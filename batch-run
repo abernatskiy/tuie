@@ -8,7 +8,7 @@ function runsim {
 	rm SavedFiles/*.log > /dev/null 2>&1
 	rm SavedFiles/bestIndividuals/* > /dev/null 2>&1
 	./run $1 $2;
-	sleep 1800 && killall M3 && sleep 5s;
+	sleep 10m && killall M3 && sleep 5s;
 	if [ $1 -eq 1 ]; then
 		killall M3-opposing && sleep 5s;
 	fi
@@ -36,8 +36,8 @@ function runopposing {
 	cp -a ./SavedFiles ./arch/tau${1}o/${2}
 }
 
-for i in `seq -w 1 10`; do
-	for nn in `seq 2 4`; do
-		runallied $nn $i
+for i in `seq -w 1 20`; do
+	for nn in 4; do
+		runopposing $nn $i
 	done
 done

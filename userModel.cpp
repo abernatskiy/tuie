@@ -122,7 +122,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 			sensorTimeSeries = NULL;
 		}
 
-		if(totalError<0.5)
+		if(totalError<0.2)
 			break;
 		else {
 			return_val = totalError;
