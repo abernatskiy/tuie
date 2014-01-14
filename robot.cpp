@@ -785,6 +785,9 @@ void ROBOT::Set_Color(double r, double g, double b) {
 		if ( joints[i]->Is_Unconnected() )
 			joints[i]->Set_Color(2.0, 0.8, 0.0);
 	}
+
+	if ( objects[1] )
+		objects[1]->Set_Color(0.0, 0.0, 2.0);
 }
 
 void ROBOT::Unattached_Joints_Unhide(void) {
@@ -1346,6 +1349,7 @@ void ROBOT::Neural_Network_Set_Sensors(void) {
 	neuralNetwork->Sensor_Set(sensorIndex++,pos[0]);
 	neuralNetwork->Sensor_Set(sensorIndex++,pos[1]);
         neuralNetwork->Sensor_Set(sensorIndex++,pos[2]);
+	printf("Robot: %lf %lf %lf\n", pos[0], pos[1], pos[2]);
 
 /*
 	for (int j=1;	j<numJoints;	j++) {

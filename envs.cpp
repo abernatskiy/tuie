@@ -783,12 +783,15 @@ double ENVS::TAU_Score_Get(void) {
 
 void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 
+	// CLIENT
+
 	if ( tau->timer<1000 ) {
 
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
 	 	tau->timer++;
 	//	tau->Optimize();
+//		printf("%le\n", )
 	}
 
 	// If the time limit for the robot pair has expired, replay it.

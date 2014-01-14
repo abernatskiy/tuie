@@ -236,6 +236,17 @@ void Simulator_Destroy(void) {
 
 void Simulate(int pause) { // "main" function, repeatedly called by ODE in every execution
 
+//	const dReal *bodypos = dBodyGetPosition(envs->taskEnvironments[1]->robots[0]->objects[1]->body);
+//	const dReal *wallpos = dBodyGetPosition(envs->taskEnvironments[0]->robots[0]->objects[0]->body);
+//	const dReal *pos = dBodyGetPosition(envs->taskEnvironments[0]->robots[0]->objects[0]);
+//	printf("Coordinates of the main body are: %lf %lf %lf\n", bodypos[0], bodypos[1], bodypos[2]);
+//	printf("Coordinates of the wall are: %lf %lf %lf\n", wallpos[0], wallpos[1], wallpos[2]);
+
+//	double x = envs->taskEnvironments[0]->robots[0]->neuralNetwork->sensorValues->Get(11,0);
+//	double y = envs->taskEnvironments[0]->robots[0]->neuralNetwork->sensorValues->Get(12,0);
+//	double z = envs->taskEnvironments[0]->robots[0]->neuralNetwork->sensorValues->Get(13,0);
+//	printf("Coordinates of the main body are: %lf %lf %lf\n", x, y, z);
+
 	if ( showGraphics )
 		envs->Draw();
 
