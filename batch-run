@@ -37,9 +37,10 @@ function runopposing {
 	cp -a ./SavedFiles ./arch/tau${1}o/${2}
 }
 
-for i in `seq -w 1 10`; do
-	for nn in `seq 2 4`; do
+#for nn in `seq 5 6`; do
+nn=5
+	for i in `seq -w 1 20`; do
 		runallied $nn $i
-		runopposing $nn $i
+#		runopposing $nn $i
 	done
-done
+#done
