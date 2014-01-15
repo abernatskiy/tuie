@@ -790,6 +790,7 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
 	 	tau->timer++;
+		printf("No_Ro_Above: %d\n", No_Robots_Above_The_Barrier());
 	//	tau->Optimize();
 //		printf("%le\n", )
 	}
