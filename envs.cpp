@@ -1755,6 +1755,11 @@ void ENVS::TAU_Store_User_Preference(void) {
 	outFile = NULL;
 
 	client->deployPrefFile();
+
+	if( prefFirst > 3.0 || prefSecond > 3.0 ) {
+		printf("SURROGATE USER: it's all over!\n");
+		exit(0);
+	}
 }
 
 void ENVS::Video_Start(void) {
