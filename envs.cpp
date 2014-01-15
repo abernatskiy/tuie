@@ -915,8 +915,10 @@ void ENVS::Write_Best_Individual(void) {
 
 void ENVS::Write_Log_Record(void) {
 
+	double roboty = optimizer->genomes[0]->sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,12);
+
 	FILE* outFile = fopen("SavedFiles/summary.log", "a");
-	fprintf(outFile, "%d\t%le\t%le\t%d\t%d\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age, No_Robots_Above_The_Barrier());
+	fprintf(outFile, "%d\t%le\t%le\t%d\t%d\t%le\t%le\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age, No_Robots_Above_The_Barrier(), roboty, Best_Y_Coordinate());
 	fclose(outFile);
 }
 
@@ -1343,6 +1345,20 @@ int ENVS::No_Robots_Above_The_Barrier(void) {
 		}
 
 	return( noRobotsAboveTheBarrier );
+}
+
+double ENVS::Best_Y_Coordinate(void) {
+
+	double bestYCoord = -1*INFINITY;
+	double ycoord;
+	if( optimizer ) {
+		for (int i=0; i<AFPO_POP_SIZE; i++) {
+			ycoord = optimizer->genomes[i]->sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,12);
+			if( ycoord > bestYCoord )
+				bestYCoord = ycoord;
+		}
+	}
+	return bestYCoord;
 }
 
 void ENVS::Optimizer_Initialize(void) {

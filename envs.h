@@ -136,6 +136,7 @@ private:
 	void Load_TAU(ifstream *inFile);
 	void Move(double x, double y, double z);
         int  No_Robots_Above_The_Barrier(void);
+				double Best_Y_Coordinate(void);
 	void Optimizer_Initialize(void);
 	int  Optimizer_Robot_Mismatch(void);
 	int  Ready_For_Champ_Mode(void);
