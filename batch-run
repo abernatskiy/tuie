@@ -2,6 +2,8 @@
 
 IFS=$'\n'
 
+ARCH="/mnt/local/arch/tuie1"
+
 function runsim {
 	rm SavedFiles/pair*.dat > /dev/null 2>&1
 	rm SavedFiles/pref*.dat > /dev/null 2>&1
@@ -9,7 +11,7 @@ function runsim {
 	rm SavedFiles/bestIndividuals/* > /dev/null 2>&1
 	sleep 1
 	./run $1 $2;
-	sleep 20m && killall M3 && sleep 5s;
+	sleep 15m && killall M3 && sleep 5s;
 	if [ $1 -eq 1 ]; then
 		killall M3-opposing && sleep 5s;
 	fi
@@ -24,31 +26,24 @@ function makedir {
 }
 
 function runallied {
-	echo "arch/tau${1}a/${2}..."
-	makedir "arch/tau${1}a"
+	echo "${ARCH}/tau${1}a/${2}..."
+	makedir "${ARCH}/tau${1}a"
 	runsim 0 $1
-	cp -a ./SavedFiles ./arch/tau${1}a/${2}
+	cp -a ./SavedFiles ${ARCH}/tau${1}a/${2}
 }
 
 function runopposing {
-	echo "arch/tau${1}o/${2}..."
-	makedir "arch/tau${1}o"
+	echo "${ARCH}/tau${1}o/${2}..."
+	makedir "${ARCH}/tau${1}o"
 	runsim 1 $1
-	cp -a ./SavedFiles ./arch/tau${1}o/${2}
+	cp -a ./SavedFiles ${ARCH}/tau${1}o/${2}
 }
 
-#for nn in `seq 5 6`; do
 nn=4
-for i in `seq -w 1 9`; do
-	runallied $nn $i
-#		runopposing $nn $i
-done
-#done
 
-cp tau.get_most_different.cpp tau.cpp
-for i in `seq -w 10 18`; do
+for i in `seq -w 1 50`; do
 	runallied $nn $i
-#		runopposing $nn $i
 done
+
 
 

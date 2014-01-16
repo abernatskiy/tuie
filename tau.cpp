@@ -636,10 +636,10 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 		}
 		else {
 //			printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: numControllers<=0, getting random genome\n");
-//			Controller_Store( optimizer->Genome_Get_Random() );
+			Controller_Store( optimizer->Genome_Get_Random() );
 
 			printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: numControllers<=0, getting best genome\n");
-			Controller_Store( optimizer->Genome_Get_Best() );
+//			Controller_Store( optimizer->Genome_Get_Best() );
 		}
 	}
 	secondControllerIndex = numControllers-1;
