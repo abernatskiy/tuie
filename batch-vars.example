@@ -1,0 +1,11 @@
+#!/bin/bash
+# settings for scripts used in batch processing: run, runclient, batch-run
+
+HOST_INDX=0
+ARCH="./arch/"
+BIN_POSTFIX=""
+M3="M3${BIN_POSTFIX}"
+M3_OPPOSING="M3-opposing${BIN_POSTFIX}"
+OPENGLENV="optirun"
+
+RUNLENGTH="5m" # format suitable for sleep shell command

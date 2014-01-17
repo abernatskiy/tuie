@@ -2,7 +2,7 @@
 
 IFS=$'\n'
 
-ARCH="/mnt/local/arch/tuie1"
+source batch-vars
 
 function runsim {
 	rm SavedFiles/pair*.dat > /dev/null 2>&1
@@ -11,11 +11,11 @@ function runsim {
 	rm SavedFiles/bestIndividuals/* > /dev/null 2>&1
 	sleep 1
 	./run $1 $2;
-	sleep 15m && killall M3 && sleep 5s;
+	sleep $RUNLENGTH && killall $M3 && sleep 5s;
 	if [ $1 -eq 1 ]; then
-		killall M3-opposing && sleep 5s;
+		killall $M3_OPPOSING && sleep 5s;
 	fi
-	if [ `ps aux | grep M3 | wc -l` -gt 1 ]; then
+	if [ `ps aux | grep $M3 | wc -l` -gt 1 ]; then
 		echo "Sorry, I couldn't kill IT..."
 		exit 1
 	fi
@@ -38,12 +38,3 @@ function runopposing {
 	runsim 1 $1
 	cp -a ./SavedFiles ${ARCH}/tau${1}o/${2}
 }
-
-nn=4
-
-for i in `seq -w 1 50`; do
-	runallied $nn $i
-done
-
-
-

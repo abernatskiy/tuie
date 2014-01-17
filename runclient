@@ -1,8 +1,11 @@
 #!/bin/bash
+
+source batch-vars
+
 if [ $# -eq 1 ]; then
 	if [ $1 -eq 1 ]; then
-		./M3-opposing -cp
+		$OPENGLENV ./$M3_OPPOSING -cp
 	fi
 else
-	./M3 -cp
+	$OPENGLENV ./$M3 -cp
 fi

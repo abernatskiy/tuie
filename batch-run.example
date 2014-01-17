@@ -1,0 +1,10 @@
+#!/bin/bash
+
+source batch-funcs
+
+for nn in `seq 3 5`; do
+	for i in `seq -w 1 10`; do
+		runallied $nn $i
+		runopposing $nn $i
+	done
+done

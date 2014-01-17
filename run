@@ -10,6 +10,8 @@ print_usage () {
 OPPOSING_USERS=0
 HIDDEN_NODES=2
 
+source batch-vars
+
 # parsing arguments
 case $# in
 2)
@@ -55,13 +57,15 @@ sed -i -e "s/\(layerSizes\[1\] = \).*/\1${HIDDEN_NODES};/" userModel.cpp
 if [ $OPPOSING_USERS -eq 1 ]; then
 	echo -n "Compiling the opposing client ... "
 	make M3-opposing > /dev/null 2>&1 && echo "done"
+	mv M3-opposing $M3_OPPOSING > /dev/null 2>&1
 fi
 
 echo -n "Compiling the code with ${HIDDEN_NODES} hidden nodes in TAU ... "
 make -j4 > /dev/null 2>&1 && echo "done"
+mv M3 $M3 > /dev/null 2>&1
 
 # running clients & server
-./M3 -null > SavedFiles/server_output.log 2>&1 &
+./$M3 -null > SavedFiles/server_output.log 2>&1 &
 sleep 1
 if [ $OPPOSING_USERS -eq 1 ]; then
 	./runclient 1 > /dev/null 2>&1 &
