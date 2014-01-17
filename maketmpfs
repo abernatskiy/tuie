@@ -4,6 +4,6 @@ if [ ! -d SavedFiles.orig ]; then
 	cp SavedFiles SavedFiles.orig
 fi
 
-mount -t tmpfs -o size=500M,mode=0777,uid=1000 tmpfs SavedFiles/
+sudo mount -t tmpfs -o size=500M,mode=0777,uid=1000 tmpfs SavedFiles/
 mkdir SavedFiles/bestIndividuals
 cp SavedFiles.orig/envs0.dat SavedFiles/
