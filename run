@@ -5,8 +5,10 @@ print_usage () {
 	echo "  run [ <mode> [ <no_of_hidden_nodes> ] ]"
 	echo "where mode=0 runs interactive evolution with allied surrogate users"
 	echo "      mode=1 runs with opposing surrogate users"
+	echo "      mode=2 runs with a single user"
 }
 
+USERS=2
 OPPOSING_USERS=0
 HIDDEN_NODES=2
 
@@ -36,6 +38,9 @@ case $# in
 		;;
 	1)
 		OPPOSING_USERS=1
+		;;
+	2)
+		USERS=1
 		;;
 	*)
 		print_usage
@@ -72,6 +77,8 @@ if [ $OPPOSING_USERS -eq 1 ]; then
 else
 	./runclient > /dev/null 2>&1 &
 fi
-sleep 15
-./runclient > /dev/null 2>&1 &
 
+if [ $USERS -eq 2 ]; then
+	sleep 15
+	./runclient > /dev/null 2>&1 &
+fi

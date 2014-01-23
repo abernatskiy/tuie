@@ -122,6 +122,43 @@ def tuieSummaryPlot6(arrayOfArrays):
 	plt.plot(arrayOfArrays[0], arrayOfArrays[6], color='red', label='best Y')
 	plt.legend(prop={'size':12}, frameon=False)
 
+def tuieSummaryPlot7(arrayOfArrays):
+	"""Generates a plot meaningful for TUIE summary data, 5-column ver"""
+	numvar = len(arrayOfArrays) - 1
+	if numvar	!= 7:
+		raise Exception("File type detection error")
+
+	plt.subplot(511)
+	plt.title("History of most fit individuals")
+	plt.ylabel("Fitness-error")
+	threshold = np.ones(len(arrayOfArrays[7]))*0.139
+	plt.plot(arrayOfArrays[7], arrayOfArrays[1])
+	plt.plot(arrayOfArrays[7], threshold, "r--")
+
+	plt.subplot(512)
+	threshold = np.ones(len(arrayOfArrays[7]))
+	plt.ylabel("Score")
+	plt.ylim(0.0, 1.1)
+	plt.plot(arrayOfArrays[7], arrayOfArrays[2])
+	plt.plot(arrayOfArrays[7], threshold, "r--")
+
+	plt.subplot(513)
+	plt.ylabel("Age")
+	plt.plot(arrayOfArrays[7], arrayOfArrays[3])
+
+	ax = plt.subplot(514)
+	plt.ylabel("No robots above the barrier")
+	plt.ylim(-0.5, 1.5)
+	ax.set_yticklabels([" ", "false", " ", "true"])
+	plt.plot(arrayOfArrays[7], arrayOfArrays[4])
+
+	plt.subplot(515)
+	plt.ylabel('y coord')
+	plt.xlabel("Time, s")
+	plt.plot(arrayOfArrays[7], arrayOfArrays[5], color='blue', label='best ind')
+	plt.plot(arrayOfArrays[7], arrayOfArrays[6], color='red', label='best Y')
+	plt.legend(prop={'size':12}, frameon=False)
+
 def tuieSummaryPlot(arrayOfArrays):
 	"""Generates a plot meaningful for TUIE summary data"""
 	numvar = len(arrayOfArrays) - 1
@@ -131,6 +168,8 @@ def tuieSummaryPlot(arrayOfArrays):
 		tuieSummaryPlot4(arrayOfArrays)
 	elif numvar == 6:
 		tuieSummaryPlot6(arrayOfArrays)
+	elif numvar == 7:
+		tuieSummaryPlot7(arrayOfArrays)
 	else:
 		raise Exception("File type detection error")
 
@@ -235,10 +274,49 @@ def tuieScoreTypePlot9(arrayOfArrays):
 	plt.xlabel("Generation")
 	plt.plot(arrayOfArrays[0], arrayOfArrays[9]) # change
 
+def tuieScoreTypePlot10(arrayOfArrays):
+	"""Generates a plot meaningful for TUIE score type plots"""
+	numvar = len(arrayOfArrays) - 1
+	if numvar	!= 10: 
+		raise Exception("File type detection error")
+
+	plt.subplot(311)
+
+	plt.title("History of TAU model errors and predictive behaviour switching")
+	plt.ylabel("TAU error")
+	plt.plot(arrayOfArrays[10], arrayOfArrays[1], color="blue", label="tau0")
+	plt.plot(arrayOfArrays[10], arrayOfArrays[2], color="cyan", label="tau1")
+	plt.plot(arrayOfArrays[10], arrayOfArrays[3], color="red", label="common tau")
+	plt.plot(arrayOfArrays[10], arrayOfArrays[4], ":", color="blue", label="tau0 gap") # comment
+	plt.plot(arrayOfArrays[10], arrayOfArrays[5], ":", color="cyan", label="tau1 gap") # commment
+	plt.plot(arrayOfArrays[10], arrayOfArrays[6], ":", color="red", label="common tau gap") # comment
+	plt.legend(prop={'size':12}, frameon=False)
+
+	ax = plt.subplot(312)
+
+	plt.ylabel("Conflicts/ambiguities")
+	plt.ylim(-0.5, 3.5)
+	plt.plot(arrayOfArrays[10], arrayOfArrays[7], color="blue", label="ambiguities") # change
+	plt.plot(arrayOfArrays[10], arrayOfArrays[8], color="red", label="conflicts") # change
+	plt.legend(prop={'size':12}, frameon=False)
+
+	ax = plt.subplot(313)
+
+#	plt.xlim(0,500)
+
+	plt.ylabel("Value used as a user score est.")
+	plt.ylim(0,6)
+	ax.set_yticklabels([" ", "tau0", "tau1", "max", "com", " "])
+
+	plt.xlabel("Time, s")
+	plt.plot(arrayOfArrays[10], arrayOfArrays[9]) # change
+
 def tuieScoreTypePlot(arrayOfArrays):
 	"""Generates a plot meaningful for TUIE score type plots"""
 	numvar = len(arrayOfArrays) - 1
-	if numvar	== 9:
+	if numvar	== 10:
+		tuieScoreTypePlot10(arrayOfArrays)
+	elif numvar	== 9:
 		tuieScoreTypePlot9(arrayOfArrays)
 	elif numvar == 7:
 		tuieScoreTypePlot7(arrayOfArrays)

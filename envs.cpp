@@ -413,7 +413,10 @@ void ENVS::Evolve( dWorldID world, dSpaceID space ) {
 				Save_All_Pairs_For_Pref(); // TAU expansion mostly happens here
 				Rescore_Population();
 
-				taus->writeScoreType(optimizer->generation);
+				clock_t currTime = clock();
+				double CPUSecondsUsed = ((double) (currTime - startTime)) / CLOCKS_PER_SEC;
+
+				taus->writeScoreType(optimizer->generation, CPUSecondsUsed);
 				Write_Log_Record();
 
 				if(optimizer-> generation % 100 == 0)
@@ -915,10 +918,13 @@ void ENVS::Write_Best_Individual(void) {
 
 void ENVS::Write_Log_Record(void) {
 
+	clock_t currTime = clock();
+	double CPUSecondsUsed = ((double) (currTime - startTime)) / CLOCKS_PER_SEC;
+
 	double roboty = optimizer->genomes[0]->sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,12);
 
 	FILE* outFile = fopen("SavedFiles/summary.log", "a");
-	fprintf(outFile, "%d\t%le\t%le\t%d\t%d\t%le\t%le\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age, No_Robots_Above_The_Barrier(), roboty, Best_Y_Coordinate());
+	fprintf(outFile, "%d\t%le\t%le\t%d\t%d\t%le\t%le\t%le\n", optimizer->generation, optimizer->genomes[0]->fitness, optimizer->genomes[0]->score, optimizer->genomes[0]->age, No_Robots_Above_The_Barrier(), roboty, Best_Y_Coordinate(), CPUSecondsUsed);
 	fclose(outFile);
 }
 
