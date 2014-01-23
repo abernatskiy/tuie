@@ -38,3 +38,10 @@ function runopposing {
 	runsim 1 $1
 	cp -a ./SavedFiles ${ARCH}/tau${1}o/${2}
 }
+
+function runsingle {
+	echo "${ARCH}/tau${1}s/${2}..."
+	makedir "${ARCH}/tau${1}s"
+	runsim 2 $1
+	cp -a ./SavedFiles ${ARCH}/tau${1}s/${2}
+}
