@@ -791,7 +791,7 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
 
-		double y0 = taskEnvironments[0]->robots[0]->neuralNetwork->sensorValues->Get(0,11);
+		double y0 = taskEnvironments[0]->robots[0]->neuralNetwork->sensorValues->Get(0,12);
 		double y1 = taskEnvironments[1]->robots[0]->neuralNetwork->sensorValues->Get(0,12);
 
 //		printf("%le %le\n", y0, y1);
