@@ -796,7 +796,7 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 
 //		printf("%le %le\n", y0, y1);
 
-		if( y1 > 3.0 || y2 > 3.0 ) {
+		if( y1 > 3.0 || y0 > 3.0 ) {
 			printf("SURROGATE USER: it's all over!\n");
 			exit(0);
 		}
