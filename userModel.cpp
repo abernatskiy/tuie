@@ -82,7 +82,9 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 	delete ANN;
 	Allocate_ANN();
 
-	for (int j=0; j<TAU_BACK_PROP_TRAINING_ITERATIONS_MAX; j++) {
+	int maxIterations = 15000*numControllers;
+
+	for (int j=0; j<maxIterations; j++) {
 		for (int i=0;	i<numControllers;	i++) {
 
 			MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
@@ -129,8 +131,8 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 			totalError = 0.0;
 		}
 
-		if(j == TAU_BACK_PROP_TRAINING_ITERATIONS_MAX - 1)
-			printf("USER_MODEL: warning - max number of backpropagation iterations (%d) reached\n", TAU_BACK_PROP_TRAINING_ITERATIONS_MAX);
+		if(j == maxIterations - 1)
+			printf("USER_MODEL: warning - max number of backpropagation iterations (%d) reached\n", maxIterations);
 	}
 
 	delete [] in;

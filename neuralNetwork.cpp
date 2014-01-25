@@ -647,7 +647,11 @@ void NEURAL_NETWORK::Store_Sensor_Data(int timeStep) {
 		double sensorValue = sensorValues->Get(0,j);
 
 		sensorTimeSeries->Set(timeStep,j,sensorValue);
+
+//		if( j==11 || j ==12)
+//			printf("%le ", sensorValue);
 	}
+//	printf("\n");
 }
 
 #endif

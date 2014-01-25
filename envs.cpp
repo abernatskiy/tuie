@@ -790,6 +790,17 @@ void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {
 
 		taskEnvironments[0]->Allow_Robot_To_Move(tau->timer);
 		taskEnvironments[1]->Allow_Robot_To_Move(tau->timer);
+
+		double y0 = taskEnvironments[0]->robots[0]->neuralNetwork->sensorValues->Get(0,11);
+		double y1 = taskEnvironments[1]->robots[0]->neuralNetwork->sensorValues->Get(0,12);
+
+//		printf("%le %le\n", y0, y1);
+
+		if( y1 > 3.0 || y2 > 3.0 ) {
+			printf("SURROGATE USER: it's all over!\n");
+			exit(0);
+		}
+
 	 	tau->timer++;
 	//	tau->Optimize();
 	}
@@ -1762,10 +1773,6 @@ void ENVS::TAU_Store_User_Preference(void) {
 
 	client->deployPrefFile();
 
-	if( prefFirst > 3.0 || prefSecond > 3.0 ) {
-		printf("SURROGATE USER: it's all over!\n");
-		exit(0);
-	}
 }
 
 void ENVS::Video_Start(void) {
