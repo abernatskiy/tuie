@@ -12,7 +12,7 @@ function runsim {
 	sleep 1
 	./run $1 $2;
 	sleep $RUNLENGTH && killall $M3 && sleep 5s;
-	if [ $1 -eq 1 ]; then
+	if [ $1 -eq 1 ] || [ $1 -eq 3 ]; then
 		killall $M3_OPPOSING && sleep 5s;
 	fi
 	if [ `ps aux | grep $M3 | wc -l` -gt 1 ]; then
@@ -44,4 +44,11 @@ function runsingle {
 	makedir "${ARCH}/tau${1}s"
 	runsim 2 $1
 	cp -a ./SavedFiles ${ARCH}/tau${1}s/${2}
+}
+
+function runsingleopposing {
+	echo "${ARCH}/tau${1}so/${2}..."
+	makedir "${ARCH}/tau${1}so"
+	runsim 3 $1
+	cp -a ./SavedFiles ${ARCH}/tau${1}so/${2}
 }
