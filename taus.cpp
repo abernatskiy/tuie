@@ -48,7 +48,16 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 	double error[3];
 	bool ready[3];
 
-	for(int i=0; i<3; i++) {
+	if( ready[2] ) {
+		typeOfLastScore = 4;
+		return tau[2]->Score_Predict(genome);
+	}
+	else {
+		typeOfLastScore = -1;
+		return 1.0;
+	}
+
+/*	for(int i=0; i<3; i++) {
 		ready[i] = tau[i]->Ready_To_Predict();
 		if( ready[i] ) {
 			score[i] = tau[i]->Score_Predict(genome);
@@ -87,7 +96,7 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 		}
 		typeOfLastScore = -1;
 		return TAU_NO_SCORE;
-	}
+	}*/
 }
 
 void TAUS::writeScoreType(int generation, double time) {
