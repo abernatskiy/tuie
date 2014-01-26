@@ -82,7 +82,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 	delete ANN;
 	Allocate_ANN();
 
-	int maxIterations = 15000*numControllers;
+	int maxIterations = 30000*numControllers;
 
 	for (int j=0; j<maxIterations; j++) {
 		for (int i=0;	i<numControllers;	i++) {
@@ -124,7 +124,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 			sensorTimeSeries = NULL;
 		}
 
-		if(totalError<0.5)
+		if(totalError<0.2)
 			break;
 		else {
 			return_val = totalError;
