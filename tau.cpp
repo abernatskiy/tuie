@@ -308,6 +308,18 @@ NEURAL_NETWORK** TAU::Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outF
 	return savedControllers;
 }
 
+NEURAL_NETWORK** TAU::Controllers_Save_Pair(OPTIMIZER *optimizer, TAU* otherTAU, ofstream *outFile) {
+
+	Controllers_Select_From_Optimizer(optimizer, otherTAU);
+	controllers[firstControllerIndex]->Save_ButNotSensorData(outFile);
+	controllers[secondControllerIndex]->Save_ButNotSensorData(outFile);
+
+	NEURAL_NETWORK** savedControllers = new NEURAL_NETWORK*[2];
+	savedControllers[0] = controllers[firstControllerIndex];
+	savedControllers[1] = controllers[secondControllerIndex];
+	return savedControllers;
+}
+
 void TAU::Controllers_Select_From_Optimizer(OPTIMIZER *optimizer) {
 
 	int controllersNeededFromOptimizer = Controllers_Num_Needed_From_Optimizer();
@@ -324,6 +336,26 @@ void TAU::Controllers_Select_From_Optimizer(OPTIMIZER *optimizer) {
 
 	case 2:
 		Controllers_Select_Two_From_Optimizer(optimizer);
+		break;
+	}
+}
+
+void TAU::Controllers_Select_From_Optimizer(OPTIMIZER *optimizer, TAU* otherTAU) {
+
+	int controllersNeededFromOptimizer = Controllers_Num_Needed_From_Optimizer();
+
+	switch ( controllersNeededFromOptimizer ) {
+
+	case 0:
+		Controllers_Select_Two_From_TAU();
+		break;
+
+	case 1:
+		Controllers_Select_One_From_TAU_One_From_Optimizer(optimizer);
+		break;
+
+	case 2:
+		Controllers_Select_Two_From_Optimizer(optimizer, otherTAU);
 		break;
 	}
 }
@@ -664,6 +696,24 @@ void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
 
 	Controller_Store( secondController );
 
+	secondControllerIndex = numControllers-1;
+
+	firstController = NULL;
+	secondController = NULL;
+}
+
+void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer, TAU* otherTAU) {
+
+	NEURAL_NETWORK* firstController = otherTAU->controllers[0];
+	Controller_Store(firstController);
+	firstControllerIndex = numControllers-1;
+
+	NEURAL_NETWORK* notASecondController[2];
+	notASecondController[0] = otherTAU->controllers[0];
+	notASecondController[1] = otherTAU->controllers[1];
+
+	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Random_But_Not(2, notASecondController);
+	Controller_Store( secondController );
 	secondControllerIndex = numControllers-1;
 
 	firstController = NULL;

@@ -124,13 +124,12 @@ void SERVER::tempFileName(char* strspace) {
 	sprintf(strspace, "SavedFiles/tmp0");
 }
 
-void SERVER::deployPairFile(int pid) {
+void SERVER::deployPairFile(char* filename) {
 
 	printf("SERVER: deployPairFile() called\n");
 	char fn[100], command[200];
-	pairFileNameByPID(fn, pid);
 	tempFileName(tmpFileName);
-	sprintf(command, "mv %s %s", tmpFileName, fn);
+	sprintf(command, "mv %s %s", tmpFileName, filename);
 	system(command);
 }
 

@@ -63,7 +63,7 @@ public:
 	int updatePreferences(void);
 
 	void tempFileName(char* strspace);
-	void deployPairFile(int pid);
+	void deployPairFile(char* filename);
 };
 
 #endif

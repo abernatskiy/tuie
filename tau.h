@@ -53,10 +53,12 @@ public:
 	NEURAL_NETWORK *Controller_Pair_Get_Second(void);
 	void		Controllers_Load_Pair(ifstream *inFile);
 	NEURAL_NETWORK**		Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outFile);
+	NEURAL_NETWORK**		Controllers_Save_Pair(OPTIMIZER *optimizer, TAU* other, ofstream *outFile);
  	void    Controllers_Select_From_Optimizer(OPTIMIZER *optimizer); // Pair selection implementation core component
 																																	// Selects varying combinations of ANNs from TAU and from AFPO population depending on
 																																	// value of Controllers_Num_Needed_From_Optimizer()
 																																	// Might be useful for sparse preference matrix implementation
+ 	void    Controllers_Select_From_Optimizer(OPTIMIZER *optimizer, TAU* other);
 
 	void		Optimize(void); // Is called from Scores_Update()
 													// Gets a variable "controllers" and the return value of Controllers_Available_For_Optimization()
@@ -103,6 +105,7 @@ private:
 	void    Controllers_Print(void);
 	void		Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer);
 	void		Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer);
+	void		Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer, TAU* other);
 	void		Controllers_Select_Two_From_TAU(void);
 	int			Num_Prefs(void);
 	void		Preferences_Expand(void);

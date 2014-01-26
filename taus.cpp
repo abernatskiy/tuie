@@ -157,8 +157,9 @@ void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile)
 	}
 	else { // if we are at the first iteration, use pointers to store the controllers in another tau
 		savedControllers = tau[0]->Controllers_Save_Pair(optimizer, outFile);
-		tau[1]->Controller_Store(savedControllers[0]);
-		tau[1]->Controller_Store(savedControllers[1]);
+		savedControllers = tau[1]->Controllers_Save_Pair(optimizer, tau[0], outFile);
+//		tau[1]->Controller_Store(savedControllers[0]);
+//		tau[1]->Controller_Store(savedControllers[1]);
 	}
 
 	delete [] savedControllers;

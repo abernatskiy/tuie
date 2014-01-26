@@ -1554,13 +1554,14 @@ void ENVS::Save_Pair_For_Pref(int pid, char* fileName) {
 	delete outFile;
 	outFile = NULL;
 
-	server->deployPairFile(pid);
+	server->deployPairFile(fileName);
 }
 
 void ENVS::Save_All_Pairs_For_Pref(void) {
 
 	// called from Evolve() in SERVER mode
 	char fileName[100];
+	char tmpstr[200];
 	int pid;
 
 	if( server->firstIteration ) { // if we are at the beginning of the service
@@ -1568,7 +1569,15 @@ void ENVS::Save_All_Pairs_For_Pref(void) {
 			printf("Old common pair file found - another server is possibly running.\nExiting.\n"); // if yes, get grumpy and exit
 			exit(1);
 		}
-		Save_Pair_For_Pref(0, fileName); // otherwise, create a common pair file
+		sprintf(tmpstr, "rm %s*", fileName);
+		system(tmpstr);
+
+		sprintf(tmpstr, "%s_0", fileName);
+		Save_Pair_For_Pref(0, tmpstr);
+//		printf("Saving %s\n", )
+
+		sprintf(tmpstr, "%s_1", fileName);
+		Save_Pair_For_Pref(-1, tmpstr);
 	}
 	else { // if we are not in the beginning of the service
 		for(int i=0; i < server->noOfClients; i++) { // go through the client list
