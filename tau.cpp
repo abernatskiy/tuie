@@ -10,6 +10,37 @@
 extern double TAU_NO_SCORE;
 extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
 extern int    AFPO_POP_SIZE;
+extern int		STARTING_EVALUATION_TIME;
+
+double distance(TAU* tau0, TAU* tau1, int id0, int id1) {
+
+	int idx0 = tau0->Find_Index(id0);
+	int idx1 = tau1->Find_Index(id1);
+
+	if( idx0 < 0 || idx1 < 0) {
+		printf("IDs not found when determining distance\n");
+		exit(1);
+	}
+
+	int timeStep = int(double(STARTING_EVALUATION_TIME)/2.0);
+	MATRIX* sts0 = tau0->controllers[idx0]->sensorTimeSeries;
+	MATRIX* sts1 = tau1->controllers[idx1]->sensorTimeSeries;
+
+	if( sts0 == NULL || sts1 == NULL ) {
+		printf("Sensor time series not found when determining distance\n");
+		exit(1);
+	}
+
+	double dist = 0.0;
+//	printf("\n!!!!!Calculating the distance\n");
+	for(int k=0; k<=10; k=k+2) {
+//		printf("+ ( %le - %le )^2\n", sts0->Get(timeStep, k), sts1->Get(timeStep, k));
+		dist += pow(sts0->Get(timeStep, k) - sts1->Get(timeStep, k), 2);
+	}
+	dist = sqrt(dist);
+//	printf("!!!!!Done calculating distance, %le is answer\n\n", dist);
+	return dist;
+}
 
 TAU::TAU(void) {
 
@@ -112,20 +143,39 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 		ranking0->print();
 	printf("TAU: Common TAU ranking constructed: %d elements, %d conflicts, %d ambiguities\n", ranking0->size, conflicts, ambiguities);
 
-	/**************** Ambiguity removal - slated for rewrite ****************/
+	/**************** Ambiguity removal ****************/
 
 	if(ambiguities > 0) {
 
-		int* ambiguousIDs = ranking0->ambiguousIDs();
+		int* ambiguousIDs = ranking0->extendedAmbiguousIDs();
 		// structure of the ranking around the ambiguity (guaranteed by RANKING implementation):
 		//				tau0		tau1
-		//	ID0		sc0t0		u
-		//	ID1		u				sc1t1
-		//	... (if there is more than 1 ambiguity) ...
-		//	ID2		sc2t0		u
-		//	ID3		u				sc3t1
-		int IDToEval = ambiguousIDs[1];
-		delete [] ambiguousIDs;
+		//				...(non-amb)...
+		//	ID..	sc		u
+		//						....
+		//	ID0		sc		u
+		//	ID1		u			sc
+		//						....
+		//  ID..	u			sc
+		//				...(non-amb)...
+		printf("%d ambiguities to remove. Ids:\n", ambiguities);
+		for(int i=0; i<ambiguities*4; i+=4)
+			printf("%d %d\t\tvs\t\t%d %d\n", ambiguousIDs[i], ambiguousIDs[i+1], ambiguousIDs[i+2], ambiguousIDs[i+3]);
+
+		double distances[ambiguities*2];
+		for(int i=0; i<ambiguities*4; i+=2)
+			distances[i/2] = distance(tau0, tau1, ambiguousIDs[i], ambiguousIDs[i+1]);
+		printf("Corresponding distances:\n");
+		for(int i=0; i<ambiguities*2; i+=2)
+			printf("%le\t\tvs\t\t%le\n", distances[i], distances[i+1]);
+
+		int IDToEval;
+		if(distances[0]<distances[1])
+			IDToEval = ambiguousIDs[1];
+		else
+			IDToEval = ambiguousIDs[3];
+
+//		delete [] ambiguousIDs;
 
 		int idxToEval = tau1->Find_Index(IDToEval);
 		if( idxToEval < 0 ) {
@@ -134,28 +184,33 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 		}
 
 		if(!tau0->requestFromCommonTAU) {
-			printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d from the first TAU in constructor argument list\n", IDToEval);
+			printf("TAU: Eliminating the first ambiguity - requesting the evaluation of controller %d from the first TAU in constructor argument list\n", IDToEval);
 			tau0->remoteController = tau1->controllers[idxToEval];
 			tau0->requestFromCommonTAU = true;
 		}
-	}
+		else
+			printf("TAU: First TAU in constructor argument list is busy, leaving it alone. Intended request was %d\n", IDToEval);
 
-	if(ambiguities > 1) {
+		if(ambiguities > 1) {
 
-		int* ambiguousIDs = ranking0->ambiguousIDs();
-		int IDToEval = ambiguousIDs[2];
-		delete [] ambiguousIDs;
+			if(distances[2]<distances[3])
+				IDToEval = ambiguousIDs[4];
+			else
+				IDToEval = ambiguousIDs[6];
 
-		int idxToEval = tau0->Find_Index(IDToEval);
-		if( idxToEval < 0 ) {
-			printf("TAU: ID determination error\n");
-			exit(1);
-		}
+			idxToEval = tau0->Find_Index(IDToEval);
+			if( idxToEval < 0 ) {
+				printf("TAU: ID determination error\n");
+				exit(1);
+			}
 
-		if(!tau1->requestFromCommonTAU) {
-			printf("TAU: Eliminating ambiguity - requesting the evaluation of controller %d from the second TAU in constructor argument list\n", IDToEval);
-			tau1->remoteController = tau0->controllers[idxToEval];
-			tau1->requestFromCommonTAU = true;
+			if(!tau1->requestFromCommonTAU) {
+				printf("TAU: Eliminating the second ambiguity - requesting the evaluation of controller %d from the second TAU in constructor argument list\n", IDToEval);
+				tau1->remoteController = tau0->controllers[idxToEval];
+				tau1->requestFromCommonTAU = true;
+			}
+			else
+				printf("TAU: Second TAU in constructor argument list is busy, leaving it alone. Intended request was %d\n", IDToEval);
 		}
 	}
 
@@ -660,7 +715,7 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 //				secondController = optimizer->Genome_Get_Most_Different_But_Not(numControllers, controllers, numControllers, controllers);
 
 				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting best genome but not\n");
-				secondController = optimizer->Genome_Get_Best_But_Not(numControllers,controllers);
+				secondController = optimizer->Genome_Get_Best_But_Not(numControllers, controllers);
 			}
 
 			Controller_Store( secondController );
@@ -708,8 +763,18 @@ void TAU::Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimize
 			}
 			else {
 
-				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting most different genome but not\n");
-				secondController = optimizer->Genome_Get_Most_Different_But_Not(numControllers, controllers, otherTAU->numControllers, otherTAU->controllers);
+				int tot = numControllers + otherTAU->numControllers;
+				NEURAL_NETWORK* notSecond[tot];
+				for(int i=0; i<numControllers; i++)
+					notSecond[i] = controllers[i];
+				for(int i=0; i<otherTAU->numControllers; i++)
+					notSecond[numControllers+i] = otherTAU->controllers[i];
+
+				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting best genome but not\n");
+				secondController = optimizer->Genome_Get_Best_But_Not(tot, notSecond);
+
+//				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting most different genome but not\n");
+//				secondController = optimizer->Genome_Get_Most_Different_But_Not(numControllers, controllers, otherTAU->numControllers, otherTAU->controllers);
 
 //				printf("TAU::Controllers_Select_One_From_TAU_One_From_Optimizer: normal structure of self, getting random genome but not\n");
 //				secondController = optimizer->Genome_Get_Random_But_Not(numControllers,controllers);
@@ -757,7 +822,7 @@ void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer) {
 
 void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer, TAU* otherTAU) {
 
-	NEURAL_NETWORK* firstController = otherTAU->controllers[0];
+/*	NEURAL_NETWORK* firstController = otherTAU->controllers[0];
 	Controller_Store(firstController);
 	firstControllerIndex = numControllers-1;
 
@@ -766,6 +831,19 @@ void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer, TAU* other
 	notASecondController[1] = otherTAU->controllers[1];
 
 	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Most_Different_But_Not(2, notASecondController, 2, notASecondController);
+	Controller_Store( secondController );
+	secondControllerIndex = numControllers-1;*/
+
+	NEURAL_NETWORK* firstController = optimizer->Genome_Get_Best_But_Not(otherTAU->numControllers, otherTAU->controllers);
+	Controller_Store(firstController);
+	firstControllerIndex = numControllers-1;
+
+	NEURAL_NETWORK* notASecondController[1+otherTAU->numControllers];
+	notASecondController[0] = firstController;
+	for(int i=0; i<otherTAU->numControllers; i++)
+		notASecondController[i+1] = otherTAU->controllers[i];
+
+	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Best_But_Not(1+otherTAU->numControllers, notASecondController);
 	Controller_Store( secondController );
 	secondControllerIndex = numControllers-1;
 

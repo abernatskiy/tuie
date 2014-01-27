@@ -121,4 +121,6 @@ private:
 	void		Storage_Initialize(void);
 };
 
+double distance(TAU* tau0, TAU* tau1, int id0, int id1);
+
 #endif

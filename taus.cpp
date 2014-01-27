@@ -139,10 +139,10 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 //		tau[otherIdx]->Scores_Check();
 //		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		TAU* commonTAU;
-		if ( tau[0]->numControllers <= tau[1]->numControllers )
+//		if ( tau[0]->numControllers <= tau[1]->numControllers )
 			commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
-		else
-			commonTAU = new TAU(tau[1], tau[0]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+//		else
+//			commonTAU = new TAU(tau[1], tau[0]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		// no need to optimize anything - common TAU comes with batteries included
 
 		recentAmbiguities = commonTAU->ambiguities;
@@ -164,7 +164,8 @@ void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile)
 	NEURAL_NETWORK** savedControllers;
 	if( pid > 0 ) { // if we are not at the first iteration, ignore pointers to saved controllers returned by Controllers_Save_Pair()
 		int idx = indexByPID(pid);
-		savedControllers = tau[idx]->Controllers_Save_Pair(optimizer, outFile);
+		int other = idx==0 ? 1 : 0;
+		savedControllers = tau[idx]->Controllers_Save_Pair(optimizer, tau[other], outFile);
 	}
 	else if(pid == 0) { // if we are at the first iteration, use pointers to store the controllers in another tau
 		savedControllers = tau[0]->Controllers_Save_Pair(optimizer, outFile);

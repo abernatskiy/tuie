@@ -340,6 +340,59 @@ int* RANKING::ambiguousIDs()
 	return ambiguousIDs;
 }
 
+int* RANKING::extendedAmbiguousIDs()
+{
+	int* ambiguousIDs = new int[4*ambiguities()];
+	int* rel;
+	int aidx = 0;
+
+	int exp = 0;
+
+	for(int i=0; i<size-1; i++)
+	{
+		rel = list[i]->compare(list[i+1]);
+		if( rel[0] == 0 && rel[1] == 0 ) {
+			if( list[i]->opinions[0] != UND_SCR ) {
+				ambiguousIDs[aidx] = list[i]->id; // first two ends of free intervals are easily found
+				ambiguousIDs[aidx+1] = list[i+1]->id;
+
+				exp = i; // search for another ends of free intervals
+				while(  exp >= 0 &&
+								list[exp]->opinions[0] != UND_SCR &&
+								list[exp]->opinions[1] == UND_SCR )
+					exp--;
+				ambiguousIDs[aidx+2] = list[exp+1]->id;
+				exp = i+1;
+				while(  exp <= size-1 &&
+								list[exp]->opinions[0] == UND_SCR &&
+								list[exp]->opinions[1] != UND_SCR )
+					exp++;
+				ambiguousIDs[aidx+3] = list[exp-1]->id;
+			}
+			else {
+				ambiguousIDs[aidx+1] = list[i]->id;
+				ambiguousIDs[aidx] = list[i+1]->id;
+
+				exp = i;
+				while(  exp >= 0 &&
+								list[exp]->opinions[0] == UND_SCR &&
+								list[exp]->opinions[1] != UND_SCR )
+					exp--;
+				ambiguousIDs[aidx+3] = list[exp+1]->id;
+				exp = i+1;
+				while(  exp <= size-1 &&
+								list[exp]->opinions[0] != UND_SCR &&
+								list[exp]->opinions[1] == UND_SCR )
+					exp++;
+				ambiguousIDs[aidx+2] = list[exp-1]->id;
+			}
+			aidx += 4;
+		}
+		delete [] rel;
+	}
+	return ambiguousIDs;
+}
+
 void RANKING::rescore()
 {
 	for(int i=0; i<size-1; i++)

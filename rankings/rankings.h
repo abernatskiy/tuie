@@ -39,6 +39,7 @@ public:
 	int conflicts();
 	int ambiguities();
 	int* ambiguousIDs(); // warning - returns a pointer to an array on heap, may cause memory leaks if the array is not deleted properly
+	int* extendedAmbiguousIDs(); // warning - returns a pointer to an array on heap, may cause memory leaks if the array is not deleted properly
 	void rescore();
 
 	void printWithComparison();

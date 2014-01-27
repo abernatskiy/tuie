@@ -556,7 +556,7 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
-	speed = 1;
+	speed = 3;
 
 	simulateMode = MODE_SIMULATE_TAU;
 
@@ -1686,29 +1686,12 @@ int  ENVS::Target_Sensor_Values_Recorded(void) {
 	return( targetSensorValuesRecorded );
 }
 
-/*
-void ENVS::TAU_Get_Controllers_From_Optimizer(void) {
-
-	if ( !tau )
-		tau = new TAU;
-	tau->Controllers_Select_From_Optimizer(optimizer);
-}*/
-
 void ENVS::TAU_Load_Controller_Pair(ifstream *inFile) {
 
 	if ( !tau )
 		tau = new TAU;
 	tau->Controllers_Load_Pair(inFile);
 }
-
-/*
-void ENVS::TAU_Reset_User_Models(void) {
-
-	if ( optimizer )
-		optimizer->Scores_Reset();
-//	if ( taus )
-//		taus->userModelsReset();
-}*/
 
 void ENVS::TAU_Save_Controller_Pair(int pid, ofstream *outFile) {
 
