@@ -104,6 +104,7 @@ private:
 	int		  Controllers_Num_Needed_From_Optimizer(void); // read this function before rewriting Controllers_Select_From_Optimizer()
 	void    Controllers_Print(void);
 	void		Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer);
+	void		Controllers_Select_One_From_TAU_One_From_Optimizer(OPTIMIZER *optimizer, TAU* other);
 	void		Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer);
 	void		Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer, TAU* other);
 	void		Controllers_Select_Two_From_TAU(void);

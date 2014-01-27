@@ -120,7 +120,7 @@ bool TAUS::readyToPredict(void) {
 void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 
 	int idx = indexByPID(pid);
-	printf("TAUS: feeding %d %d %d to tau[%d]\n", firstID, secondID, pref, idx);
+	printf("TAUS: feeding %d %d %d to tau[%d] (PID %d)\n", firstID, secondID, pref, idx, pid);
 	tau[idx]->Store_Pref(firstID, secondID, pref);
 //	tau[idx]->Scores_Check();
 
@@ -132,7 +132,11 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 		printf("TAUS: merging individual TAUs to produce a common one\n");
 //		tau[otherIdx]->Scores_Check();
 //		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
-		TAU* commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+		TAU* commonTAU;
+		if ( tau[0]->numControllers <= tau[1]->numControllers )
+			commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+		else
+			commonTAU = new TAU(tau[1], tau[0]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		// no need to optimize anything - common TAU comes with batteries included
 
 		recentAmbiguities = commonTAU->ambiguities;
