@@ -47,6 +47,8 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 	double score[3];
 	double error[3];
 	bool ready[3];
+	for(int i=0; i<3; i++)
+		ready[i] = tau[i]->Ready_To_Predict();
 
 	if( ready[2] ) {
 		typeOfLastScore = 4;

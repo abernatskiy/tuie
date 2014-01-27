@@ -78,6 +78,7 @@ mv M3 $M3 > /dev/null 2>&1
 SEED=$RANDOM
 echo $SEED > SavedFiles/seed
 ./$M3 -null -r $SEED > SavedFiles/server_output.log 2>&1 &
+#./$M3 -null -r $SEED &
 sleep 1
 if [ $OPPOSING_USERS -eq 1 ]; then
 	./runclient 1 > /dev/null 2>&1 &
