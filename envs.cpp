@@ -834,6 +834,8 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 		delete tau;
 		tau = NULL;
 
+		sleep(15);
+
 		Destroy_Simulated_Objects();
 
 		Mode_Simulate_Set_Design();
