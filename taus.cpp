@@ -139,11 +139,10 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 //		tau[otherIdx]->Scores_Check();
 //		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		TAU* commonTAU;
-//		if ( tau[0]->numControllers <= tau[1]->numControllers )
+		if ( tau[0]->numControllers <= tau[1]->numControllers )
 			commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
-//		else
-//			commonTAU = new TAU(tau[1], tau[0]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
-		// no need to optimize anything - common TAU comes with batteries included
+		else
+			commonTAU = new TAU(tau[1], tau[0]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 
 		recentAmbiguities = commonTAU->ambiguities;
 		recentConflicts = commonTAU->conflicts;
