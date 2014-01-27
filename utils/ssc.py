@@ -10,4 +10,13 @@ for line in fileinput.input():
 	arr.append(float(line))
 
 narr = np.array(arr)
-print str(narr.mean()) + " " + str(narr.std())
+print "Mean " + str(narr.mean()) + " std " + str(narr.std())
+
+tmarr = np.array([])
+
+for i in range(0,100):
+	parr = np.random.permutation(narr)
+	marr = np.array(np.minimum(narr, parr))
+	tmarr = np.append(tmarr, marr)
+
+print "100 mins with a self-permutation: mean " + str(tmarr.mean()) + " std " + str(tmarr.std())
