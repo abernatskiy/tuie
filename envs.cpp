@@ -839,6 +839,8 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 		Destroy_Simulated_Objects();
 
 		Mode_Simulate_Set_Design();
+
+		client->deletePairFile();
 	}
 }
 
@@ -1306,8 +1308,6 @@ void ENVS::Load_Pair(void) {
 	delete inFile;
 	inFile = NULL;
 //	printf("CLIENT: pair load successful\n");
-
-	client->deletePairFile();
 }
 
 void ENVS::Load_Environments(ifstream *inFile) {
@@ -1590,9 +1590,11 @@ void ENVS::Save_All_Pairs_For_Pref(void) {
 	else { // if we are not in the beginning of the service
 		for(int i=0; i < server->noOfClients; i++) { // go through the client list
 			pid = server->clientList[i];
+//			printf("%d ", pid);
 			if( server->pairFileNameByPID(fileName, pid) != 0 ) // if pair files do not exist
 				Save_Pair_For_Pref(pid, fileName); // create them
 		}
+//		printf("\n");
 	}
 
 	server->checkIfFirstIterationAndMakeRecord();

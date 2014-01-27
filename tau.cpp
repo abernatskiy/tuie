@@ -305,6 +305,8 @@ NEURAL_NETWORK** TAU::Controllers_Save_Pair(OPTIMIZER *optimizer, ofstream *outF
 	NEURAL_NETWORK** savedControllers = new NEURAL_NETWORK*[2];
 	savedControllers[0] = controllers[firstControllerIndex];
 	savedControllers[1] = controllers[secondControllerIndex];
+
+//	printf("TAU: saving controllers %d and %d\n", controllers[firstControllerIndex]->ID, controllers[secondControllerIndex]->ID);
 	return savedControllers;
 }
 
