@@ -147,13 +147,14 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 
 		recentAmbiguities = commonTAU->ambiguities;
 		recentConflicts = commonTAU->conflicts;
-		if( commonTAU->ambiguities == 0 ) {
+		if( commonTAU->conflicts == 0 ) {
+//		if( commonTAU->conflicts == 0 && commonTAU->ambiguities == 0 ) {
 			commonTAU->Optimize();
 			delete tau[2];
 			tau[2] = commonTAU;
 		}
 		else {
-			printf("TAUS: ditching ambiguous common TAU till it gets better\n");
+			printf("TAUS: ditching conflicting common TAU forever\n");
 			delete commonTAU;
 		}
 	}
