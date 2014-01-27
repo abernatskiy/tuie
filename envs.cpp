@@ -556,7 +556,7 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
-	speed = 3;
+	speed = 1;
 
 	simulateMode = MODE_SIMULATE_TAU;
 
