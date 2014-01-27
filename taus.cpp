@@ -144,6 +144,7 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 		recentAmbiguities = commonTAU->ambiguities;
 		recentConflicts = commonTAU->conflicts;
 		if( commonTAU->ambiguities == 0 ) {
+			commonTAU->Optimize();
 			delete tau[2];
 			tau[2] = commonTAU;
 		}

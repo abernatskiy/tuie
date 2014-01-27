@@ -205,10 +205,6 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 
 	requestFromCommonTAU = false;
 	remoteController = NULL;
-
-	// batteries included
-	if ( ambiguities == 0 && conflicts == 0)
-		Optimize();
 }
 
 TAU::~TAU(void) {
