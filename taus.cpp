@@ -155,11 +155,15 @@ void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile)
 		int idx = indexByPID(pid);
 		savedControllers = tau[idx]->Controllers_Save_Pair(optimizer, outFile);
 	}
-	else { // if we are at the first iteration, use pointers to store the controllers in another tau
+	else if(pid == 0) { // if we are at the first iteration, use pointers to store the controllers in another tau
 		savedControllers = tau[0]->Controllers_Save_Pair(optimizer, outFile);
+	}
+	else if(pid == -1) {
 		savedControllers = tau[1]->Controllers_Save_Pair(optimizer, tau[0], outFile);
-//		tau[1]->Controller_Store(savedControllers[0]);
-//		tau[1]->Controller_Store(savedControllers[1]);
+	}
+	else {
+		printf("TAUS::controllersSavePair failed\n");
+		exit(1);
 	}
 
 	delete [] savedControllers;

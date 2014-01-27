@@ -30,23 +30,20 @@ short CLIENT::pairFileName(char* strspace) {
 
 	if( firstIteration ) {
 
-		sprintf(strspace, "SavedFiles/pair0.dat");
+		sprintf(strspace, "SavedFiles/pair0.dat_0");
 		if( fileExists(strspace) )
 			return 0;
-		else
-		{
-//			printf(".");
-//			exit(1);
-			return 1;
-		}
+
+		sprintf(strspace, "SavedFiles/pair0.dat_1");
+		if( fileExists(strspace) )
+			return 0;
+
+		return 1;
 	}
 
-	sprintf(tmpFileName, "SavedFiles/pair%d.dat", getPID());
-	if( fileExists(tmpFileName) ) {
-
-		sprintf(strspace, "SavedFiles/pair%d.dat", getPID());
+	sprintf(strspace, "SavedFiles/pair%d.dat", getPID());
+	if( fileExists(strspace) )
 		return 0;
-	}
 
 	return 1;
 }

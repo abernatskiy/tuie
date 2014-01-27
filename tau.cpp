@@ -712,7 +712,7 @@ void TAU::Controllers_Select_Two_From_Optimizer(OPTIMIZER *optimizer, TAU* other
 	notASecondController[0] = otherTAU->controllers[0];
 	notASecondController[1] = otherTAU->controllers[1];
 
-	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Random_But_Not(2, notASecondController);
+	NEURAL_NETWORK *secondController = optimizer->Genome_Get_Most_Different_But_Not(2, notASecondController, 2, notASecondController);
 	Controller_Store( secondController );
 	secondControllerIndex = numControllers-1;
 

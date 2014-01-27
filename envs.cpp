@@ -837,9 +837,6 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 		Destroy_Simulated_Objects();
 
 		Mode_Simulate_Set_Design();
-
-		client->deletePairFile();
-		client->checkIfFirstIterationAndMakeRecord();
 	}
 }
 
@@ -1285,9 +1282,16 @@ void ENVS::Load(int showGraphics) {
 void ENVS::Load_Pair(void) {
 
 	// called from M3 in CLIENT mode
+	char tmpFileName[100];
 	char fileName[100];
+	char command[200];
+	client->pairFileName(tmpFileName);
+	client->checkIfFirstIterationAndMakeRecord();
 	client->pairFileName(fileName);
-//	printf("CLIENT: loading pairs from %s\n", fileName);
+	sprintf(command, "mv %s %s > /dev/null 2>&1", tmpFileName, fileName);
+//	printf("CLIENT: about to execute %s\n", command);
+	system(command);
+
 	ifstream *inFile = new ifstream(fileName);
 
 	Camera_Position_Load(inFile,true);
@@ -1300,6 +1304,8 @@ void ENVS::Load_Pair(void) {
 	delete inFile;
 	inFile = NULL;
 //	printf("CLIENT: pair load successful\n");
+
+	client->deletePairFile();
 }
 
 void ENVS::Load_Environments(ifstream *inFile) {
