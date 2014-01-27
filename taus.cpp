@@ -54,9 +54,13 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 		typeOfLastScore = 4;
 		return tau[2]->Score_Predict(genome);
 	}
+	else if( ready[0] ) {
+		typeOfLastScore = 1;
+		return tau[0]->Score_Predict(genome);
+	}
 	else {
-		typeOfLastScore = -1;
-		return 1.0;
+		printf("You messed up score composition. See l.62 of taus.cpp\n");
+		exit(1);
 	}
 
 /*	for(int i=0; i<3; i++) {
