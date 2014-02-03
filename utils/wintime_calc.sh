@@ -24,11 +24,16 @@ for subdir in $DIR/*; do
 		ATTEMPTS=$((1+$ATTEMPTS))
 		CURWINTIME=`"$WINTIMEAPP" "${subdir}/summary.log"`
 		echo $CURWINTIME >> wintime.log
-		echo $CURWINTIME
+#		echo $CURWINTIME
 		WINTIME=`calc "print $WINTIME + $CURWINTIME"`
 	fi
 done
 
-WINTIME=`calc ${WINTIME}/$ATTEMPTS`
+#WINTIME=`calc ${WINTIME}/$ATTEMPTS`
 #echo Attempts $ATTEMPTS, wins $WINS, fraction $FRAC
-echo $ATTEMPTS $WINTIME
+#echo $ATTEMPTS $WINTIME
+
+echo Wintime:
+"${SCRDIR}/ssc.py" wintime.log
+echo Generations:
+"${SCRDIR}/ssc.py" gens.log | head -1

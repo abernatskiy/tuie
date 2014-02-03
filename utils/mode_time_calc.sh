@@ -19,4 +19,4 @@ done
 
 FRAC=`calc ${MODETIME}/$ALLTIME`
 echo "Out of $ALLTIME valid iterations $MODETIME ($FRAC) were spent in mode $MODE"
-echo $FRAC
+#echo $FRAC

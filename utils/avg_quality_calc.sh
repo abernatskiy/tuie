@@ -28,6 +28,8 @@ for subdir in $DIR/*; do
 	fi
 done
 
-WINTIME=`calc ${WINTIME}/$ATTEMPTS`
+#WINTIME=`calc ${WINTIME}/$ATTEMPTS`
 #echo Attempts $ATTEMPTS, wins $WINS, fraction $FRAC
-echo $ATTEMPTS $WINTIME
+#echo $ATTEMPTS $WINTIME
+echo Avg. quality:
+"${SCRDIR}/ssc.py" avg_quality.log | head -1
