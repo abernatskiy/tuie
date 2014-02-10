@@ -23,87 +23,10 @@ TAUS::TAUS(void) {
 	recentConflicts = 0;
 }
 
-/*
-TAUS::TAUS(ifstream* inFile) {
-
-	for(int i=0; i<3; i++)
-		tau[i] = new TAU(inFile);
-}*/
-
 TAUS::~TAUS(void) {
 
 	for(int i=0; i<3; i++)
 		delete tau[i];
-}
-
-/*
-void TAUS::save(ofstream* outFile) {
-
-	for(int i=0; i<3; i++)
-		tau[i]->Save(outFile);
-}*/
-
-double TAUS::score(NEURAL_NETWORK* genome) {
-
-	double score[3];
-	double error[3];
-	bool ready[3];
-/*	for(int i=0; i<3; i++)
-		ready[i] = tau[i]->Ready_To_Predict();
-
-	if( ready[2] ) {
-		typeOfLastScore = 4;
-		return tau[2]->Score_Predict(genome);
-	}
-	else if( ready[0] ) {
-		typeOfLastScore = 1;
-		return tau[0]->Score_Predict(genome);
-	}
-	else {
-		printf("You messed up score composition. See l.62 of taus.cpp\n");
-		exit(1);
-	}
-
-*/	for(int i=0; i<3; i++) {
-		ready[i] = tau[i]->Ready_To_Predict();
-		if( ready[i] ) {
-			score[i] = tau[i]->Score_Predict(genome);
-			error[i] = tau[i]->Model_Error();
-		}
-		else {
-			score[i] = TAU_NO_SCORE;
-			error[i] = TAU_OPTIMIZER_ERROR_UNDEFINED;
-		}
-	}
-
-	if( ready[0] && ready[1] ) {
-		if( ready[2] &&
-				error[0] > error[2] &&
-				error[1] > error[2] ) {
-			typeOfLastScore = 4;
-			return score[2];
-		}
-		else {
-			typeOfLastScore = 3;
-			return fmax( score[0], score[1] );
-		}
-	}
-	else {
-		if(ready[0]) {
-			typeOfLastScore = 1;
-			return score[0];
-		}
-		if(ready[1]) {
-			typeOfLastScore = 2;
-			return score[1];
-		}
-		if(ready[2]) {
-			typeOfLastScore = 5;
-			return score[2];
-		}
-		typeOfLastScore = -1;
-		return TAU_NO_SCORE;
-	}
 }
 
 void TAUS::writeScoreType(int generation, double time) {
@@ -138,25 +61,10 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 	{
 		printf("TAUS: merging individual TAUs to produce a common one\n");
 //		tau[otherIdx]->Scores_Check();
-//		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
-		TAU* commonTAU;
-		if ( tau[0]->numControllers <= tau[1]->numControllers )
-			commonTAU = new TAU(tau[0], tau[1]); // order of TAUs is important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
-		else
-			commonTAU = new TAU(tau[1], tau[0]);
-
-		recentAmbiguities = commonTAU->ambiguities;
-		recentConflicts = commonTAU->conflicts;
-		if( commonTAU->conflicts == 0 ) {
-//		if( commonTAU->conflicts == 0 && commonTAU->ambiguities == 0 ) {
-			commonTAU->Optimize();
-			delete tau[2];
-			tau[2] = commonTAU;
-		}
-		else {
-			printf("TAUS: ditching conflicting common TAU forever\n");
-			delete commonTAU;
-		}
+		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]);
+		commonTAU->Optimize();
+		delete tau[2];
+		tau[2] = commonTAU;
 	}
 }
 
@@ -277,7 +185,7 @@ void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
 	printf("TAU%d: ", tauidx);
 	for( int j=0; j<AFPO_POP_SIZE; j++ ) {
 		if( optimizer->genomes[j] && optimizer->genomes[j]->sensorTimeSeries ) {
-			printf("%2.2lf ", tau[tauidx]->Score_Predict(optimizer->genomes[j]));
+			printf("%2.2lf ", tau[tauidx]->Score_Predict(optimizer->genomes[AFPO_POP_SIZE/2], optimizer->genomes[j]));
 			output[j] = 1.0;
 
 //			hiscores[i] = hiscores[i] < scores[i][j] ? scores[i][j] : hiscores[i];

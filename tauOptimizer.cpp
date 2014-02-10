@@ -36,16 +36,16 @@ TAU_OPTIMIZER::~TAU_OPTIMIZER(void) {
 	}
 }
 
-void TAU_OPTIMIZER::Optimize(int numControllers, NEURAL_NETWORK **controllers) {
+void TAU_OPTIMIZER::Optimize(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers) {
 
 	// Train the current user model on the supplied controllers.
 	if ( !model )
 		model = new USER_MODEL(controllers[0]->numSensors);
 
-	modelError = model->Evaluate(numControllers,controllers);
+	modelError = model->Evaluate(numControllers, preferences, controllers);
 }
 
-void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
+/*void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 					int numControllers,
 					NEURAL_NETWORK **controllers) {
 
@@ -58,7 +58,7 @@ void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 			predictedScore,
 			fabs(actualScore-predictedScore));
 	}
-}
+}*/
 
 int TAU_OPTIMIZER::Ready_To_Predict(void) {
 
@@ -87,23 +87,20 @@ void TAU_OPTIMIZER::Save(ofstream *outFile) {
 	(*outFile) << modelError << "\n";
 }
 
-double TAU_OPTIMIZER::Score_Predict(NEURAL_NETWORK *controller) {
-
-	// For the supplied controller, use the best user model
-	// to predict its score.
+double TAU_OPTIMIZER::Score_Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
 
 	if ( !model )
 		return( TAU_NO_SCORE );
-	return( model->Predict(controller->sensorTimeSeries) );
+	return( model->Predict(controller1, controller2) );
 }
 
-void TAU_OPTIMIZER::User_Models_Reset(int numControllers, NEURAL_NETWORK **controllers) {
+/*void TAU_OPTIMIZER::User_Models_Reset(int numControllers, NEURAL_NETWORK **controllers) {
 
 	Print_Predictions(model,numControllers,controllers);
 
 	printf("%5.5f\n",modelError);
 
 	modelError = model->Evaluate(numControllers,controllers);
-}
+}*/
 
 #endif

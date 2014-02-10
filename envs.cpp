@@ -556,7 +556,7 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
-	speed = 1;
+	speed = 3;
 
 	simulateMode = MODE_SIMULATE_TAU;
 
@@ -772,18 +772,6 @@ int ENVS::TAU_Ready_To_Predict(void) {
 	if ( !taus )
 		return( false );
 	return( taus->readyToPredict() );
-}
-
-double ENVS::TAU_Score_Get(void) {
-
-	// called from Evolve()
-
-	// Get the current controller that was just evaluated,
-//	NEURAL_NETWORK *currentController = taskEnvironments[0]->robots[0]->neuralNetwork;
-
-	// and return the predicted score of that controller.
-//	return( taus->score(currentController) );
-	return taus->score(controllerUnderEvaluation);
 }
 
 void ENVS::TAU_Show_Robot_Pair( dWorldID world, dSpaceID space ) {

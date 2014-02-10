@@ -122,143 +122,23 @@ TAU::TAU(ifstream *inFile) {
 
 TAU::TAU(TAU* tau0, TAU* tau1) {
 
+	timer = 0; // irrelevant
+	numControllers = tau0->numControllers; // TEMPORARY
+	controllers = tau0->controllers; // TEMPORARY
+	preferences = tau0->preferences; //TEMPORARY
+
+	firstControllerIndex  = -1; // irrelevant
+	secondControllerIndex = -1; // irrelevant
+
+	tauOptimizer = tau0->tauOptimizer; // TEMPORARY
+	nextControllerForTraining = 0; // irrelevant
+
 	commonTAU = true;
-
-	RANKING* ranking0 = new RANKING(tau0->numControllers + tau1->numControllers);
-	RANKING* ranking1 = new RANKING(tau1->numControllers);
-
-	for(int i=0; i<tau0->numControllers; i++)
-		if(tau0->controllers[i]->Score_Get() != TAU_NO_SCORE)
-			ranking0->autoInsert(tau0->controllers[i]->ID, tau0->controllers[i]->Score_Get(), 0);
-	for(int i=0; i<tau1->numControllers; i++)
-		if(tau1->controllers[i]->Score_Get() != TAU_NO_SCORE)
-			ranking1->autoInsert(tau1->controllers[i]->ID, tau1->controllers[i]->Score_Get(), 1);
-
-	ranking0->merge(ranking1);
-	delete ranking1;
-
-	ambiguities = ranking0->ambiguities();
-	conflicts = ranking0->conflicts();
-//	if( ambiguities > 0 )
-		ranking0->print();
-	printf("TAU: Common TAU ranking constructed: %d elements, %d conflicts, %d ambiguities\n", ranking0->size, conflicts, ambiguities);
-
-	/**************** Ambiguity removal ****************/
-
-	if(ambiguities > 0) {
-
-		int* ambiguousIDs = ranking0->extendedAmbiguousIDs();
-		// structure of the ranking around the ambiguity (guaranteed by RANKING implementation):
-		//				tau0		tau1
-		//				...(non-amb)...
-		//	ID..	sc		u
-		//						....
-		//	ID0		sc		u
-		//	ID1		u			sc
-		//						....
-		//  ID..	u			sc
-		//				...(non-amb)...
-		printf("%d ambiguities to remove. Ids:\n", ambiguities);
-		for(int i=0; i<ambiguities*4; i+=4)
-			printf("%d %d\t\tvs\t\t%d %d\n", ambiguousIDs[i], ambiguousIDs[i+1], ambiguousIDs[i+2], ambiguousIDs[i+3]);
-
-		double distances[ambiguities*2];
-		for(int i=0; i<ambiguities*4; i+=2)
-			distances[i/2] = distance(tau0, tau1, ambiguousIDs[i], ambiguousIDs[i+1]);
-		printf("Corresponding distances:\n");
-		for(int i=0; i<ambiguities*2; i+=2)
-			printf("%le\t\tvs\t\t%le\n", distances[i], distances[i+1]);
-
-		int IDToEval;
-		if(distances[0]<distances[1])
-			IDToEval = ambiguousIDs[1];
-		else
-			IDToEval = ambiguousIDs[3];
-
-//		delete [] ambiguousIDs;
-
-		int idxToEval = tau1->Find_Index(IDToEval);
-		if( idxToEval < 0 ) {
-			printf("TAU: ID determination error\n");
-			exit(1);
-		}
-
-		if(!tau0->requestFromCommonTAU) {
-			printf("TAU: Eliminating the first ambiguity - requesting the evaluation of controller %d from the first TAU in constructor argument list\n", IDToEval);
-			tau0->remoteController = tau1->controllers[idxToEval];
-			tau0->requestFromCommonTAU = true;
-		}
-		else
-			printf("TAU: First TAU in constructor argument list is busy, leaving it alone. Intended request was %d\n", IDToEval);
-
-		if(ambiguities > 1) {
-
-			if(distances[2]<distances[3])
-				IDToEval = ambiguousIDs[4];
-			else
-				IDToEval = ambiguousIDs[6];
-
-			idxToEval = tau0->Find_Index(IDToEval);
-			if( idxToEval < 0 ) {
-				printf("TAU: ID determination error\n");
-				exit(1);
-			}
-
-			if(!tau1->requestFromCommonTAU) {
-				printf("TAU: Eliminating the second ambiguity - requesting the evaluation of controller %d from the second TAU in constructor argument list\n", IDToEval);
-				tau1->remoteController = tau0->controllers[idxToEval];
-				tau1->requestFromCommonTAU = true;
-			}
-			else
-				printf("TAU: Second TAU in constructor argument list is busy, leaving it alone. Intended request was %d\n", IDToEval);
-		}
-	}
-
-	/*********************** End of ambiguity removal ***********************/
-
-	ranking0->rescore();
-
-	numControllers = 0;
-	int curidx;
-	NEURAL_NETWORK* curctr;
-	controllers = NULL;
-	for(int i=0; i<ranking0->size; i++)
-	{
-		if(tau0->Find_Index(ranking0->list[i]->id) >= 0)
-		{
-			curidx = tau0->Find_Index(ranking0->list[i]->id);
-			curctr = tau0->controllers[curidx];
-		}
-		else if(tau1->Find_Index(ranking0->list[i]->id) >= 0)
-		{
-			curidx = tau1->Find_Index(ranking0->list[i]->id);
-			curctr = tau1->controllers[curidx];
-		}
-		else
-		{
-			printf("TAU: error - found an id in ranking which is not in either tau. Exiting.\n");
-			exit(1);
-		}
-
-		Controller_Store_Without_ID_Check(curctr);
-		controllers[i]->Score_Set(ranking0->list[i]->opinions[0]);
-	}
-
-	delete ranking0;
-
-	tauOptimizer = NULL;
-
-	scoreMin = 0.0;
-	scoreMax = 1.0;
-
-	// those are irrelevant to merged TAUs
-	preferences = NULL;
-	firstControllerIndex  = -1;
-	secondControllerIndex = -1;
-	timer = 0;
-	nextControllerForTraining = 0;
+	conflicts = 0;
+	ambiguities = 0;
 
 	requestFromCommonTAU = false;
+	currentJobFromCommonTAU = false;
 	remoteController = NULL;
 }
 
@@ -425,7 +305,7 @@ void TAU::Optimize(void) {
 		tauOptimizer = new TAU_OPTIMIZER();
 
 //	printf("TAU::Optimize: optimizing for %d controllers, numControllers %d\n", Controllers_Available_For_Optimization(), numControllers);
-	tauOptimizer->Optimize( Controllers_Available_For_Optimization() , controllers );
+	tauOptimizer->Optimize( Controllers_Available_For_Optimization(), preferences, controllers );
 }
 
 void TAU::Print(void) {
@@ -486,11 +366,11 @@ void TAU::Save(ofstream *outFile) {
 	(*outFile) << scoreMax << "\n";
 }
 
-double TAU::Score_Predict(NEURAL_NETWORK *controller) {
+double TAU::Score_Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
 
 	if ( !tauOptimizer )
 		return( TAU_NO_SCORE );
-	return( tauOptimizer->Score_Predict(controller) );
+	return( tauOptimizer->Score_Predict(controller1, controller2) );
 }
 
 void TAU::Store_Pref(int firstID, int secondID, int pref) {

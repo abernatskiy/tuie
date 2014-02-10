@@ -97,7 +97,6 @@ public:
 	void Speed_Increase(void);
 //	NEURAL_NETWORK *TAU_Get_User_Favorite(void);
 	int  TAU_Ready_To_Predict(void);
-	double TAU_Score_Get(void);
 	void TAU_Show_Robot_Pair( dWorldID world, dSpaceID space); // CLIENT code - old-style tau kept
 	void TAU_User_Has_Indicated_A_Preference(dWorldID world, dSpaceID space); // CLIENT code - old-style tau kept
 	void Video_Record(void);

@@ -12,7 +12,7 @@ extern int    TAU_NUM_NEURONS;
 extern int    STARTING_EVALUATION_TIME;
 extern int    ALG_VARIANT_PREFS_ONLY;
 extern int    TAU_NUM_SENSOR_ROWS;
-extern int    TAU_BACK_PROP_TRAINING_ITERATIONS_MAX;
+extern int    TAU_BACK_PROP_ITER_MAX_MULTIPLIER;
 
 USER_MODEL::USER_MODEL(int numS) {
 
@@ -53,18 +53,11 @@ void USER_MODEL::Allocate_ANN(void) {
 
 	ANN = new CBackProp(3,layerSizes,0.1,0.1);
 
-/*	int *layerSizes = new int[2];
-
-	layerSizes[0] = 1;
-	layerSizes[1] = 6;
-
-	ANN = new CBackProp(2,layerSizes,0.1,0.1);*/
-
 	delete [] layerSizes;
 	layerSizes = NULL;
 }
 
-double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
+double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETWORK **controllers) {
 
 //	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
 
@@ -73,36 +66,88 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 //	   printf("%d(%2.2f) ", controllers[i]->ID, controllers[i]->Score_Get());
 //  printf("\n");
 
-	double score, scorePrediction;
-	double totalError = 0.0;
-	double return_val = 0.0;
+	double scorePrediction;
+	int errors;
 	double* in = new double[7];
 	double* target = new double[1];
 
 	delete ANN;
 	Allocate_ANN();
 
-	int maxIterations = 30000*numControllers;
+	int maxIterations = TAU_BACK_PROP_ITER_MAX_MULTIPLIER*numControllers*(numControllers-1)/2;
 
-	for (int j=0; j<maxIterations; j++) {
-		for (int i=0;	i<numControllers;	i++) {
+//	printf("Training user model on the following matrix:\n");
+//	preferences->Print(2);
 
-			MATRIX *sensorTimeSeries = controllers[i]->sensorTimeSeries;
-//			int sensorRow;
-			score = controllers[i]->Score_Get();
+	for (int iter=0; iter<maxIterations; iter++) {
 
-			if( score < 0 || score > 1 ) {
-				printf("USER_MODEL: error - bad score of %2.2f detected for ID %d, exiting\n", score, controllers[i]->ID);
-				exit(1);
+		for (int i=0;	i<(numControllers-1);	i++) {
+			for (int j=i+1; j<numControllers; j++) {
+
+				Extract_Feature_Vector(in, controllers[i], controllers[j]);
+
+				if (preferences->Get(i,j) > 0 )
+						target[0] = 1.0;
+				else if (preferences->Get(i,j) < 0)
+						target[0] = 0.0;
+				else
+						target[0] = 0.5;
+
+				ANN->bpgt(in,target);
+
 			}
+		}
 
-			int m=0;
-			for (int k=0;k<=10;k=k+2) {
-				//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
-				in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
-				m++;
+		errors = 0;
+		for (int i=0;	i<(numControllers-1);	i++) {
+			for (int j=i+1; j<numControllers; j++) {
+
+				Extract_Feature_Vector(in, controllers[i], controllers[j]);
+
+				ANN->ffwd(in);
+				scorePrediction = ANN->Out(0);
+
+				if (preferences->Get(i,j) > 0 )
+						target[0] = 1.0;
+				else if (preferences->Get(i,j) < 0)
+						target[0] = 0.0;
+				else
+						target[0] = 0.5;
+
+//				printf("bppgtd %d vs %d, target %2.2lf, got %2.2lf\n", controllers[i]->ID, controllers[j]->ID, target[0], scorePrediction);
+
+				if( (scorePrediction < 0.5 && target[0] > 0.5) ||
+						(scorePrediction > 0.5 && target[0] < 0.5) )
+					errors++;
 			}
-			in[m] = 1.0; // Bias node, in[6]
+		}
+//		printf("\n");
+
+		if (errors == 0) {
+			delete [] in;
+			delete [] target;
+			return 100.0/((double) iter);
+		}
+	}
+
+	printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers, maxIterations);
+	return 10000.0;
+}
+
+void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1, NEURAL_NETWORK* controller2) {
+
+	int m=0;
+	for( int k=0; k<=10; k=k+2 ) {
+		in[m] = controller2->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k) -
+			controller1->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+		m++;
+  }
+	if( controller1->ID > controller2->ID )
+		in[m] = 1.0;
+	else if( controller1->ID < controller2->ID )
+		in[m] = -1.0;
+	else
+		in[m] = 0.0;
 
 //			in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
 //			in[1] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 12);
@@ -111,54 +156,16 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 //			in[4] = 0;
 //			in[5] = 0;
 //			in[6] = 1.0;
-
-			target[0] = score;
-
-			ANN->bpgt(in,target);
-
-			scorePrediction = ANN->Out(0); // raw, unbiased prediction
-
-			totalError = totalError + fabs(score-scorePrediction);
-//				totalError += ANN->mse(target);
-
-			sensorTimeSeries = NULL;
-		}
-
-		if(totalError<0.2)
-			break;
-		else {
-			return_val = totalError;
-			totalError = 0.0;
-		}
-
-		if(j == maxIterations - 1)
-			printf("USER_MODEL: warning - max number of backpropagation iterations (%d) reached\n", maxIterations);
-	}
-
-	delete [] in;
-	delete [] target;
-
-	return( return_val / ((double) numControllers) );
 }
 
-double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
+double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
 
-//	int i;
-	double *in;
-	in = new double[7];
-//	in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
-
-	int m=0;
-	for (int k=0;k<=10;k=k+2) {
-		//in[m] = sensorTimeSeries->Get(STARTING_EVALUATION_TIME-1,k);
-		in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
-		m++;
-  }
-	in[m] = 1.0; // Bias neuron
-
+	double* in = new double[7];
+	Extract_Feature_Vector(in, controller1, controller2);
   ANN->ffwd(in);
 	delete [] in;
-	return( pow(ANN->Out(0),0.3) ); // artificial bias introduced to avoid underestimating individuals with low predicted score
+	return( ANN->Out(0) );
+//	return( 2*(ANN->Out(0) - 0.5) );
 }
 
 void USER_MODEL::Save(ofstream *outFile) {

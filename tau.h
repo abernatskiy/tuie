@@ -83,8 +83,7 @@ public:
 	double	Model_Error(void);
 
 	void		Save(ofstream *outFile);
-	double	Score_Predict(NEURAL_NETWORK *controller); // biased - returns a pow(, 0.3) of a score predicted by the backpropagated network of tau - see USER_MODEL::Predict
-//	void		User_Models_Reset(void); // never really called
+	double	Score_Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2);
   void    Controller_Store(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] if there are none present with such ID
   void    Controller_Store_Without_ID_Check(NEURAL_NETWORK *newController); // stores a copy of a given controller to controllers[] unconditionally
 
