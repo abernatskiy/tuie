@@ -628,12 +628,14 @@ void ENVS::Prepare_To_Run_Without_Graphics(dWorldID world, dSpaceID space) {
 
 void ENVS::Rescore_Population(void) {
 
-	for (int i=0; i<AFPO_POP_SIZE; i++) {
-		if (	optimizer	&&
-			optimizer->genomes[i] &&
-			optimizer->genomes[i]->sensorTimeSeries )
-			optimizer->genomes[i]->Score_Set( taus->score(optimizer->genomes[i]) );
-	}
+	if( optimizer )
+		taus->rescorePopulation(optimizer);
+//	for (int i=0; i<AFPO_POP_SIZE; i++) {
+//		if (	optimizer	&&
+//			optimizer->genomes[i] &&
+//			optimizer->genomes[i]->sensorTimeSeries )
+//			optimizer->genomes[i]->Score_Set( taus->score(optimizer->genomes[i]) );
+//	}
 }
 
 void ENVS::Reset(void) {

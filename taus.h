@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include "tau.h"
-//#include "neuralNetwork.h"
 
 class TAUS {
 
@@ -15,16 +14,6 @@ protected:
 	int recentAmbiguities, recentConflicts;
 
 public:
-	TAUS(void);
-//	TAUS(ifstream* inFile);
-	~TAUS(void);
-//	void save(ofstream* outFile);
-	double score(NEURAL_NETWORK* genome);
-	bool readyToPredict(void);
-	void storePref(int pid, int firstID, int secondID, int pref);
-//	void userModelsReset(void);
-	void controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile);
-
 	int typeOfLastScore;	// -1	TAU_NO_SCORE
 												// 0	no scores returned yet
 												// 1	score from tau[0]
@@ -32,10 +21,22 @@ public:
 												// 3	max(score(tau[0]), score(tau[1]))
 												// 4	score from common tau (tau[2])
 												// 5	score from common tau, when other taus are not functional
+
+	TAUS(void);
+	~TAUS(void);
+	double score(NEURAL_NETWORK* );
+	bool readyToPredict(void);
+	void storePref(int pid, int firstID, int secondID, int pref);
+	void controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile);
+
 	void writeScoreType(int generation, double time);
+
+	void rescorePopulation(OPTIMIZER* optimizer);
 
 private:
 	int indexByPID(int pid);
+
+	void rawScores(double* output, int tauidx, OPTIMIZER* optimizer);
 };
 
 #endif

@@ -7,6 +7,7 @@
 
 extern double TAU_NO_SCORE;
 extern double TAU_OPTIMIZER_ERROR_UNDEFINED;
+extern int AFPO_POP_SIZE;
 
 TAUS::TAUS(void) {
 
@@ -140,9 +141,9 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 //		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		TAU* commonTAU;
 		if ( tau[0]->numControllers <= tau[1]->numControllers )
-			commonTAU = new TAU(tau[0], tau[1]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+			commonTAU = new TAU(tau[0], tau[1]); // order of TAUs is important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
 		else
-			commonTAU = new TAU(tau[1], tau[0]); // order of TAUs may be important here - in case of ambiguity TAU(TAU* tau0, TAU* tau1) will ask tau0 to resolve it
+			commonTAU = new TAU(tau[1], tau[0]);
 
 		recentAmbiguities = commonTAU->ambiguities;
 		recentConflicts = commonTAU->conflicts;
@@ -181,6 +182,70 @@ void TAUS::controllersSavePair(int pid, OPTIMIZER* optimizer, ofstream* outFile)
 	delete [] savedControllers;
 }
 
+void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
+
+	double scores[3][AFPO_POP_SIZE];
+
+	double error[3] = {TAU_OPTIMIZER_ERROR_UNDEFINED, TAU_OPTIMIZER_ERROR_UNDEFINED, TAU_OPTIMIZER_ERROR_UNDEFINED};
+	bool ready[3];
+
+	// filling our scores array with proper values (see rawScores)
+	for( int i=0; i<3; i++ ) {
+		ready[i] = tau[i]->Ready_To_Predict();
+		if( ready[i] ) {
+			error[i] = tau[i]->Model_Error();
+			rawScores(scores[i], i, optimizer);
+		}
+		else
+			for(int j=0; j<AFPO_POP_SIZE; j++)
+				scores[i][j] = TAU_NO_SCORE;
+	}
+
+	// deciding which score to use and performing the rescoring
+	if( ready[0] && ready[1] ) {
+		if( ready[2] &&
+				error[0] > error[2] &&
+				error[1] > error[2] ) {
+
+			typeOfLastScore = 4;
+			for( int j=0; j<AFPO_POP_SIZE; j++ )
+				optimizer->genomes[j]->Score_Set( scores[2][j] );
+			return;
+		}
+		else {
+			typeOfLastScore = 3;
+			for( int j=0; j<AFPO_POP_SIZE; j++ )
+				optimizer->genomes[j]->Score_Set( fmax( scores[0][j], scores[1][j] ) );
+			return;
+		}
+	}
+	else {
+		if(ready[0]) {
+			typeOfLastScore = 1;
+			for( int j=0; j<AFPO_POP_SIZE; j++ )
+				optimizer->genomes[j]->Score_Set( scores[0][j] );
+			return;
+		}
+		if(ready[1]) {
+			typeOfLastScore = 2;
+			printf("TAUS: WARNING - tau[1] is ready before tau[0]\n");
+			for( int j=0; j<AFPO_POP_SIZE; j++ )
+				optimizer->genomes[j]->Score_Set( scores[1][j] );
+			return;
+		}
+		if(ready[2]) {
+			typeOfLastScore = 5;
+			printf("TAUS: WARNING - common tau is ready before any other\n");
+			for( int j=0; j<AFPO_POP_SIZE; j++ )
+				optimizer->genomes[j]->Score_Set( scores[2][j] );
+			return;
+		}
+		typeOfLastScore = -1;
+		printf("TAUS: WARNING - decision maker default case reached\n");
+		return;
+	}
+}
+
 /*** private methods ***/
 
 int TAUS::indexByPID(int pid) {
@@ -197,6 +262,44 @@ int TAUS::indexByPID(int pid) {
 	printf("No more than two clients allowed.\n");
 	exit(1);
 	return -9999;
+}
+
+void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
+
+	// TEMPORARY SUBSTITUTE
+
+//	double hiscores[3] = {-1*INFINITY, -1*INFINITY, -1*INFINITY};
+//	double loscores[3] = {INFINITY, INFINITY, INFINITY};
+
+	// use straightforward TAU predictions where available, TAU_NO_SCORE where not
+	// taking notes on min and max scores
+
+	printf("TAU%d: ", tauidx);
+	for( int j=0; j<AFPO_POP_SIZE; j++ ) {
+		if( optimizer->genomes[j] && optimizer->genomes[j]->sensorTimeSeries ) {
+			printf("%2.2lf ", tau[tauidx]->Score_Predict(optimizer->genomes[j]));
+			output[j] = 1.0;
+
+//			hiscores[i] = hiscores[i] < scores[i][j] ? scores[i][j] : hiscores[i];
+//			loscores[i] = loscores[i] > scores[i][j] ? scores[i][j] : loscores[i];
+		}
+		else {
+			printf("%2.2lf ", TAU_NO_SCORE);
+			output[j] = TAU_NO_SCORE;
+			printf("TAUS: WARNING - the number of simulated individuals in AFPO population is less than expected\n");
+		}
+	}
+	printf("\n");
+
+	// normalizing scores
+//	for( int i=0; i<3; i++ ) {
+//		if( ready[i] ) {
+//			for( int j=0; j<AFPO_POP_SIZE; j++ ) {
+//				if( scores[i][j] != TAU_NO_SCORE )
+//					scores[i][j] = (scores[i][j] - loscores[i])/(hiscores[i] - loscores[i]);
+//			}
+//		}
+//	}
 }
 
 #endif
