@@ -47,7 +47,7 @@ void USER_MODEL::Allocate_ANN(void) {
 
 	int *layerSizes = new int[3];
 
-	layerSizes[0] = 7;
+	layerSizes[0] = 13;
 	layerSizes[1] = 6;
 	layerSizes[2] = 1;
 
@@ -68,7 +68,7 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 
 	double scorePrediction;
 	int errors;
-	double* in = new double[7];
+	double* in = new double[13];
 	double* target = new double[1];
 
 	delete ANN;
@@ -92,7 +92,13 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 						target[0] = 0.0;
 				else
 						target[0] = 0.5;
+				ANN->bpgt(in,target);
 
+				// learning antisymmetry
+//				ANN->ffwd(in);
+//				target[0] = 1.0 - ANN->Out(0);
+				target[0] = 1.0 - target[0];
+				Extract_Feature_Vector(in, controllers[j], controllers[i]);
 				ANN->bpgt(in,target);
 
 			}
@@ -114,14 +120,22 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 				else
 						target[0] = 0.5;
 
-//				printf("bppgtd %d vs %d, target %2.2lf, got %2.2lf\n", controllers[i]->ID, controllers[j]->ID, target[0], scorePrediction);
-
 				if( (scorePrediction < 0.5 && target[0] > 0.5) ||
 						(scorePrediction > 0.5 && target[0] < 0.5) )
 					errors++;
+
+				// checking the antisymmetry
+				Extract_Feature_Vector(in, controllers[j], controllers[i]);
+
+				ANN->ffwd(in);
+				scorePrediction = ANN->Out(0);
+
+				if( (scorePrediction < 0.5 && target[0] < 0.5) ||
+						(scorePrediction > 0.5 && target[0] > 0.5) )
+					errors++;
+//				printf("bppgtd %d vs %d, target %2.2lf, got %2.2lf\n", controllers[i]->ID, controllers[j]->ID, target[0], scorePrediction);
 			}
 		}
-//		printf("\n");
 
 		if (errors == 0) {
 			delete [] in;
@@ -130,6 +144,8 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 		}
 	}
 
+	delete [] in;
+	delete [] target;
 	printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers, maxIterations);
 	return 10000.0;
 }
@@ -137,16 +153,22 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1, NEURAL_NETWORK* controller2) {
 
 	int m=0;
+
 	for( int k=0; k<=10; k=k+2 ) {
-		in[m] = controller2->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k) -
-			controller1->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+		in[m] =	controller1->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
 		m++;
   }
-	if( controller1->ID > controller2->ID )
-		in[m] = 1.0;
-	else if( controller1->ID < controller2->ID )
-		in[m] = -1.0;
-	else
+
+	for( int k=0; k<=10; k=k+2 ) {
+		in[m] = controller2->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+		m++;
+	}
+
+//	if( controller1->ID > controller2->ID )
+//		in[m] = 1.0;
+//	else if( controller1->ID < controller2->ID )
+//		in[m] = -1.0;
+//	else
 		in[m] = 0.0;
 
 //			in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
@@ -160,12 +182,12 @@ void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1,
 
 double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
 
-	double* in = new double[7];
+	double* in = new double[13];
 	Extract_Feature_Vector(in, controller1, controller2);
   ANN->ffwd(in);
 	delete [] in;
 	return( ANN->Out(0) );
-//	return( 2*(ANN->Out(0) - 0.5) );
+//	return( 2.0*(ANN->Out(0) - 1.0) );
 }
 
 void USER_MODEL::Save(ofstream *outFile) {

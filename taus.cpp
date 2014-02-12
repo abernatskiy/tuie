@@ -132,6 +132,12 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 			typeOfLastScore = 1;
 			for( int j=0; j<AFPO_POP_SIZE; j++ )
 				optimizer->genomes[j]->Score_Set( scores[0][j] );
+
+			printf("TAU%d:", 0);
+			for( int i=0; i<AFPO_POP_SIZE; i++ ) {
+				printf(" %2.2lf", optimizer->genomes[i]->Score_Get());
+			}
+			printf("\n");
 			return;
 		}
 		if(ready[1]) {
@@ -172,42 +178,122 @@ int TAUS::indexByPID(int pid) {
 	return -9999;
 }
 
-void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
+void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
+{
+	int size = end-start+1;
+	if( size < 2 )
+		return;
 
-	// TEMPORARY SUBSTITUTE
+	NEURAL_NETWORK* buf;
 
-//	double hiscores[3] = {-1*INFINITY, -1*INFINITY, -1*INFINITY};
-//	double loscores[3] = {INFINITY, INFINITY, INFINITY};
-
-	// use straightforward TAU predictions where available, TAU_NO_SCORE where not
-	// taking notes on min and max scores
-
-	printf("TAU%d: ", tauidx);
-	for( int j=0; j<AFPO_POP_SIZE; j++ ) {
-		if( optimizer->genomes[j] && optimizer->genomes[j]->sensorTimeSeries ) {
-			printf("%2.2lf ", tau[tauidx]->Score_Predict(optimizer->genomes[AFPO_POP_SIZE/2], optimizer->genomes[j]));
-			output[j] = 1.0;
-
-//			hiscores[i] = hiscores[i] < scores[i][j] ? scores[i][j] : hiscores[i];
-//			loscores[i] = loscores[i] > scores[i][j] ? scores[i][j] : loscores[i];
+	int i=0;
+	while( i<AFPO_POP_SIZE-1 ) {
+		while( i >= 0 && tau->Score_Predict(A[i], A[i+1]) > 0.5 ) {
+			buf = A[i];
+			A[i] = A[i+1];
+			A[i+1] = buf;
+			i--;
 		}
-		else {
-			printf("%2.2lf ", TAU_NO_SCORE);
-			output[j] = TAU_NO_SCORE;
-			printf("TAUS: WARNING - the number of simulated individuals in AFPO population is less than expected\n");
+		i++;
+	}
+
+	return;
+}
+
+/*void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
+{
+	int size = end-start+1;
+	if( size < 2 )
+		return;
+
+	NEURAL_NETWORK* pivot = A[0];
+	NEURAL_NETWORK** left = new NEURAL_NETWORK*[size-1];
+	NEURAL_NETWORK** right = new NEURAL_NETWORK*[size-1];
+
+	int l = 0; int r = 0; int i;
+	for(i=1; i<size; i++)
+	{
+		if( tau->Score_Predict(A[i], pivot) <= 0.5 )
+		{
+			left[l] = A[i];
+			l++;
+		}
+		else
+		{
+			right[r] = A[i];
+			r++;
 		}
 	}
-	printf("\n");
+	int leftSize = l;
+	int rightSize = r;
 
-	// normalizing scores
-//	for( int i=0; i<3; i++ ) {
-//		if( ready[i] ) {
-//			for( int j=0; j<AFPO_POP_SIZE; j++ ) {
-//				if( scores[i][j] != TAU_NO_SCORE )
-//					scores[i][j] = (scores[i][j] - loscores[i])/(hiscores[i] - loscores[i]);
-//			}
-//		}
+	sortControllers(tau, left, 0, leftSize-1);
+	sortControllers(tau, right, 0, rightSize-1);
+
+	i = 0;
+	for(l=0; l<leftSize; l++)
+	{
+		A[i] = left[l];
+		i++;
+	}
+	A[i] = pivot;
+	i++;
+	for(r=0; r<rightSize; r++)
+	{
+		A[i] = right[r];
+		i++;
+	}
+
+	delete [] left;
+	delete [] right;
+	return;
+}*/
+
+void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
+
+	// quicksorting controllers
+
+	NEURAL_NETWORK* genomes1[AFPO_POP_SIZE];
+	for (int i=0; i<AFPO_POP_SIZE; i++)
+		genomes1[i] = optimizer->genomes[i];
+
+	sortControllers(tau[tauidx], genomes1, 0, AFPO_POP_SIZE-1);
+
+	extern int STARTING_EVALUATION_TIME;
+
+//	printf("X11%d:", tauidx);
+//	for( int i=0; i<AFPO_POP_SIZE; i++ ) {
+//		printf(" %2.2lf", genomes1[i]->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11));
 //	}
+//	printf("\n");
+
+	double consequentScores[AFPO_POP_SIZE];
+	for (int i=0; i<AFPO_POP_SIZE-1; i++)
+		consequentScores[i] = ((double) i)/((double) (AFPO_POP_SIZE-1));
+	consequentScores[AFPO_POP_SIZE-1] = 1.0;
+
+	printf("SCR%d:", tauidx);
+	int sum = 0;
+	for( int i=0; i<AFPO_POP_SIZE-1; i++ )
+		sum += (tau[tauidx]->Score_Predict(genomes1[i], genomes1[i+1]) > 0.5);
+//		printf(" %d-%2.2lf", tau[tauidx]->Score_Predict(genomes1[i], genomes1[i+1]) > 0.5, consequentScores[i]);
+	printf("%2.2lf\n", (double) sum/((double) AFPO_POP_SIZE));
+
+	for (int i=0; i<AFPO_POP_SIZE; i++) {
+		for (int j=0; j<AFPO_POP_SIZE; j++) {
+			if (optimizer->genomes[i] == genomes1[j]) {
+				output[i] = consequentScores[j];
+//				printf("found at %d, score %2.2lf\n", j, output[i]);
+			}
+		}
+	}
+
+//	printf("TAU%d:", tauidx);
+//	for( int i=0; i<AFPO_POP_SIZE; i++ ) {
+//		printf(" %2.2lf", output[i]);
+////				tau[tauidx]->Score_Predict(optimizer->genomes[j], optimizer->genomes[AFPO_POP_SIZE/2]));
+//	}
+//	printf("\n");
 }
 
 #endif
