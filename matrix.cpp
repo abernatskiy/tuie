@@ -1216,6 +1216,30 @@ void MATRIX::Print(int decimalPlaces) {
 	}
 }
 
+void MATRIX::PrintWithSums(int decimalPlaces) {
+
+	double sumsS[length];
+	for (int i=0;i<length;i++)
+		sumsS[i] = SumOfRow(i);
+
+	for (int i=0;i<length;i++) {
+		for (int j=0;j<width;j++) {
+			if ( decimalPlaces==0 )
+				printf("%0.0f ",vals[i*width+j]);
+			else if ( decimalPlaces==1 )
+				printf("%1.1f ",vals[i*width+j]);
+			else if ( decimalPlaces==2 )
+				printf("%2.2f ",vals[i*width+j]);
+			else if ( decimalPlaces==3 )
+				printf("%3.3f ",vals[i*width+j]);
+			else
+				printf("%12.12f ",vals[i*width+j]);
+		}
+		printf("\t%2.2f", sumsS[i]);
+		printf("\n");
+	}
+}
+
 void MATRIX::Print(int i1, int i2, int j1, int j2) {
 
 	for (int i=i1;i<=i2;i++) {

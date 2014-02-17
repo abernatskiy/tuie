@@ -76,13 +76,14 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 
 	int maxIterations = TAU_BACK_PROP_ITER_MAX_MULTIPLIER*numControllers*(numControllers-1)/2;
 
-//	printf("Training user model on the following matrix:\n");
-//	preferences->Print(2);
+	printf("Training user model on the following matrix:\n");
+	preferences->PrintWithSums(2);
 
+	int reqiter;
 	for (int iter=0; iter<maxIterations; iter++) {
 
-		for (int i=0;	i<(numControllers-1);	i++) {
-			for (int j=i+1; j<numControllers; j++) {
+		for (int i=0;	i<numControllers;	i++) {
+			for (int j=0; j<numControllers; j++) {
 
 				Extract_Feature_Vector(in, controllers[i], controllers[j]);
 
@@ -93,25 +94,17 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 				else
 						target[0] = 0.5;
 				ANN->bpgt(in,target);
-
-				// learning antisymmetry
-//				ANN->ffwd(in);
-//				target[0] = 1.0 - ANN->Out(0);
-				target[0] = 1.0 - target[0];
-				Extract_Feature_Vector(in, controllers[j], controllers[i]);
-				ANN->bpgt(in,target);
-
 			}
 		}
 
 		errors = 0;
-		for (int i=0;	i<(numControllers-1);	i++) {
-			for (int j=i+1; j<numControllers; j++) {
+		for (int i=0;	i<numControllers;	i++) {
+			for (int j=0; j<numControllers; j++) {
 
-				Extract_Feature_Vector(in, controllers[i], controllers[j]);
-
-				ANN->ffwd(in);
-				scorePrediction = ANN->Out(0);
+				scorePrediction = Predict(controllers[i], controllers[j]);
+//				Extract_Feature_Vector(in, controllers[i], controllers[j]);
+//				ANN->ffwd(in);
+//				scorePrediction = ANN->Out(0);
 
 				if (preferences->Get(i,j) > 0 )
 						target[0] = 1.0;
@@ -125,10 +118,11 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 					errors++;
 
 				// checking the antisymmetry
-				Extract_Feature_Vector(in, controllers[j], controllers[i]);
 
-				ANN->ffwd(in);
-				scorePrediction = ANN->Out(0);
+				scorePrediction = Predict(controllers[j], controllers[i]);
+//				Extract_Feature_Vector(in, controllers[j], controllers[i]);
+//				ANN->ffwd(in);
+//				scorePrediction = ANN->Out(0);
 
 				if( (scorePrediction < 0.5 && target[0] < 0.5) ||
 						(scorePrediction > 0.5 && target[0] > 0.5) )
@@ -138,16 +132,32 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 		}
 
 		if (errors == 0) {
-			delete [] in;
-			delete [] target;
-			return 100.0/((double) iter);
+			reqiter = iter;
+			break;
 		}
 	}
 
+	MATRIX* demo = new MATRIX(numControllers, numControllers, 0.0);
+	for( int i=0; i<numControllers; i++ ) {
+		for( int j=0; j<numControllers; j++ ) {
+
+//			Extract_Feature_Vector(in, controllers[j], controllers[i]);
+//			ANN->ffwd(in);
+			demo->Set(i, j, Predict(controllers[i], controllers[j]));
+		}
+	}
+	printf("We learned:\n");
+	demo->PrintWithSums(2);
+
 	delete [] in;
 	delete [] target;
-	printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers, maxIterations);
-	return 10000.0;
+
+	if (errors == 0)
+		return 100.0/((double) reqiter);
+	else {
+		printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers, maxIterations);
+		return 10000.0;
+	}
 }
 
 void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1, NEURAL_NETWORK* controller2) {

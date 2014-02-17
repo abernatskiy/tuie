@@ -105,6 +105,7 @@ public:
 	void	 Perturb(double maxVal);
 	void	 Print(void);
 	void	 Print(int decimalPlaces);
+	void	 PrintWithSums(int decimalPlaces);
 	void	 Print(int i1, int i2, int j1, int j2);
 	void	 PrintColumn(int j);
 	void	 PrintRow(int i);

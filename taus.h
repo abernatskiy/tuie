@@ -36,7 +36,7 @@ public:
 private:
 	int indexByPID(int pid);
 
-	void sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end);
+//	void sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end);
 	void rawScores(double* output, int tauidx, OPTIMIZER* optimizer);
 };
 

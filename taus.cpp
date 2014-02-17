@@ -134,9 +134,8 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 				optimizer->genomes[j]->Score_Set( scores[0][j] );
 
 			printf("TAU%d:", 0);
-			for( int i=0; i<AFPO_POP_SIZE; i++ ) {
+			for( int i=0; i<AFPO_POP_SIZE; i++ )
 				printf(" %2.2lf", optimizer->genomes[i]->Score_Get());
-			}
 			printf("\n");
 			return;
 		}
@@ -178,6 +177,7 @@ int TAUS::indexByPID(int pid) {
 	return -9999;
 }
 
+/* ///// bubble sort for controllers /////
 void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
 {
 	int size = end-start+1;
@@ -198,9 +198,10 @@ void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
 	}
 
 	return;
-}
+}*/
 
-/*void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
+/* ///// quicksort for controllers /////
+void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
 {
 	int size = end-start+1;
 	if( size < 2 )
@@ -251,15 +252,22 @@ void TAUS::sortControllers(TAU* tau, NEURAL_NETWORK** A, int start, int end)
 
 void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
 
-	// quicksorting controllers
+/*	printf("\nStarting raw scores generation\n");
+	printf("TAU preferences matrix\n");
+	tau[tauidx]->preferences->PrintWithSums(2);
 
-	NEURAL_NETWORK* genomes1[AFPO_POP_SIZE];
-	for (int i=0; i<AFPO_POP_SIZE; i++)
-		genomes1[i] = optimizer->genomes[i];
+  MATRIX* demo = new MATRIX(tau[tauidx]->numControllers, tau[tauidx]->numControllers, 0.0);
+  for( int i=0; i<tau[tauidx]->numControllers; i++ ) {
+    for( int j=0; j<tau[tauidx]->numControllers; j++ ) {
 
-	sortControllers(tau[tauidx], genomes1, 0, AFPO_POP_SIZE-1);
+      demo->Set(i, j, tau[tauidx]->Score_Predict(optimizer->genomes[i], optimizer->genomes[j]));
+    }
+  }
+  printf("Learned pref. matrix:\n");
+  demo->PrintWithSums(2);*/
 
-	extern int STARTING_EVALUATION_TIME;
+
+	MATRIX* approxPref = new MATRIX(AFPO_POP_SIZE, AFPO_POP_SIZE, 0.0);
 
 //	printf("X11%d:", tauidx);
 //	for( int i=0; i<AFPO_POP_SIZE; i++ ) {
@@ -267,33 +275,44 @@ void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
 //	}
 //	printf("\n");
 
-	double consequentScores[AFPO_POP_SIZE];
-	for (int i=0; i<AFPO_POP_SIZE-1; i++)
-		consequentScores[i] = ((double) i)/((double) (AFPO_POP_SIZE-1));
-	consequentScores[AFPO_POP_SIZE-1] = 1.0;
-
-	printf("SCR%d:", tauidx);
-	int sum = 0;
-	for( int i=0; i<AFPO_POP_SIZE-1; i++ )
-		sum += (tau[tauidx]->Score_Predict(genomes1[i], genomes1[i+1]) > 0.5);
-//		printf(" %d-%2.2lf", tau[tauidx]->Score_Predict(genomes1[i], genomes1[i+1]) > 0.5, consequentScores[i]);
-	printf("%2.2lf\n", (double) sum/((double) AFPO_POP_SIZE));
-
-	for (int i=0; i<AFPO_POP_SIZE; i++) {
-		for (int j=0; j<AFPO_POP_SIZE; j++) {
-			if (optimizer->genomes[i] == genomes1[j]) {
-				output[i] = consequentScores[j];
-//				printf("found at %d, score %2.2lf\n", j, output[i]);
-			}
+	for(int i=0; i<AFPO_POP_SIZE; i++) {
+		for(int j=0; j<AFPO_POP_SIZE; j++) {
+			approxPref->Set(i, j, tau[tauidx]->Score_Predict(optimizer->genomes[i], optimizer->genomes[j]));
 		}
 	}
 
-//	printf("TAU%d:", tauidx);
-//	for( int i=0; i<AFPO_POP_SIZE; i++ ) {
+/*	printf("Got an approximate preferences matrix for AFPO population:\n");
+	approxPref->PrintWithSums(2);*/
+
+	double min = INFINITY;
+	double max = -1*INFINITY;
+	for(int i=0; i<AFPO_POP_SIZE; i++) {
+		output[i] = approxPref->SumOfRow(i);
+		min = min > output[i] ? output[i] : min;
+		max = max < output[i] ? output[i] : max;
+	}
+
+// normalization
+//	printf("Normalizing scores: min %le, max %le\n", min, max);
+//	for(int i=0; i<AFPO_POP_SIZE; i++)
+//		output[i] = (output[i] - min)/(max - min);
+
+//	printf("SCR%d:", tauidx);
+//	for( int i=0; i<AFPO_POP_SIZE; i++ )
 //		printf(" %2.2lf", output[i]);
-////				tau[tauidx]->Score_Predict(optimizer->genomes[j], optimizer->genomes[AFPO_POP_SIZE/2]));
+//	printf("\n");
+
+//	for(int i=0; i<tau[tauidx]->numControllers-1; i++) {
+//		printf("%d\t", tau[tauidx]->preferences->Get(i,i+1));
 //	}
 //	printf("\n");
+
+//	for(int i=0; i<tau[tauidx]->numControllers; i++) {
+//		printf("%d\t", out);
+//	}
+//	printf("\n");
+
+	delete approxPref;
 }
 
 #endif
