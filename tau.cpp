@@ -134,16 +134,23 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 	ambiguities = 0;
 	tauOptimizer = NULL;
 
+	printf("TAU: constructing common TAU\n");
 	commonNumCont[0] = tau0->Controllers_Available_For_Optimization();
 	commonNumCont[1] = tau1->Controllers_Available_For_Optimization();
+	numControllers = commonNumCont[0] + commonNumCont[1];
+	printf("TAU: %d controllers from tau0, %d controllers from tau1\n", commonNumCont[0], commonNumCont[1]);
 
 	commonCont[0] = new NEURAL_NETWORK*[commonNumCont[0]];
-	for(int i=0; i<commonNumCont[0]; i++)
+	for(int i=0; i<commonNumCont[0]; i++) {
 		commonCont[0][i] = new NEURAL_NETWORK(tau0->controllers[i]);
+		commonCont[0][i]->sensorTimeSeries = new MATRIX(tau0->controllers[i]->sensorTimeSeries);
+	}
 
 	commonCont[1] = new NEURAL_NETWORK*[commonNumCont[1]];
-	for(int i=0; i<commonNumCont[1]; i++)
+	for(int i=0; i<commonNumCont[1]; i++) {
 		commonCont[1][i] = new NEURAL_NETWORK(tau1->controllers[i]);
+		commonCont[1][i]->sensorTimeSeries = new MATRIX(tau1->controllers[i]->sensorTimeSeries);
+	}
 
 	commonPref[0] = new MATRIX(tau0->preferences);
 	commonPref[1] = new MATRIX(tau1->preferences);
@@ -154,30 +161,6 @@ TAU::TAU(TAU* tau0, TAU* tau1) {
 }
 
 TAU::~TAU(void) {
-
-	if ( controllers ) {
-		for (int i=0;i<numControllers;i++) {
-			if ( controllers[i] ) {
-				delete controllers[i];
-				controllers[i] = NULL;
-			}
-		}
-		delete [] controllers;
-		controllers = NULL;
-	}
-
-	if ( preferences ) {
-		delete preferences;
-		preferences = NULL;
-	}
-
-	if ( tauOptimizer ) {
-		delete tauOptimizer;
-		tauOptimizer = NULL;
-	}
-
-	if( requestFromCommonTAU )
-		delete remoteController;
 
 	if(commonTAU) {
 		for(int i=0; i<commonNumCont[0]; i++) {
@@ -199,6 +182,32 @@ TAU::~TAU(void) {
 		delete commonPref[1];
 		commonPref[1] = NULL;
 	}
+	else {
+		if ( controllers ) {
+			for (int i=0;i<numControllers;i++) {
+				if ( controllers[i] ) {
+					delete controllers[i];
+					controllers[i] = NULL;
+				}
+			}
+			delete [] controllers;
+			controllers = NULL;
+		}
+
+		if ( preferences ) {
+			delete preferences;
+			preferences = NULL;
+		}
+
+		if( requestFromCommonTAU )
+			delete remoteController;
+	}
+
+	if ( tauOptimizer ) {
+		delete tauOptimizer;
+		tauOptimizer = NULL;
+	}
+
 }
 
 int TAU::All_Required_Preferences_Supplied(void) {
@@ -519,19 +528,26 @@ void TAU::Controller_Store_Sensor_Data(int controllerIndex, MATRIX *sensorData) 
 }
 
 int TAU::Controllers_Available_For_Optimization(void) {
-
+/*
 	int numAvailable = 0;
 
 	for (int i=0;	i<numControllers;	i++) {
 		if (	 controllers[i] &&
 			 controllers[i]->Score_Available() &&
 			(controllers[i]->Get_Sensor_Data() != NULL) &&
-			(controllers[i]->Score_Get() != TAU_NO_SCORE) )
+			(controllers[i]->Score_Get() != TAU_NO_SCORE) &&
+			preferences->SumOfRow(i) != 0)
 
 			numAvailable++;
 	}
 
 	return( numAvailable );
+*/
+
+	if(preferences->ValFoundOffTheDiagonal(0.0))
+		return numControllers-1;
+	else
+		return numControllers;
 }
 
 void TAU::Controllers_Expand(void) {

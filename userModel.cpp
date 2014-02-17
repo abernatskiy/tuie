@@ -92,6 +92,7 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 
 	printf("We learned:\n");
 	demo->PrintWithSums(2);
+	delete demo;
 
 	if (errors == 0)
 		return 100.0/((double) reqiter);
@@ -146,6 +147,9 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	demo0->PrintWithSums(2);
 	printf("First learned matrix:\n");
 	demo1->PrintWithSums(2);
+
+	delete demo0;
+	delete demo1;
 
 	if (errors == 0)
 		return 100.0/((double) reqiter);
@@ -215,6 +219,7 @@ void USER_MODEL::Learn_On_Matrix(int numControllers, MATRIX *preferences, NEURAL
 	double* in = new double[TAU_INPUTS];
 	double* target = new double[1];
 
+//		printf("here\n\n\n");
 	for (int i=0;	i<numControllers;	i++) {
 		for (int j=0; j<numControllers; j++) {
 
