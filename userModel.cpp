@@ -14,6 +14,8 @@ extern int    ALG_VARIANT_PREFS_ONLY;
 extern int    TAU_NUM_SENSOR_ROWS;
 extern int    TAU_BACK_PROP_ITER_MAX_MULTIPLIER;
 
+int TAU_INPUTS = 13;
+
 USER_MODEL::USER_MODEL(int numS) {
 
 	numSensors = numS;
@@ -47,7 +49,7 @@ void USER_MODEL::Allocate_ANN(void) {
 
 	int *layerSizes = new int[3];
 
-	layerSizes[0] = 13;
+	layerSizes[0] = TAU_INPUTS;
 	layerSizes[1] = 6;
 	layerSizes[2] = 1;
 
@@ -59,17 +61,7 @@ void USER_MODEL::Allocate_ANN(void) {
 
 double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETWORK **controllers) {
 
-//	printf("USER_MODEL: Backpropagating on  %d controllers\n", numControllers);
-
-//	printf("USER_MODEL: Backpropagating on  %d controllers, IDs: ", numControllers);
-//	  for(int i=0; i<numControllers; i++)
-//	   printf("%d(%2.2f) ", controllers[i]->ID, controllers[i]->Score_Get());
-//  printf("\n");
-
-	double scorePrediction;
 	int errors;
-	double* in = new double[13];
-	double* target = new double[1];
 
 	delete ANN;
 	Allocate_ANN();
@@ -82,54 +74,10 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 	int reqiter;
 	for (int iter=0; iter<maxIterations; iter++) {
 
-		for (int i=0;	i<numControllers;	i++) {
-			for (int j=0; j<numControllers; j++) {
-
-				Extract_Feature_Vector(in, controllers[i], controllers[j]);
-
-				if (preferences->Get(i,j) > 0 )
-						target[0] = 1.0;
-				else if (preferences->Get(i,j) < 0)
-						target[0] = 0.0;
-				else
-						target[0] = 0.5;
-				ANN->bpgt(in,target);
-			}
-		}
+		Learn_On_Matrix(numControllers, preferences, controllers);
 
 		errors = 0;
-		for (int i=0;	i<numControllers;	i++) {
-			for (int j=0; j<numControllers; j++) {
-
-				scorePrediction = Predict(controllers[i], controllers[j]);
-//				Extract_Feature_Vector(in, controllers[i], controllers[j]);
-//				ANN->ffwd(in);
-//				scorePrediction = ANN->Out(0);
-
-				if (preferences->Get(i,j) > 0 )
-						target[0] = 1.0;
-				else if (preferences->Get(i,j) < 0)
-						target[0] = 0.0;
-				else
-						target[0] = 0.5;
-
-				if( (scorePrediction < 0.5 && target[0] > 0.5) ||
-						(scorePrediction > 0.5 && target[0] < 0.5) )
-					errors++;
-
-				// checking the antisymmetry
-
-				scorePrediction = Predict(controllers[j], controllers[i]);
-//				Extract_Feature_Vector(in, controllers[j], controllers[i]);
-//				ANN->ffwd(in);
-//				scorePrediction = ANN->Out(0);
-
-				if( (scorePrediction < 0.5 && target[0] < 0.5) ||
-						(scorePrediction > 0.5 && target[0] > 0.5) )
-					errors++;
-//				printf("bppgtd %d vs %d, target %2.2lf, got %2.2lf\n", controllers[i]->ID, controllers[j]->ID, target[0], scorePrediction);
-			}
-		}
+		errors += Errors_On_Matrix(numControllers, preferences, controllers);
 
 		if (errors == 0) {
 			reqiter = iter;
@@ -138,19 +86,12 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 	}
 
 	MATRIX* demo = new MATRIX(numControllers, numControllers, 0.0);
-	for( int i=0; i<numControllers; i++ ) {
-		for( int j=0; j<numControllers; j++ ) {
-
-//			Extract_Feature_Vector(in, controllers[j], controllers[i]);
-//			ANN->ffwd(in);
+	for( int i=0; i<numControllers; i++ )
+		for( int j=0; j<numControllers; j++ )
 			demo->Set(i, j, Predict(controllers[i], controllers[j]));
-		}
-	}
+
 	printf("We learned:\n");
 	demo->PrintWithSums(2);
-
-	delete [] in;
-	delete [] target;
 
 	if (errors == 0)
 		return 100.0/((double) reqiter);
@@ -159,6 +100,85 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 		return 10000.0;
 	}
 }
+
+double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NEURAL_NETWORK **controllers0, int numControllers1, MATRIX *preferences1, NEURAL_NETWORK **controllers1) {
+
+	int errors;
+
+	delete ANN;
+	Allocate_ANN();
+
+	int maxIterations = TAU_BACK_PROP_ITER_MAX_MULTIPLIER*(numControllers0*(numControllers0-1) + numControllers1*(numControllers1-1))/2;
+
+	printf("Training user model on the following:\n");
+	printf("Matrix0:\n");
+	preferences0->PrintWithSums(2);
+	printf("Matrix1:\n");
+	preferences1->PrintWithSums(2);
+
+	int reqiter;
+	for (int iter=0; iter<maxIterations; iter++) {
+
+		Learn_On_Matrix(numControllers0, preferences0, controllers0);
+		Learn_On_Matrix(numControllers1, preferences1, controllers1);
+
+		errors = 0;
+		errors += Errors_On_Matrix(numControllers0, preferences0, controllers0);
+		errors += Errors_On_Matrix(numControllers1, preferences1, controllers1);
+
+		if (errors == 0) {
+			reqiter = iter;
+			break;
+		}
+	}
+
+	MATRIX* demo0 = new MATRIX(numControllers0, numControllers0, 0.0);
+	for( int i=0; i<numControllers0; i++ )
+		for( int j=0; j<numControllers0; j++ )
+			demo0->Set(i, j, Predict(controllers0[i], controllers0[j]));
+
+	MATRIX* demo1 = new MATRIX(numControllers1, numControllers1, 0.0);
+	for( int i=0; i<numControllers1; i++ )
+		for( int j=0; j<numControllers1; j++ )
+			demo1->Set(i, j, Predict(controllers1[i], controllers1[j]));
+
+	printf("Zeroth learned matrix:\n");
+	demo0->PrintWithSums(2);
+	printf("First learned matrix:\n");
+	demo1->PrintWithSums(2);
+
+	if (errors == 0)
+		return 100.0/((double) reqiter);
+	else {
+		printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers0 + numControllers1, maxIterations);
+		return 10000.0;
+	}
+}
+
+double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
+
+	double* in = new double[TAU_INPUTS];
+	Extract_Feature_Vector(in, controller1, controller2);
+  ANN->ffwd(in);
+	delete [] in;
+
+	return( ANN->Out(0) );
+//	return( 2.0*(ANN->Out(0) - 1.0) );
+}
+
+void USER_MODEL::Save(ofstream *outFile) {
+
+	(*outFile) << numSensors << "\n";
+
+	if ( ANN ) {
+		(*outFile) << "1\n";
+		ANN->Save(outFile);
+	}
+	else
+		(*outFile) << "0\n";
+}
+
+/***** PRIVATE METHODS *****/
 
 void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1, NEURAL_NETWORK* controller2) {
 
@@ -190,26 +210,56 @@ void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1,
 //			in[6] = 1.0;
 }
 
-double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
+void USER_MODEL::Learn_On_Matrix(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers) {
 
-	double* in = new double[13];
-	Extract_Feature_Vector(in, controller1, controller2);
-  ANN->ffwd(in);
+	double* in = new double[TAU_INPUTS];
+	double* target = new double[1];
+
+	for (int i=0;	i<numControllers;	i++) {
+		for (int j=0; j<numControllers; j++) {
+
+			Extract_Feature_Vector(in, controllers[i], controllers[j]);
+			target[0] = Target(i, j, preferences);
+			ANN->bpgt(in, target);
+		}
+	}
 	delete [] in;
-	return( ANN->Out(0) );
-//	return( 2.0*(ANN->Out(0) - 1.0) );
+	delete [] target;
 }
 
-void USER_MODEL::Save(ofstream *outFile) {
+int USER_MODEL::Errors_On_Matrix(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers) {
 
-	(*outFile) << numSensors << "\n";
+	double* in = new double[TAU_INPUTS];
+	double target, scorePrediction;
+	int errors = 0;
 
-	if ( ANN ) {
-		(*outFile) << "1\n";
-		ANN->Save(outFile);
+	for (int i=0;	i<numControllers;	i++) {
+		for (int j=0; j<numControllers; j++) {
+
+			scorePrediction = Predict(controllers[i], controllers[j]);
+			target = Target(i, j, preferences);
+
+			if( (scorePrediction < 0.5 && target > 0.5) ||
+					(scorePrediction > 0.5 && target < 0.5) )
+				errors++;
+		}
 	}
+
+	delete [] in;
+	return errors;
+}
+
+double USER_MODEL::Target(int i, int j, MATRIX* pref) {
+
+	double target;
+	if (pref->Get(i,j) > 0 )
+		target = 1.0;
+	else if (pref->Get(i,j) < 0)
+		target = 0.0;
 	else
-		(*outFile) << "0\n";
+		target = 0.5;
+
+	return target;
 }
 
 #endif

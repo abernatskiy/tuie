@@ -16,6 +16,7 @@ public:
 	TAU_OPTIMIZER(ifstream *inFile);
 	~TAU_OPTIMIZER(void);
 	void   Optimize(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers);
+	void   Optimize_Common(int numControllers0, MATRIX *preferences0, NEURAL_NETWORK **controllers0, int numControllers1, MATRIX *preferences1, NEURAL_NETWORK **controllers1);
 //	void   Print_Predictions(USER_MODEL *model, int numControllers, NEURAL_NETWORK **controllers);
 	int    Ready_To_Predict(void);
 	double Model_Error(void);

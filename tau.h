@@ -29,6 +29,10 @@ public:
 	int conflicts;
 	int ambiguities;
 
+	int commonNumCont[2];
+	NEURAL_NETWORK** commonCont[2];
+	MATRIX* commonPref[2];
+
 	bool requestFromCommonTAU;
 	bool currentJobFromCommonTAU;
 	NEURAL_NETWORK* remoteController;

@@ -45,6 +45,14 @@ void TAU_OPTIMIZER::Optimize(int numControllers, MATRIX *preferences, NEURAL_NET
 	modelError = model->Evaluate(numControllers, preferences, controllers);
 }
 
+void TAU_OPTIMIZER::Optimize_Common(int numControllers0, MATRIX *preferences0, NEURAL_NETWORK **controllers0, int numControllers1, MATRIX *preferences1, NEURAL_NETWORK **controllers1) {
+
+	if ( !model )
+		model = new USER_MODEL(controllers0[0]->numSensors);
+
+	modelError = model->Evaluate_Common(numControllers0, preferences0, controllers0, numControllers1, preferences1, controllers1);
+}
+
 /*void TAU_OPTIMIZER::Print_Predictions(	USER_MODEL *model,
 					int numControllers,
 					NEURAL_NETWORK **controllers) {

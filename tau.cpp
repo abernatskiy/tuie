@@ -123,19 +123,30 @@ TAU::TAU(ifstream *inFile) {
 TAU::TAU(TAU* tau0, TAU* tau1) {
 
 	timer = 0; // irrelevant
-	numControllers = tau0->numControllers; // TEMPORARY
-	controllers = tau0->controllers; // TEMPORARY
-	preferences = tau0->preferences; //TEMPORARY
 
 	firstControllerIndex  = -1; // irrelevant
 	secondControllerIndex = -1; // irrelevant
-
-	tauOptimizer = tau0->tauOptimizer; // TEMPORARY
 	nextControllerForTraining = 0; // irrelevant
 
 	commonTAU = true;
+
 	conflicts = 0;
 	ambiguities = 0;
+	tauOptimizer = NULL;
+
+	commonNumCont[0] = tau0->Controllers_Available_For_Optimization();
+	commonNumCont[1] = tau1->Controllers_Available_For_Optimization();
+
+	commonCont[0] = new NEURAL_NETWORK*[commonNumCont[0]];
+	for(int i=0; i<commonNumCont[0]; i++)
+		commonCont[0][i] = new NEURAL_NETWORK(tau0->controllers[i]);
+
+	commonCont[1] = new NEURAL_NETWORK*[commonNumCont[1]];
+	for(int i=0; i<commonNumCont[1]; i++)
+		commonCont[1][i] = new NEURAL_NETWORK(tau1->controllers[i]);
+
+	commonPref[0] = new MATRIX(tau0->preferences);
+	commonPref[1] = new MATRIX(tau1->preferences);
 
 	requestFromCommonTAU = false;
 	currentJobFromCommonTAU = false;
@@ -167,6 +178,27 @@ TAU::~TAU(void) {
 
 	if( requestFromCommonTAU )
 		delete remoteController;
+
+	if(commonTAU) {
+		for(int i=0; i<commonNumCont[0]; i++) {
+			delete commonCont[0][i];
+			commonCont[0][i] = NULL;
+		}
+		delete [] commonCont[0];
+		commonCont[0] = NULL;
+
+		for(int i=0; i<commonNumCont[1]; i++) {
+			delete commonCont[1][i];
+			commonCont[1][i] = NULL;
+		}
+		delete [] commonCont[1];
+		commonCont[1] = NULL;
+
+		delete commonPref[0];
+		commonPref[0] = NULL;
+		delete commonPref[1];
+		commonPref[1] = NULL;
+	}
 }
 
 int TAU::All_Required_Preferences_Supplied(void) {
@@ -305,7 +337,10 @@ void TAU::Optimize(void) {
 		tauOptimizer = new TAU_OPTIMIZER();
 
 //	printf("TAU::Optimize: optimizing for %d controllers, numControllers %d\n", Controllers_Available_For_Optimization(), numControllers);
-	tauOptimizer->Optimize( Controllers_Available_For_Optimization(), preferences, controllers );
+	if(commonTAU)
+		tauOptimizer->Optimize_Common( commonNumCont[0], commonPref[0], commonCont[0], commonNumCont[1], commonPref[1], commonCont[1] );
+	else
+		tauOptimizer->Optimize( Controllers_Available_For_Optimization(), preferences, controllers );
 }
 
 void TAU::Print(void) {
