@@ -109,6 +109,25 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 				scores[i][j] = TAU_NO_SCORE;
 	}
 
+	// trivial decision maker for preliminary testing
+	if( ready[2] ) {
+		typeOfLastScore = 4;
+		for( int j=0; j<AFPO_POP_SIZE; j++ )
+			optimizer->genomes[j]->Score_Set( scores[2][j] );
+		return;
+	}
+	else if( ready[0] ) {
+		typeOfLastScore = 1;
+		for( int j=0; j<AFPO_POP_SIZE; j++ )
+			optimizer->genomes[j]->Score_Set( scores[0][j] );
+		return;
+	}
+	else {
+		printf("ERROR - Not enough ready TAUs\n");
+		exit(1);
+	}
+
+/*
 	// deciding which score to use and performing the rescoring
 	if( ready[0] && ready[1] ) {
 		if( ready[2] &&
@@ -157,6 +176,7 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 		printf("TAUS: WARNING - decision maker default case reached\n");
 		return;
 	}
+*/
 }
 
 /*** private methods ***/
