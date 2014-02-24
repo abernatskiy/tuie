@@ -95,7 +95,8 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 	delete demo;
 
 	if (errors == 0)
-		return 100.0/((double) reqiter);
+//		return 100.0/((double) reqiter);
+		return 2000.0;
 	else {
 		printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers, maxIterations);
 		return 10000.0;
@@ -152,7 +153,8 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	delete demo1;
 
 	if (errors == 0)
-		return 100.0/((double) reqiter);
+//		return 100.0/((double) reqiter);
+		return 1000.0;
 	else {
 		printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers0 + numControllers1, maxIterations);
 		return 10000.0;
