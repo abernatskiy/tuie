@@ -10,8 +10,13 @@ private:
 	int numSensors;
 	CBackProp *ANN;
 	void Extract_Feature_Vector(double* vector, NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2);
+
 	void Learn_On_Matrix(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers);
 	int Errors_On_Matrix(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers);
+	void Learn_On_Matrix_With_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX* mask);
+	int Errors_On_Matrix_With_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX* mask);
+	int Errors_On_Matrix_With_Inverted_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX* mask);
+
 	double Target(int i, int j, MATRIX *preferences);
 
 public:

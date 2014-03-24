@@ -16,6 +16,8 @@ extern int    TAU_BACK_PROP_ITER_MAX_MULTIPLIER;
 
 int TAU_INPUTS = 13;
 
+double MASK_THRESHOLD = 0.5;
+
 USER_MODEL::USER_MODEL(int numS) {
 
 	numSensors = numS;
@@ -68,16 +70,21 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 
 	int maxIterations = TAU_BACK_PROP_ITER_MAX_MULTIPLIER*numControllers*(numControllers-1)/2;
 
+	MATRIX* mask = new MATRIX(numControllers, numControllers, 0.0);
+	mask->Randomize(0.0,1.0);
+
 	printf("Training user model on the following matrix:\n");
 	preferences->PrintWithSums(2);
+	printf("Mask:\n");
+	mask->Print(2);
 
 	int reqiter;
 	for (int iter=0; iter<maxIterations; iter++) {
 
-		Learn_On_Matrix(numControllers, preferences, controllers);
+		Learn_On_Matrix_With_Mask(numControllers, preferences, controllers, mask);
 
 		errors = 0;
-		errors += Errors_On_Matrix(numControllers, preferences, controllers);
+		errors += Errors_On_Matrix_With_Mask(numControllers, preferences, controllers, mask);
 
 		if (errors == 0) {
 			reqiter = iter;
@@ -94,13 +101,7 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 	demo->PrintWithSums(2);
 	delete demo;
 
-	if (errors == 0)
-//		return 100.0/((double) reqiter);
-		return 2000.0;
-	else {
-		printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers, maxIterations);
-		return 10000.0;
-	}
+	return ((double) Errors_On_Matrix_With_Inverted_Mask(numControllers, preferences, controllers, mask))/((double) (numControllers*numControllers));
 }
 
 double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NEURAL_NETWORK **controllers0, int numControllers1, MATRIX *preferences1, NEURAL_NETWORK **controllers1) {
@@ -118,15 +119,21 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	printf("Matrix1:\n");
 	preferences1->PrintWithSums(2);
 
+	MATRIX* mask0 = new MATRIX(numControllers0, numControllers0, 0.0);
+	mask0->Randomize(0.0,1.0);
+
+	MATRIX* mask1 = new MATRIX(numControllers1, numControllers1, 0.0);
+	mask1->Randomize(0.0,1.0);
+
 	int reqiter;
 	for (int iter=0; iter<maxIterations; iter++) {
 
-		Learn_On_Matrix(numControllers0, preferences0, controllers0);
-		Learn_On_Matrix(numControllers1, preferences1, controllers1);
+		Learn_On_Matrix_With_Mask(numControllers0, preferences0, controllers0, mask0);
+		Learn_On_Matrix_With_Mask(numControllers1, preferences1, controllers1, mask1);
 
 		errors = 0;
-		errors += Errors_On_Matrix(numControllers0, preferences0, controllers0);
-		errors += Errors_On_Matrix(numControllers1, preferences1, controllers1);
+		errors += Errors_On_Matrix_With_Mask(numControllers0, preferences0, controllers0, mask0);
+		errors += Errors_On_Matrix_With_Mask(numControllers1, preferences1, controllers1, mask1);
 
 		if (errors == 0) {
 			reqiter = iter;
@@ -152,13 +159,9 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	delete demo0;
 	delete demo1;
 
-	if (errors == 0)
-//		return 100.0/((double) reqiter);
-		return 1000.0;
-	else {
-		printf("WARNING - Couldn't train the network, got %d errors (out of %d controllers) after %d iterations\n", errors, numControllers0 + numControllers1, maxIterations);
-		return 10000.0;
-	}
+	return ((double) (Errors_On_Matrix_With_Inverted_Mask(numControllers0, preferences0, controllers0, mask0) +
+										Errors_On_Matrix_With_Inverted_Mask(numControllers1, preferences1, controllers1, mask1)))/
+										((double) (numControllers0*numControllers0 + numControllers1*numControllers1));
 }
 
 double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
@@ -249,6 +252,73 @@ int USER_MODEL::Errors_On_Matrix(int numControllers, MATRIX *preferences, NEURAL
 			if( (scorePrediction < 0.5 && target > 0.5) ||
 					(scorePrediction > 0.5 && target < 0.5) )
 				errors++;
+		}
+	}
+
+	delete [] in;
+	return errors;
+}
+
+void USER_MODEL::Learn_On_Matrix_With_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX *mask) {
+
+	double* in = new double[TAU_INPUTS];
+	double* target = new double[1];
+
+	for (int i=0;	i<numControllers;	i++) {
+		for (int j=0; j<numControllers; j++) {
+
+			if (mask->Get(i,j)<MASK_THRESHOLD) {
+				Extract_Feature_Vector(in, controllers[i], controllers[j]);
+				target[0] = Target(i, j, preferences);
+				ANN->bpgt(in, target);
+			}
+		}
+	}
+	delete [] in;
+	delete [] target;
+}
+
+int USER_MODEL::Errors_On_Matrix_With_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX *mask) {
+
+	double* in = new double[TAU_INPUTS];
+	double target, scorePrediction;
+	int errors = 0;
+
+	for (int i=0;	i<numControllers;	i++) {
+		for (int j=0; j<numControllers; j++) {
+
+			if (mask->Get(i,j)<MASK_THRESHOLD) {
+				scorePrediction = Predict(controllers[i], controllers[j]);
+				target = Target(i, j, preferences);
+
+				if( (scorePrediction < 0.5 && target > 0.5) ||
+						(scorePrediction > 0.5 && target < 0.5) )
+					errors++;
+			}
+		}
+	}
+
+	delete [] in;
+	return errors;
+}
+
+int USER_MODEL::Errors_On_Matrix_With_Inverted_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX *mask) {
+
+	double* in = new double[TAU_INPUTS];
+	double target, scorePrediction;
+	int errors = 0;
+
+	for (int i=0;	i<numControllers;	i++) {
+		for (int j=0; j<numControllers; j++) {
+
+			if (mask->Get(i,j)>=MASK_THRESHOLD) {
+				scorePrediction = Predict(controllers[i], controllers[j]);
+				target = Target(i, j, preferences);
+
+				if( (scorePrediction < 0.5 && target > 0.5) ||
+						(scorePrediction > 0.5 && target < 0.5) )
+					errors++;
+			}
 		}
 	}
 
