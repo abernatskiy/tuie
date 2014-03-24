@@ -830,7 +830,7 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 	// Only accept a user's preference if in TAU mode.
 	if ( In_TAU_Mode() ) {
 
-//		sleep(15);
+		sleep(15);
 
 		TAU_Store_User_Preference(); // into a file
 		delete tau;

@@ -47,8 +47,8 @@ void USER_MODEL::Allocate_ANN(void) {
 
 	int *layerSizes = new int[3];
 
-	layerSizes[0] = 7;
-	layerSizes[1] = 3;
+	layerSizes[0] = 6;
+	layerSizes[1] = 6;
 	layerSizes[2] = 1;
 
 	ANN = new CBackProp(3,layerSizes,0.1,0.1);
@@ -56,7 +56,7 @@ void USER_MODEL::Allocate_ANN(void) {
 /*	int *layerSizes = new int[2];
 
 	layerSizes[0] = 1;
-	layerSizes[1] = 3;
+	layerSizes[1] = 6;
 
 	ANN = new CBackProp(2,layerSizes,0.1,0.1);*/
 
@@ -76,7 +76,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 	double score, scorePrediction;
 	double totalError = 0.0;
 	double return_val = 0.0;
-	double* in = new double[7];
+	double* in = new double[6];
 	double* target = new double[1];
 
 	delete ANN;
@@ -102,7 +102,7 @@ double USER_MODEL::Evaluate(int numControllers, NEURAL_NETWORK **controllers) {
 				in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
 				m++;
 			}
-			in[m] = 1.0; // Bias node, in[6]
+//			in[m] = 1.0; // Bias node, in[6]
 
 //			in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
 //			in[1] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 12);
@@ -145,7 +145,7 @@ double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
 
 //	int i;
 	double *in;
-	in = new double[7];
+	in = new double[6];
 //	in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
 
 	int m=0;
@@ -154,7 +154,7 @@ double USER_MODEL::Predict(MATRIX *sensorTimeSeries) {
 		in[m] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
 		m++;
   }
-	in[m] = 1.0; // Bias neuron
+//	in[m] = 1.0; // Bias neuron
 
   ANN->ffwd(in);
 	delete [] in;
