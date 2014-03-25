@@ -14,6 +14,8 @@ IFS=$'\n'
 rm wins.log
 
 for subdir in $DIR/*; do
+#	echo $subdir `"$CHECKERAPP" ${subdir}`
+#	if [ -d "$subdir" ] && [ `"$CHECKERAPP" ${subdir} | sed -e 's/.*allied - \([0123456789]*\);.*/\1/'` -eq 0 ]; then
 	if [ -d "$subdir" ] && [ `"$CHECKERAPP" ${subdir} | sed -e 's/.*opposing - \([0123456789]*\),.*/\1/'` -eq 0 ]; then
 		ATTEMPTS=$((1+$ATTEMPTS))
 		if [ `tail -$LFW ${subdir}/summary.log | awk '{print $5}' | grep 0 | wc -l` -eq $LFW ]; then
