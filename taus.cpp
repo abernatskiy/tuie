@@ -63,7 +63,8 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 		exit(1);
 	}
 
-*/	for(int i=0; i<3; i++) {
+*/
+	for(int i=0; i<3; i++) {
 		ready[i] = tau[i]->Ready_To_Predict();
 		if( ready[i] ) {
 			score[i] = tau[i]->Score_Predict(genome);

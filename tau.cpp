@@ -441,6 +441,8 @@ int TAU::Ready_To_Predict(void) {
 
 	if ( !tauOptimizer )
 		return( false );
+	if ( commonTAU && ( conflicts > 0 || ambiguities > 0 ) )
+		return( false );
 	return( tauOptimizer->Ready_To_Predict() );
 }
 
