@@ -76,6 +76,10 @@ double TAUS::score(NEURAL_NETWORK* genome) {
 		}
 	}
 
+	for(int i=0; i<3; i++)
+		if(score[i] < 0 )
+			ready[i] = false;
+
 	if( ready[0] && ready[1] ) {
 		if( ready[2] &&
 				error[0] > error[2] &&
@@ -147,14 +151,14 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 
 		recentAmbiguities = commonTAU->ambiguities;
 		recentConflicts = commonTAU->conflicts;
-		if( commonTAU->conflicts == 0 ) {
-//		if( commonTAU->conflicts == 0 && commonTAU->ambiguities == 0 ) {
+//		if( commonTAU->conflicts == 0 ) {
+		if( commonTAU->conflicts == 0 && commonTAU->ambiguities == 0 ) {
 			commonTAU->Optimize();
 			delete tau[2];
 			tau[2] = commonTAU;
 		}
 		else {
-			printf("TAUS: ditching conflicting common TAU forever\n");
+			printf("TAUS: ditching conflicting or ambiguous common TAU till it gets better\n");
 			delete commonTAU;
 		}
 	}
