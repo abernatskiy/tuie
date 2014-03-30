@@ -19,6 +19,8 @@ function runsim {
 		echo "Sorry, I couldn't kill IT..."
 		exit 1
 	fi
+
+	echo "exit" > mlserver/input*
 }
 
 function makedir {

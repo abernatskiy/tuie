@@ -44,6 +44,8 @@ double distance(TAU* tau0, TAU* tau1, int id0, int id1) {
 
 TAU::TAU(void) {
 
+	id = -1;
+
 	numControllers = 0;
 
 	firstControllerIndex  = -1;
@@ -70,6 +72,38 @@ TAU::TAU(void) {
 	currentJobFromCommonTAU = false;
 	remoteController = NULL;
 }
+
+TAU::TAU(int id_no) {
+
+	id = id_no;
+
+	numControllers = 0;
+
+	firstControllerIndex  = -1;
+	secondControllerIndex = -1;
+
+	controllers = NULL;
+
+	preferences = NULL;
+
+	tauOptimizer = NULL;
+
+	nextControllerForTraining = 0;
+
+	scoreMin = +1000000.0;
+	scoreMax = -1000000.0;
+
+	commonTAU = false;
+	ambiguities = -1;
+	conflicts = -1;
+
+	timer = 0;
+
+	requestFromCommonTAU = false;
+	currentJobFromCommonTAU = false;
+	remoteController = NULL;
+}
+
 
 TAU::TAU(ifstream *inFile) {
 
@@ -120,7 +154,9 @@ TAU::TAU(ifstream *inFile) {
 	remoteController = NULL;
 }
 
-TAU::TAU(TAU* tau0, TAU* tau1) {
+TAU::TAU(TAU* tau0, TAU* tau1, int id_no) {
+
+	id = id_no;
 
 	timer = 0; // irrelevant
 

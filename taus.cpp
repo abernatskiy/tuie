@@ -12,7 +12,7 @@ extern int AFPO_POP_SIZE;
 TAUS::TAUS(void) {
 
 	for(int i=0; i<3; i++)
-		tau[i] = new TAU;
+		tau[i] = new TAU(i);
 	noOfClients = 0;
 	clientList[0] = 0;
 	clientList[1] = 0;
@@ -61,7 +61,7 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 	{
 		printf("TAUS: merging individual TAUs to produce a common one\n");
 //		tau[otherIdx]->Scores_Check();
-		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx]);
+		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx], 2);
 		commonTAU->Optimize();
 		delete tau[2];
 		tau[2] = commonTAU;

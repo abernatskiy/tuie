@@ -74,6 +74,11 @@ echo -n "Compiling the code with ${HIDDEN_NODES} hidden nodes in TAU ... "
 make -j4 > /dev/null 2>&1 && echo "done"
 mv M3 $M3 > /dev/null 2>&1
 
+# running machine learning server
+./mlserver/mlserver.py 0
+./mlserver/mlserver.py 1
+./mlserver/mlserver.py 2
+
 # running clients & server
 SEED=$RANDOM
 echo $SEED > SavedFiles/seed

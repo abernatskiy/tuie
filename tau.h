@@ -10,6 +10,8 @@
 class TAU {
 
 public:
+	int id;
+
 	int	timer; // used in CLIENT mode
 	int numControllers;
 	NEURAL_NETWORK **controllers;
@@ -39,8 +41,9 @@ public:
 
 public:
 	TAU(void);
+	TAU(int id);
 	TAU(ifstream *inFile);
-	TAU(TAU* tau0, TAU* tau1);
+	TAU(TAU* tau0, TAU* tau1, int id);
 	~TAU(void);
 
 	void	Store_Pref(int firstID, int secondID, int pref); // Is called from ENVS when reading preferences supplied by clients

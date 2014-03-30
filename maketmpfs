@@ -7,3 +7,10 @@ fi
 sudo mount -t tmpfs -o size=500M,mode=0777,uid=1000 tmpfs SavedFiles/
 mkdir SavedFiles/bestIndividuals
 cp SavedFiles.orig/envs0.dat SavedFiles/
+
+if [ -p mlserver/input0 ]; then mkfifo mlserver/input0; fi
+if [ -p mlserver/input1 ]; then mkfifo mlserver/input1; fi
+if [ -p mlserver/input2 ]; then mkfifo mlserver/input2; fi
+if [ -p mlserver/output0 ]; then mkfifo mlserver/output0; fi
+if [ -p mlserver/output1 ]; then mkfifo mlserver/output1; fi
+if [ -p mlserver/output2 ]; then mkfifo mlserver/output2; fi
