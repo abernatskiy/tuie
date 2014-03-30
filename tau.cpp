@@ -379,7 +379,7 @@ void TAU::Optimize(void) {
 		return;
 
 	if ( !tauOptimizer )
-		tauOptimizer = new TAU_OPTIMIZER();
+		tauOptimizer = new TAU_OPTIMIZER(id);
 
 //	printf("TAU::Optimize: optimizing for %d controllers, numControllers %d\n", Controllers_Available_For_Optimization(), numControllers);
 	if(commonTAU)

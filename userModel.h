@@ -7,6 +7,8 @@
 class USER_MODEL {
 
 private:
+	int id;
+
 	int numSensors;
 	CBackProp *ANN;
 	void Extract_Feature_Vector(double* vector, NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2);
@@ -20,7 +22,7 @@ private:
 	double Target(int i, int j, MATRIX *preferences);
 
 public:
-	USER_MODEL(int numS);
+	USER_MODEL(int id_no, int numS);
 	USER_MODEL(ifstream *inFile);
 	~USER_MODEL(void);
 	void Allocate_ANN(void);

@@ -18,8 +18,9 @@ int TAU_INPUTS = 13;
 
 double MASK_THRESHOLD = 0.5;
 
-USER_MODEL::USER_MODEL(int numS) {
+USER_MODEL::USER_MODEL(int id_no, int numS) {
 
+	id = id_no;
 	numSensors = numS;
 	Allocate_ANN();
 }

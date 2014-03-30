@@ -8,11 +8,12 @@ class TAU_OPTIMIZER {
 
 private:
 	USER_MODEL *model;
+	int id;
 
 public:
 	double 	    modelError;
 
-	TAU_OPTIMIZER(void);
+	TAU_OPTIMIZER(int id_no);
 	TAU_OPTIMIZER(ifstream *inFile);
 	~TAU_OPTIMIZER(void);
 	void   Optimize(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers);
