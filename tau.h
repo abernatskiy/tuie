@@ -46,6 +46,8 @@ public:
 	TAU(TAU* tau0, TAU* tau1, int id);
 	~TAU(void);
 
+	void Update_Common_TAU(TAU* tau0, TAU* tau1);
+
 	void	Store_Pref(int firstID, int secondID, int pref); // Is called from ENVS when reading preferences supplied by clients
 																												// After a couple of procedure levels calls Optimize() (see below)
 

@@ -170,26 +170,7 @@ TAU::TAU(TAU* tau0, TAU* tau1, int id_no) {
 	ambiguities = 0;
 	tauOptimizer = NULL;
 
-	printf("TAU: constructing common TAU\n");
-	commonNumCont[0] = tau0->Controllers_Available_For_Optimization();
-	commonNumCont[1] = tau1->Controllers_Available_For_Optimization();
-	numControllers = commonNumCont[0] + commonNumCont[1];
-	printf("TAU: %d controllers from tau0, %d controllers from tau1\n", commonNumCont[0], commonNumCont[1]);
-
-	commonCont[0] = new NEURAL_NETWORK*[commonNumCont[0]];
-	for(int i=0; i<commonNumCont[0]; i++) {
-		commonCont[0][i] = new NEURAL_NETWORK(tau0->controllers[i]);
-		commonCont[0][i]->sensorTimeSeries = new MATRIX(tau0->controllers[i]->sensorTimeSeries);
-	}
-
-	commonCont[1] = new NEURAL_NETWORK*[commonNumCont[1]];
-	for(int i=0; i<commonNumCont[1]; i++) {
-		commonCont[1][i] = new NEURAL_NETWORK(tau1->controllers[i]);
-		commonCont[1][i]->sensorTimeSeries = new MATRIX(tau1->controllers[i]->sensorTimeSeries);
-	}
-
-	commonPref[0] = new MATRIX(tau0->preferences);
-	commonPref[1] = new MATRIX(tau1->preferences);
+	Update_Common_TAU(tau0, tau1);
 
 	requestFromCommonTAU = false;
 	currentJobFromCommonTAU = false;
@@ -244,6 +225,30 @@ TAU::~TAU(void) {
 		tauOptimizer = NULL;
 	}
 
+}
+
+void TAU::Update_Common_TAU( TAU* tau0, TAU* tau1 ) {
+
+	printf("TAU: updating common TAU\n");
+	commonNumCont[0] = tau0->Controllers_Available_For_Optimization();
+	commonNumCont[1] = tau1->Controllers_Available_For_Optimization();
+	numControllers = commonNumCont[0] + commonNumCont[1];
+	printf("TAU: %d controllers from tau0, %d controllers from tau1\n", commonNumCont[0], commonNumCont[1]);
+
+	commonCont[0] = new NEURAL_NETWORK*[commonNumCont[0]];
+	for(int i=0; i<commonNumCont[0]; i++) {
+		commonCont[0][i] = new NEURAL_NETWORK(tau0->controllers[i]);
+		commonCont[0][i]->sensorTimeSeries = new MATRIX(tau0->controllers[i]->sensorTimeSeries);
+	}
+
+	commonCont[1] = new NEURAL_NETWORK*[commonNumCont[1]];
+	for(int i=0; i<commonNumCont[1]; i++) {
+		commonCont[1][i] = new NEURAL_NETWORK(tau1->controllers[i]);
+		commonCont[1][i]->sensorTimeSeries = new MATRIX(tau1->controllers[i]->sensorTimeSeries);
+	}
+
+	commonPref[0] = new MATRIX(tau0->preferences);
+	commonPref[1] = new MATRIX(tau1->preferences);
 }
 
 int TAU::All_Required_Preferences_Supplied(void) {

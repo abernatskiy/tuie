@@ -145,7 +145,7 @@ int		TIME_STEPS_PER_FRAME		= 0;
 // TAU-specific constants
 
 int		TAU_MAX_CONTROLLERS		= 10000;
-double		TAU_NO_SCORE			= 0.01;
+double		TAU_NO_SCORE			= 0.5;
 //int		TAU_NUM_NEURONS			= 5;
 int		TAU_NUM_SENSOR_ROWS		= 1;
 // int		TAU_BACK_PROP_TRAINING_ITERATIONS_MAX = 1000000;

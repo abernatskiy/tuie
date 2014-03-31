@@ -20,9 +20,13 @@ function runsim {
 		exit 1
 	fi
 
+	echo -n "Stopping mlservers ... "
 	echo "exit" > mlserver/input0
+	echo -n "0 "
 	echo "exit" > mlserver/input1
+	echo -n "1 "
 	echo "exit" > mlserver/input2
+	echo "2 - done"
 }
 
 function makedir {

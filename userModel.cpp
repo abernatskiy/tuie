@@ -45,7 +45,7 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 	fclose(server_output);
 
 	printf("Server's reply was %s\n", reply);
-	if(strcmp(reply, "OK\n") != 0)
+	if(strcmp(reply, "OK") != 0)
 		printf("That's not OK\n");
 
 	ready = true;
@@ -63,7 +63,7 @@ double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETW
 
 	delete demo0;
 
-	return ((double) errors);
+	return ((double) errors)/((double) (numControllers*numControllers));
 }
 
 double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NEURAL_NETWORK **controllers0, int numControllers1, MATRIX *preferences1, NEURAL_NETWORK **controllers1) {
@@ -82,15 +82,15 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	fclose(server_output);
 
 	printf("Server's reply was %s\n", reply);
-	if(strcmp(reply, "OK\n") != 0)
+	if(strcmp(reply, "OK") != 0)
 		printf("That's not OK\n");
 
 	ready = true;
 
 	printf("Trained user model %d on the following:\n", id);
-	printf("Matrix0:\n");
+	printf("Matrix0 (using only upper-left %d x %d submatrix):\n", numControllers0, numControllers0);
 	preferences0->PrintWithSums(2);
-	printf("Matrix1:\n");
+	printf("Matrix1 (using only upper-left %d x %d submatrix):\n", numControllers1, numControllers1);
 	preferences1->PrintWithSums(2);
 
 	MATRIX* demo0 = new MATRIX(numControllers0, numControllers0, 0.0);
@@ -111,7 +111,7 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	delete demo0;
 	delete demo1;
 
-	return ((double) errors);
+	return ((double) errors)/((double) (numControllers0*numControllers0 + numControllers1*numControllers1));
 }
 
 double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {

@@ -1,4 +1,4 @@
-1. Compare performance of the long TAU with and without normalization
+Func Update_Common_TAU copies too much memory -- optimize.
 
 --------------------------
 TOPICS

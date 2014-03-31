@@ -75,9 +75,13 @@ make -j4 > /dev/null 2>&1 && echo "done"
 mv M3 $M3 > /dev/null 2>&1
 
 # running machine learning server
-./mlserver/mlserver.py 0
-./mlserver/mlserver.py 1
-./mlserver/mlserver.py 2
+echo -n "Starting mlservers ... "
+./mlserver/mlserver.py 0 > SavedFiles/mlserver0.log 2>&1 &
+echo -n "0 "
+./mlserver/mlserver.py 1 > SavedFiles/mlserver1.log 2>&1 &
+echo -n "1 "
+./mlserver/mlserver.py 2 > SavedFiles/mlserver2.log 2>&1 &
+echo "2 - done"
 
 # running clients & server
 SEED=$RANDOM

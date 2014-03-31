@@ -59,12 +59,19 @@ void TAUS::storePref(int pid, int firstID, int secondID, int pref) {
 	if( tau[otherIdx]->Ready_To_Predict() &&
 			tau[idx]->numControllers == tau[idx]->Controllers_Available_For_Optimization() )
 	{
-		printf("TAUS: merging individual TAUs to produce a common one\n");
+			printf("TAUS: merging individual TAUs to produce a common one\n");
+			if( !tau[2]->commonTAU ) {
+				delete tau[2];
+				tau[2] = new TAU(tau[0], tau[1], 2);
+			}
+			else
+				tau[2]->Update_Common_TAU(tau[0], tau[1]);
 //		tau[otherIdx]->Scores_Check();
-		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx], 2);
-		commonTAU->Optimize();
-		delete tau[2];
-		tau[2] = commonTAU;
+//		TAU* commonTAU = new TAU(tau[idx], tau[otherIdx], 2);
+//		commonTAU->Optimize();
+//		delete tau[2];
+//		tau[2] = commonTAU;
+			tau[2]->Optimize();
 	}
 }
 
@@ -137,12 +144,22 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 			typeOfLastScore = 4;
 			for( int j=0; j<AFPO_POP_SIZE; j++ )
 				optimizer->genomes[j]->Score_Set( scores[2][j] );
+
+			printf("TAU2:");
+			for( int i=0; i<AFPO_POP_SIZE; i++ )
+				printf(" %2.2lf", optimizer->genomes[i]->Score_Get());
+			printf("\n");
 			return;
 		}
 		else {
 			typeOfLastScore = 3;
 			for( int j=0; j<AFPO_POP_SIZE; j++ )
 				optimizer->genomes[j]->Score_Set( fmax( scores[0][j], scores[1][j] ) );
+
+			printf("max(TAU0, TAU1):");
+			for( int i=0; i<AFPO_POP_SIZE; i++ )
+				printf(" %2.2lf", optimizer->genomes[i]->Score_Get());
+			printf("\n");
 			return;
 		}
 	}
@@ -152,7 +169,7 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 			for( int j=0; j<AFPO_POP_SIZE; j++ )
 				optimizer->genomes[j]->Score_Set( scores[0][j] );
 
-			printf("TAU%d:", 0);
+			printf("TAU0:");
 			for( int i=0; i<AFPO_POP_SIZE; i++ )
 				printf(" %2.2lf", optimizer->genomes[i]->Score_Get());
 			printf("\n");
@@ -295,21 +312,31 @@ void TAUS::rawScores(double* output, int tauidx, OPTIMIZER* optimizer) {
 //	}
 //	printf("\n");
 
+	double prediction;
+	bool nontrivial = false;
 	for(int i=0; i<AFPO_POP_SIZE; i++) {
 		for(int j=0; j<AFPO_POP_SIZE; j++) {
-			approxPref->Set(i, j, tau[tauidx]->Score_Predict(optimizer->genomes[i], optimizer->genomes[j]));
+			prediction = tau[tauidx]->Score_Predict(optimizer->genomes[i], optimizer->genomes[j]);
+			approxPref->Set(i, j, prediction);
+			if( prediction != 0.0 )
+				nontrivial = true;
 		}
 	}
 
 /*	printf("Got an approximate preferences matrix for AFPO population:\n");
 	approxPref->PrintWithSums(2);*/
 
-	double min = INFINITY;
-	double max = -1*INFINITY;
+//	double min = INFINITY;
+//	double max = -1*INFINITY;
+
+
 	for(int i=0; i<AFPO_POP_SIZE; i++) {
-		output[i] = approxPref->SumOfRow(i);
-		min = min > output[i] ? output[i] : min;
-		max = max < output[i] ? output[i] : max;
+		if(nontrivial)
+			output[i] = (approxPref->SumOfRow(i) + ((double) AFPO_POP_SIZE))/((double) 2*AFPO_POP_SIZE);
+		else
+			output[i] = TAU_NO_SCORE;
+//		min = min > output[i] ? output[i] : min;
+//		max = max < output[i] ? output[i] : max;
 	}
 
 // normalization
