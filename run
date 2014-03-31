@@ -63,7 +63,7 @@ esac
 
 # recompiling the code with appropriate no of hidden nodes
 
-sed -i -e "s/\(layerSizes\[1\] = \).*/\1${HIDDEN_NODES};/" userModel.cpp
+# sed -i -e "s/\(layerSizes\[1\] = \).*/\1${HIDDEN_NODES};/" userModel.cpp
 if [ $OPPOSING_USERS -eq 1 ]; then
 	echo -n "Compiling the opposing client ... "
 	make M3-opposing > /dev/null 2>&1 && echo "done"

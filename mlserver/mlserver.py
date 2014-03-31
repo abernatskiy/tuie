@@ -27,11 +27,12 @@ class Predictor:
 		foutput.close()
 
 	def predict(self):
-		print 'Predicting...'
+#		print 'Predicting...'
 		pri = np.loadtxt(self.finput, dtype=np.double)
 		self.finput.close()
 		pro = self.clf.predict(pri)
-		print pro
+#		print pro
+		sys.stdout.write('.')
 		foutput = open(self.fnoutput, 'w')
 		np.savetxt(foutput, pro, fmt='%le')
 		foutput.close()

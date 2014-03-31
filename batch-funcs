@@ -20,7 +20,9 @@ function runsim {
 		exit 1
 	fi
 
-	echo "exit" > mlserver/input*
+	echo "exit" > mlserver/input0
+	echo "exit" > mlserver/input1
+	echo "exit" > mlserver/input2
 }
 
 function makedir {

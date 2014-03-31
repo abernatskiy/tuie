@@ -401,6 +401,8 @@ int TAU::Ready_To_Predict(void) {
 
 	if ( !tauOptimizer )
 		return( false );
+	if( numControllers < 3 )
+		return( false );
 	return( tauOptimizer->Ready_To_Predict() );
 }
 

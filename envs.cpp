@@ -556,7 +556,7 @@ void ENVS::Mode_Simulate_Set_TAU(dWorldID world, dSpaceID space) {
 
 	End_Current_Mode();
 
-//	speed = 3;
+	speed = 3;
 
 	simulateMode = MODE_SIMULATE_TAU;
 
@@ -820,7 +820,7 @@ void ENVS::TAU_User_Has_Indicated_A_Preference( dWorldID world, dSpaceID space )
 	// Only accept a user's preference if in TAU mode.
 	if ( In_TAU_Mode() ) {
 
-		sleep(45);
+//		sleep(45);
 
 		TAU_Store_User_Preference(); // into a file
 		delete tau;

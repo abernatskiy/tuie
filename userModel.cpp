@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "math.h"
+#include "string.h"
 
 #include "userModel.h"
 
@@ -16,131 +17,81 @@ extern int    TAU_BACK_PROP_ITER_MAX_MULTIPLIER;
 
 int TAU_INPUTS = 13;
 
-double MASK_THRESHOLD = 0.5;
-
 USER_MODEL::USER_MODEL(int id_no, int numS) {
 
+	ready = false;
 	id = id_no;
 	numSensors = numS;
-	Allocate_ANN();
-}
 
-USER_MODEL::USER_MODEL(ifstream *inFile) {
-
-  (*inFile) >> numSensors;
-
-	int isANN;
-
-	(*inFile) >> isANN;
-
-	if ( isANN )
-		ANN = new CBackProp(inFile);
-	else
-		ANN = NULL;
+	ANN = NULL;
 }
 
 USER_MODEL::~USER_MODEL(void) {
 
-	if ( ANN ) {
-
-		delete ANN;
-		ANN = NULL;
-	}
-}
-
-void USER_MODEL::Allocate_ANN(void) {
-
-	int *layerSizes = new int[3];
-
-	layerSizes[0] = TAU_INPUTS;
-	layerSizes[1] = 6;
-	layerSizes[2] = 1;
-
-	ANN = new CBackProp(3,layerSizes,0.1,0.1);
-
-	delete [] layerSizes;
-	layerSizes = NULL;
 }
 
 double USER_MODEL::Evaluate(int numControllers, MATRIX* preferences, NEURAL_NETWORK **controllers) {
 
-	int errors;
+	int errors = Errors_On_Matrix(numControllers, preferences, controllers);
 
-	delete ANN;
-	Allocate_ANN();
+	FILE* server_input = Server_Input();
+	fprintf(server_input, "train\n");
+	Learn_On_Matrix(server_input, numControllers, preferences, controllers);
+	fclose(server_input);
 
-	int maxIterations = TAU_BACK_PROP_ITER_MAX_MULTIPLIER*numControllers*(numControllers-1)/2;
+	FILE* server_output = Server_Output();
+	char reply[100];
+	fscanf(server_output, "%s", reply);
+	fclose(server_output);
 
-	MATRIX* mask = new MATRIX(numControllers, numControllers, 0.0);
-	mask->Randomize(0.0,1.0);
+	printf("Server's reply was %s\n", reply);
+	if(strcmp(reply, "OK\n") != 0)
+		printf("That's not OK\n");
 
-	printf("Training user model on the following matrix:\n");
+	ready = true;
+
+	printf("Trained user model %d on the following:\n", id);
 	preferences->PrintWithSums(2);
-	printf("Mask:\n");
-	mask->Print(2);
 
-	int reqiter;
-	for (int iter=0; iter<maxIterations; iter++) {
-
-		Learn_On_Matrix_With_Mask(numControllers, preferences, controllers, mask);
-
-		errors = 0;
-		errors += Errors_On_Matrix_With_Mask(numControllers, preferences, controllers, mask);
-
-		if (errors == 0) {
-			reqiter = iter;
-			break;
-		}
-	}
-
-	MATRIX* demo = new MATRIX(numControllers, numControllers, 0.0);
+	MATRIX* demo0 = new MATRIX(numControllers, numControllers, 0.0);
 	for( int i=0; i<numControllers; i++ )
 		for( int j=0; j<numControllers; j++ )
-			demo->Set(i, j, Predict(controllers[i], controllers[j]));
+			demo0->Set(i, j, Predict(controllers[i], controllers[j]));
 
-	printf("We learned:\n");
-	demo->PrintWithSums(2);
-	delete demo;
+	printf("Learned matrix:\n");
+	demo0->PrintWithSums(2);
 
-	return ((double) Errors_On_Matrix_With_Inverted_Mask(numControllers, preferences, controllers, mask))/((double) (numControllers*numControllers));
+	delete demo0;
+
+	return ((double) errors);
 }
 
 double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NEURAL_NETWORK **controllers0, int numControllers1, MATRIX *preferences1, NEURAL_NETWORK **controllers1) {
 
-	int errors;
+	int errors = Errors_On_Matrix(numControllers0, preferences0, controllers0) + Errors_On_Matrix(numControllers1, preferences1, controllers1);
 
-	delete ANN;
-	Allocate_ANN();
+	FILE* server_input = Server_Input();
+	fprintf(server_input, "train\n");
+	Learn_On_Matrix(server_input, numControllers0, preferences0, controllers0);
+	Learn_On_Matrix(server_input, numControllers1, preferences1, controllers1);
+	fclose(server_input);
 
-	int maxIterations = TAU_BACK_PROP_ITER_MAX_MULTIPLIER*(numControllers0*(numControllers0-1) + numControllers1*(numControllers1-1))/2;
+	FILE* server_output = Server_Output();
+	char reply[100];
+	fscanf(server_output, "%s", reply);
+	fclose(server_output);
 
-	printf("Training user model on the following:\n");
+	printf("Server's reply was %s\n", reply);
+	if(strcmp(reply, "OK\n") != 0)
+		printf("That's not OK\n");
+
+	ready = true;
+
+	printf("Trained user model %d on the following:\n", id);
 	printf("Matrix0:\n");
 	preferences0->PrintWithSums(2);
 	printf("Matrix1:\n");
 	preferences1->PrintWithSums(2);
-
-	MATRIX* mask0 = new MATRIX(numControllers0, numControllers0, 0.0);
-	mask0->Randomize(0.0,1.0);
-
-	MATRIX* mask1 = new MATRIX(numControllers1, numControllers1, 0.0);
-	mask1->Randomize(0.0,1.0);
-
-	int reqiter;
-	for (int iter=0; iter<maxIterations; iter++) {
-
-		Learn_On_Matrix_With_Mask(numControllers0, preferences0, controllers0, mask0);
-		Learn_On_Matrix_With_Mask(numControllers1, preferences1, controllers1, mask1);
-
-		errors = 0;
-		errors += Errors_On_Matrix_With_Mask(numControllers0, preferences0, controllers0, mask0);
-		errors += Errors_On_Matrix_With_Mask(numControllers1, preferences1, controllers1, mask1);
-
-		if (errors == 0) {
-			reqiter = iter;
-			break;
-		}
-	}
 
 	MATRIX* demo0 = new MATRIX(numControllers0, numControllers0, 0.0);
 	for( int i=0; i<numControllers0; i++ )
@@ -160,32 +111,32 @@ double USER_MODEL::Evaluate_Common(int numControllers0, MATRIX *preferences0, NE
 	delete demo0;
 	delete demo1;
 
-	return ((double) (Errors_On_Matrix_With_Inverted_Mask(numControllers0, preferences0, controllers0, mask0) +
-										Errors_On_Matrix_With_Inverted_Mask(numControllers1, preferences1, controllers1, mask1)))/
-										((double) (numControllers0*numControllers0 + numControllers1*numControllers1));
+	return ((double) errors);
 }
 
 double USER_MODEL::Predict(NEURAL_NETWORK *controller1, NEURAL_NETWORK *controller2) {
 
-	double* in = new double[TAU_INPUTS];
+	if( !ready )
+		return TAU_NO_SCORE;
+
+	double in[TAU_INPUTS];
+
+	FILE* server_input = Server_Input();
+	fprintf(server_input, "predict\n");
+
 	Extract_Feature_Vector(in, controller1, controller2);
-  ANN->ffwd(in);
-	delete [] in;
+	for(int k=0; k<TAU_INPUTS-1; k++)
+		fprintf(server_input, "%le ", in[k]);
+	fprintf(server_input, "%le\n", in[TAU_INPUTS-1]);
 
-	return( ANN->Out(0) );
-//	return( 2.0*(ANN->Out(0) - 1.0) );
-}
+	fclose(server_input);
 
-void USER_MODEL::Save(ofstream *outFile) {
+	double curpred;
+	FILE* server_output = Server_Output();
+	fscanf(server_output, "%lf\n", &curpred);
+	fclose(server_output);
 
-	(*outFile) << numSensors << "\n";
-
-	if ( ANN ) {
-		(*outFile) << "1\n";
-		ANN->Save(outFile);
-	}
-	else
-		(*outFile) << "0\n";
+	return curpred; // or the inverse of Target()
 }
 
 /***** PRIVATE METHODS *****/
@@ -220,124 +171,109 @@ void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1,
 //			in[6] = 1.0;
 }
 
-void USER_MODEL::Learn_On_Matrix(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers) {
+void USER_MODEL::Learn_On_Matrix(FILE* server_input, int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers) {
 
-	double* in = new double[TAU_INPUTS];
-	double* target = new double[1];
+	double in[TAU_INPUTS];
 
-//		printf("here\n\n\n");
 	for (int i=0;	i<numControllers;	i++) {
 		for (int j=0; j<numControllers; j++) {
 
 			Extract_Feature_Vector(in, controllers[i], controllers[j]);
-			target[0] = Target(i, j, preferences);
-			ANN->bpgt(in, target);
+
+			for(int k=0; k<TAU_INPUTS; k++)
+				fprintf(server_input, "%le ", in[k]);
+			fprintf(server_input, "%le\n", Target(i, j, preferences));
 		}
 	}
-	delete [] in;
-	delete [] target;
 }
 
 int USER_MODEL::Errors_On_Matrix(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers) {
 
-	double* in = new double[TAU_INPUTS];
-	double target, scorePrediction;
+	if( !ready )
+		return -1;
+
 	int errors = 0;
+	double in[TAU_INPUTS];
+
+	FILE* server_input = Server_Input();
+	fprintf(server_input, "predict\n");
 
 	for (int i=0;	i<numControllers;	i++) {
 		for (int j=0; j<numControllers; j++) {
 
-			scorePrediction = Predict(controllers[i], controllers[j]);
-			target = Target(i, j, preferences);
+			Extract_Feature_Vector(in, controllers[i], controllers[j]);
 
-			if( (scorePrediction < 0.5 && target > 0.5) ||
-					(scorePrediction > 0.5 && target < 0.5) )
+			for(int k=0; k<TAU_INPUTS-1; k++)
+				fprintf(server_input, "%le ", in[k]);
+			fprintf(server_input, "%le\n", in[TAU_INPUTS-1]);
+		}
+	}
+
+	fclose(server_input);
+
+	double curpred;
+	double threshold = 0.0;
+	FILE* server_output = Server_Output();
+	for (int i=0;	i<numControllers;	i++) {
+		for (int j=0; j<numControllers; j++) {
+
+			fscanf(server_output, "%lf\n", &curpred);
+			if( ( curpred<=threshold && Target(i, j, preferences)>0 ) ||
+					( curpred>threshold && Target(i, j, preferences)<=0 ) )
 				errors++;
 		}
 	}
 
-	delete [] in;
-	return errors;
-}
+	fclose(server_output);
 
-void USER_MODEL::Learn_On_Matrix_With_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX *mask) {
-
-	double* in = new double[TAU_INPUTS];
-	double* target = new double[1];
-
-	for (int i=0;	i<numControllers;	i++) {
-		for (int j=0; j<numControllers; j++) {
-
-			if (mask->Get(i,j)<MASK_THRESHOLD) {
-				Extract_Feature_Vector(in, controllers[i], controllers[j]);
-				target[0] = Target(i, j, preferences);
-				ANN->bpgt(in, target);
-			}
-		}
-	}
-	delete [] in;
-	delete [] target;
-}
-
-int USER_MODEL::Errors_On_Matrix_With_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX *mask) {
-
-	double* in = new double[TAU_INPUTS];
-	double target, scorePrediction;
-	int errors = 0;
-
-	for (int i=0;	i<numControllers;	i++) {
-		for (int j=0; j<numControllers; j++) {
-
-			if (mask->Get(i,j)<MASK_THRESHOLD) {
-				scorePrediction = Predict(controllers[i], controllers[j]);
-				target = Target(i, j, preferences);
-
-				if( (scorePrediction < 0.5 && target > 0.5) ||
-						(scorePrediction > 0.5 && target < 0.5) )
-					errors++;
-			}
-		}
-	}
-
-	delete [] in;
-	return errors;
-}
-
-int USER_MODEL::Errors_On_Matrix_With_Inverted_Mask(int numControllers, MATRIX *preferences, NEURAL_NETWORK **controllers, MATRIX *mask) {
-
-	double* in = new double[TAU_INPUTS];
-	double target, scorePrediction;
-	int errors = 0;
-
-	for (int i=0;	i<numControllers;	i++) {
-		for (int j=0; j<numControllers; j++) {
-
-			if (mask->Get(i,j)>=MASK_THRESHOLD) {
-				scorePrediction = Predict(controllers[i], controllers[j]);
-				target = Target(i, j, preferences);
-
-				if( (scorePrediction < 0.5 && target > 0.5) ||
-						(scorePrediction > 0.5 && target < 0.5) )
-					errors++;
-			}
-		}
-	}
-
-	delete [] in;
 	return errors;
 }
 
 double USER_MODEL::Target(int i, int j, MATRIX* pref) {
 
-	double target;
-	if (pref->Get(i,j) > 0 )
-		target = 1.0;
-	else if (pref->Get(i,j) < 0)
-		target = 0.0;
-	else
-		target = 0.5;
+	return pref->Get(i,j); // see also Errors_on_matrix() and Predict()
+}
 
-	return target;
+FILE* USER_MODEL::Server_Input(void) {
+
+	char fn[100];
+	sprintf(fn, "mlserver/input%d", id);
+	return fopen(fn, "w");
+}
+
+FILE* USER_MODEL::Server_Output(void) {
+
+	char fn[100];
+	sprintf(fn, "mlserver/output%d", id);
+	return fopen(fn, "r");
+}
+
+/* state saving-related funcs */
+
+USER_MODEL::USER_MODEL(ifstream *inFile) {
+
+  (*inFile) >> numSensors;
+
+	int isANN;
+
+	(*inFile) >> isANN;
+
+//	if ( isANN )
+//		ANN = new CBackProp(inFile);
+//	else
+//		ANN = NULL;
+}
+
+void USER_MODEL::Save(ofstream *outFile) {
+
+	(*outFile) << numSensors << "\n";
+
+	if ( ANN ) {
+		(*outFile) << "1\n";
+		ANN->Save(outFile);
+	}
+	else
+		(*outFile) << "0\n";
 }
 
 #endif
