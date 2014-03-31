@@ -3,8 +3,9 @@
 import sys
 import re
 import os
-from predictor_decisionTree import Predictor
+#from predictor_decisionTree import Predictor
 #from predictor_logistic import Predictor
+from predictor_linearSVC import Predictor
 
 if __name__=="__main__":
 	if len(sys.argv) > 1:
