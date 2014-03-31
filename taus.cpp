@@ -138,8 +138,8 @@ void TAUS::rescorePopulation(OPTIMIZER* optimizer) { // a monster
 	// deciding which score to use and performing the rescoring
 	if( ready[0] && ready[1] ) {
 		if( ready[2] &&
-				error[0] > error[2] &&
-				error[1] > error[2] ) {
+				error[0] >= error[2] &&
+				error[1] >= error[2] ) {
 
 			typeOfLastScore = 4;
 			for( int j=0; j<AFPO_POP_SIZE; j++ )

@@ -21,10 +21,13 @@ function runsim {
 	fi
 
 	echo -n "Stopping mlservers ... "
+	timeout 1 cat mlserver/output0 > /dev/null
 	echo "exit" > mlserver/input0
 	echo -n "0 "
+	timeout 1 cat mlserver/output1 > /dev/null
 	echo "exit" > mlserver/input1
 	echo -n "1 "
+	timeout 1 cat mlserver/output2 > /dev/null
 	echo "exit" > mlserver/input2
 	echo "2 - done"
 }
