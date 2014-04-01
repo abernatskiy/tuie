@@ -6,9 +6,9 @@ import os
 #from predictor_decisionTree import Predictor
 #from predictor_logistic import Predictor
 #from predictor_linearSVC import Predictor
-from predictor_nearestNeighb import Predictor
-#from predictor_SVC-rbf import Predictor
-#from predictor_randomForest import Predictor
+#from predictor_nearestNeighb import Predictor
+#from predictor_rbfSVC import Predictor
+from predictor_randomForest import Predictor
 
 if __name__=="__main__":
 	if len(sys.argv) > 1:

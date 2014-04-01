@@ -1,10 +1,10 @@
 #!/usr/bin/python2
 
 import numpy as np
-from sklearn import tree
 import sys
 
 from sklearn.ensemble import RandomForestClassifier
+from predictor_base import PredictorBase
 
 class Predictor(PredictorBase):
 	def __init__(self, fninput = 'input', fnoutput = 'output'):
