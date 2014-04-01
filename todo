@@ -1,5 +1,7 @@
 Func Update_Common_TAU copies too much memory -- optimize.
 
+Fix the bad behavior of .sh utils for opposing simultaions (the behavior when most sims are discarded)
+
 --------------------------
 TOPICS
 
