@@ -1,7 +1,7 @@
 #!/usr/bin/python2
 
 import numpy as np
-from sklearn import neighbors
+from sklearn import svm
 import sys
 
 from predictor_base import PredictorBase
@@ -9,4 +9,4 @@ from predictor_base import PredictorBase
 class Predictor(PredictorBase):
 	def __init__(self, fninput = 'input', fnoutput = 'output'):
 		PredictorBase.__init__(self, fninput, fnoutput)
-		self.clf = neighbors.KNeighborsClassifier(7)
+		self.clf = svm.SVC()

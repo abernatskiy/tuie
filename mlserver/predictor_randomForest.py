@@ -1,12 +1,12 @@
 #!/usr/bin/python2
 
 import numpy as np
-from sklearn import neighbors
+from sklearn import tree
 import sys
 
-from predictor_base import PredictorBase
+from sklearn.ensemble import RandomForestClassifier
 
 class Predictor(PredictorBase):
 	def __init__(self, fninput = 'input', fnoutput = 'output'):
 		PredictorBase.__init__(self, fninput, fnoutput)
-		self.clf = neighbors.KNeighborsClassifier(7)
+		self.clf = RandomForestClassifier()
