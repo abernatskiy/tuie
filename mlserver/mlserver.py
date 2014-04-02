@@ -3,12 +3,31 @@
 import sys
 import re
 import os
-#from predictor_decisionTree import Predictor
-#from predictor_logistic import Predictor
-#from predictor_linearSVC import Predictor
-#from predictor_nearestNeighb import Predictor
-#from predictor_rbfSVC import Predictor
-from predictor_randomForest import Predictor
+
+if len(sys.argv) > 2:
+	if sys.argv[2] == 'decisionTree':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_decisionTree import Predictor
+	elif sys.argv[2] == 'logistic':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_logistic import Predictor
+	elif sys.argv[2] == 'linearSVC':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_linearSVC import Predictor
+	elif sys.argv[2] == 'nearestNeighb':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_nearestNeighb import Predictor
+	elif sys.argv[2] == 'rbfSVC':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_rbfSVC import Predictor
+	elif sys.argv[2] == 'randomForest':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_randomForest import Predictor
+	else:
+		raise ValueError('I dont have such predictor')
+else:
+	print 'Defaulting to logistic regression'
+	from predictor_logistic import Predictor
 
 if __name__=="__main__":
 	if len(sys.argv) > 1:
