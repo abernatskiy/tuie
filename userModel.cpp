@@ -15,7 +15,7 @@ extern int    ALG_VARIANT_PREFS_ONLY;
 extern int    TAU_NUM_SENSOR_ROWS;
 extern int    TAU_BACK_PROP_ITER_MAX_MULTIPLIER;
 
-int TAU_INPUTS = 13;
+int TAU_INPUTS = 6;
 
 USER_MODEL::USER_MODEL(int id_no, int numS) {
 
@@ -150,8 +150,10 @@ void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1,
 		m++;
   }
 
+	m=0;
+
 	for( int k=0; k<=10; k=k+2 ) {
-		in[m] = controller2->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
+		in[m] = in[m] - controller2->sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0),k);
 		m++;
 	}
 
@@ -160,7 +162,7 @@ void USER_MODEL::Extract_Feature_Vector(double* in, NEURAL_NETWORK* controller1,
 //	else if( controller1->ID < controller2->ID )
 //		in[m] = -1.0;
 //	else
-		in[m] = 0.0;
+//		in[m] = 0.0;
 
 //			in[0] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 11);
 //			in[1] = sensorTimeSeries->Get(int(double(STARTING_EVALUATION_TIME)/2.0), 12);
