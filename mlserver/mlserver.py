@@ -14,10 +14,10 @@ if len(sys.argv) > 2:
 	elif sys.argv[2] == 'linearSVC':
 		print 'Using predictor ' + sys.argv[2]
 		from predictor_linearSVC import Predictor
-	elif sys.argv[2] == 'predictor_nearestNeighb':
+	elif sys.argv[2] == 'nearestNeighb':
 		print 'Using predictor ' + sys.argv[2]
 		from predictor_nearestNeighb import Predictor
-	elif sys.argv[2] == 'predictor_rbfSVC':
+	elif sys.argv[2] == 'rbfSVC':
 		print 'Using predictor ' + sys.argv[2]
 		from predictor_rbfSVC import Predictor
 	elif sys.argv[2] == 'randomForest':
