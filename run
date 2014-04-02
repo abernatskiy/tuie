@@ -2,7 +2,7 @@
 
 print_usage () {
 	echo "Usage:"
-	echo "  run [ <mode> [ <no_of_hidden_nodes> ] ]"
+	echo "  run [ <mode> [ <mlalgorithm> ] ]"
 	echo "where mode=0 runs interactive evolution with allied surrogate users"
 	echo "      mode=1 runs with opposing surrogate users"
 	echo "      mode=2 runs with a single user preferring rightbound controller"
@@ -11,27 +11,29 @@ print_usage () {
 
 USERS=2
 OPPOSING_USERS=0
-HIDDEN_NODES=2
+#HIDDEN_NODES=
 
 source batch-vars
 
 # parsing arguments
 case $# in
 2)
-	case $2 in
-	0)
-		echo Zero hidden nodes makes no sense
-		print_usage
-		exit 1
-		;;
-	[0-9]*)
-		HIDDEN_NODES=$2
-		;;
-	*)
-		print_usage
-		exit 1
-		;;
-	esac
+#	case $2 in
+#	0)
+#		echo Zero hidden nodes makes no sense
+#		print_usage
+#		exit 1
+#		;;
+#	[0-9]*)
+#		HIDDEN_NODES=$2
+#		;;
+#	*)
+#		print_usage
+#		exit 1
+#		;;
+#	esac
+#	;&
+	HIDDEN_NODES=$2
 	;&
 1)
 	case $1 in
@@ -63,7 +65,6 @@ esac
 
 # recompiling the code with appropriate no of hidden nodes
 
-# sed -i -e "s/\(layerSizes\[1\] = \).*/\1${HIDDEN_NODES};/" userModel.cpp
 if [ $OPPOSING_USERS -eq 1 ]; then
 	echo -n "Compiling the opposing client ... "
 	make M3-opposing > /dev/null 2>&1 && echo "done"
@@ -76,11 +77,11 @@ mv M3 $M3 > /dev/null 2>&1
 
 # running machine learning server
 echo -n "Starting mlservers ... "
-./mlserver/mlserver.py 0 > SavedFiles/mlserver0.log 2>&1 &
+./mlserver/mlserver.py 0 $HIDDEN_NODES > SavedFiles/mlserver0.log 2>&1 &
 echo -n "0 "
-./mlserver/mlserver.py 1 > SavedFiles/mlserver1.log 2>&1 &
+./mlserver/mlserver.py 1 $HIDDEN_NODES > SavedFiles/mlserver1.log 2>&1 &
 echo -n "1 "
-./mlserver/mlserver.py 2 > SavedFiles/mlserver2.log 2>&1 &
+./mlserver/mlserver.py 2 $HIDDEN_NODES > SavedFiles/mlserver2.log 2>&1 &
 echo "2 - done"
 
 # running clients & server

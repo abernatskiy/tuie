@@ -37,29 +37,29 @@ function makedir {
 }
 
 function runallied {
-	echo "${ARCH}/tau${1}a/${2}..."
-	makedir "${ARCH}/tau${1}a"
+	echo "${ARCH}/tau_${1}_a/${2}..."
+	makedir "${ARCH}/tau_${1}_a"
 	runsim 0 $1
-	cp -a ./SavedFiles ${ARCH}/tau${1}a/${2}
+	cp -a ./SavedFiles ${ARCH}/tau_${1}_a/${2}
 }
 
 function runopposing {
-	echo "${ARCH}/tau${1}o/${2}..."
-	makedir "${ARCH}/tau${1}o"
+	echo "${ARCH}/tau_${1}_o/${2}..."
+	makedir "${ARCH}/tau_${1}_o"
 	runsim 1 $1
-	cp -a ./SavedFiles ${ARCH}/tau${1}o/${2}
+	cp -a ./SavedFiles ${ARCH}/tau_${1}_o/${2}
 }
 
 function runsingle {
-	echo "${ARCH}/tau${1}s/${2}..."
-	makedir "${ARCH}/tau${1}s"
+	echo "${ARCH}/tau_${1}_s/${2}..."
+	makedir "${ARCH}/tau_${1}_s"
 	runsim 2 $1
-	cp -a ./SavedFiles ${ARCH}/tau${1}s/${2}
+	cp -a ./SavedFiles ${ARCH}/tau_${1}_s/${2}
 }
 
 function runsingleopposing {
-	echo "${ARCH}/tau${1}so/${2}..."
-	makedir "${ARCH}/tau${1}so"
+	echo "${ARCH}/tau_${1}_so/${2}..."
+	makedir "${ARCH}/tau_${1}_so"
 	runsim 3 $1
-	cp -a ./SavedFiles ${ARCH}/tau${1}so/${2}
+	cp -a ./SavedFiles ${ARCH}/tau_${1}_so/${2}
 }
