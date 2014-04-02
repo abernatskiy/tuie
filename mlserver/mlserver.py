@@ -20,6 +20,9 @@ if len(sys.argv) > 2:
 	elif sys.argv[2] == 'rbfSVC':
 		print 'Using predictor ' + sys.argv[2]
 		from predictor_rbfSVC import Predictor
+	elif sys.argv[2] == 'nuSVC':
+		print 'Using predictor ' + sys.argv[2]
+		from predictor_nuSVC import Predictor
 	elif sys.argv[2] == 'randomForest':
 		print 'Using predictor ' + sys.argv[2]
 		from predictor_randomForest import Predictor
