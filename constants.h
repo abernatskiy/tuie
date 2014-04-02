@@ -43,7 +43,7 @@ int		TIME_TO_CHECK_FOR_NEUTRAL_MUTATION = 50;
 
 //	AFPO-related constants
 
-int		AFPO_POP_SIZE			= 30;
+int		AFPO_POP_SIZE			= 100;
 
 // Constants related to viewing the simulation
 
