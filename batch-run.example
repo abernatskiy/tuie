@@ -2,7 +2,7 @@
 
 source batch-funcs
 
-# nn values: "decisionTree", "logistic", "linearSVC", "predictor_nearestNeighb", "predictor_rbfSVC", "randomForest"
+# nn values: "decisionTree", "logistic", "linearSVC", "nearestNeighb", "rbfSVC", "randomForest"
 # default value: "logistic"
 
 for nn in `seq 3 5`; do
